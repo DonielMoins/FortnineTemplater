@@ -1,0 +1,23 @@
+- Engine
+    Main Event Handler for async communication
+    8 Threads Thread Pool
+    Template config
+    Custom Requests Handler
+    Use requests session for each button
+
+- GUI
+    - Refresh Config
+    - Dummy Mode
+        Read config file and display buttons
+        Show paste / file drop-in box to enter input variables 
+        Communicate with event handler to get template progress
+    - Dev Mode  
+        Create new buttons
+        Change request URL
+        Change request type 
+        Set Input Type(?)
+        Force-Set Headers(?)
+        Save/Load Config
+
+- Template Config
+    JSON 
