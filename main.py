@@ -2,7 +2,9 @@ from datetime import date
 import logging
 
 from utils.overridesHandler import getOverrides
+from utils.requestHandler import makeRequest
 import utils.configHandler as cfg
+from objects.requestObj import Request as ReqObj
 
 today = date.today()
 dayDate = today.strftime("%d-%m-%Y")
@@ -15,7 +17,9 @@ else:
 
 def main():
     logging.debug('Entering main()')
-    cfg.get_config()
+    config = cfg.get_config()
+    profiles = cfg.get_profiles(config)
+    
     logging.debug('Exiting main()')
 
 
