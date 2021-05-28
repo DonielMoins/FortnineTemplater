@@ -1,12 +1,10 @@
-from requests.api import request, get, head, post, patch, put, delete, options
-
 class Request():
     
     def __init__(self, **kwargs):
         if len(kwargs) != 0:
-            self.__dict__ = kwargs
+            self.__dict__.update(kwargs)
             self.reqtype.lower()
-            if self.reqtype != "request" or "get" or "head" or "post" or "patch" or "put" or "delete" or "options":
+            if self.reqtype != "get" or "head" or "post" or "patch" or "put" or "delete" or "options":
                 raise Exception("Malformed Request Type JSON") 
         else:
             self.uri = "https://example.com/api?requestParm1={0}&requestParm2={1}"
