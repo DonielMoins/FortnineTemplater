@@ -1,2 +1,2 @@
-import requests as req
 
+import utils.configHandler as cfg
