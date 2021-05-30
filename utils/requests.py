@@ -1,9 +1,10 @@
+from typing import Optional
 import requests
-import objects.requestObj as requestObj
+import classes.requestObj as ReqObj
 
 # NOTE USE IN THREAD FROM THREADPOOL OR ELSE BLOCKING
 # make single request checking what type from template
-def makeRequest(requestTemplate: requestObj, data=None, session=requests.Session()):
+def makeRequest(requestTemplate: ReqObj, data=None, session=Optional[requests.Session]):
     reqtype = requestTemplate.reqtype
     
     URL = requestTemplate.uri
@@ -35,6 +36,6 @@ def makeRequest(requestTemplate: requestObj, data=None, session=requests.Session
     
 def MakeRequests(requestList: list, data=None, session=requests.Session()):
     for request in requestList:
-        request: requestObj.Request = request
-        makeRequest(request, data=data session=session)
+        request: ReqObj.Request = request
+        makeRequest(request, data=data, session=session)
         

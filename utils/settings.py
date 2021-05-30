@@ -1,7 +1,7 @@
 from pathlib import Path
 from os import scandir
 
-OverridesFolder = Path(__file__).parent.joinpath("Overrides")
+OverridesFolder = Path(__file__).parent.parent.joinpath("Overrides")
 Overrides = []
 checked = False
 

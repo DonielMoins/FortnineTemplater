@@ -1,10 +1,9 @@
 from datetime import date
 import logging
 
-from utils.overridesHandler import getOverrides
-from utils.requestHandler import makeRequest
-import utils.configHandler as cfg
-from objects.requestObj import Request as ReqObj
+from utils.settings import getOverrides
+from utils.requests import makeRequest, ReqObj
+import utils.config as cfg
 
 today = date.today()
 dayDate = today.strftime("%d-%m-%Y")
