@@ -6,11 +6,11 @@ import logging
 
 # NOTE USE IN THREAD FROM THREADPOOL OR ELSE BLOCKING
 # make single request checking what type from template
-def _makeRequest(requestTemplate: ReqObj, data: Optional[list[str]], session: requests.Session):
+def makeRequest(requestTemplate: ReqObj, data: Optional[list[str]], session: requests.Session):
     reqtype = requestTemplate.reqtype
     
     
-    URL = _parseLink(requestTemplate.uri, data)
+    URL = parseLink(requestTemplate.uri, data)
     request = requests.Request(str(reqtype).upper(), URL)
     
     match requestTemplate.reqtype:
@@ -47,11 +47,11 @@ def MakeRequests(requestList: list, dataList: Optional[list[list[str]]], session
         request: ReqObj.Request = request
         if dataList is not None:
             for data in dataList:
-                _makeRequest(request, data, session)
+                makeRequest(request, data, session)
         else:
-            _makeRequest(request, None, session)
+            makeRequest(request, None, session)
 
-def _parseLink(uri: str, data: Optional[list[str]]):
+def parseLink(uri: str, data: Optional[list[str]]):
     finalURI = uri
     if data is not None:
         matches = re.findall("/{([0-9])+}/g", uri)
