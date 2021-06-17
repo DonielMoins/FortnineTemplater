@@ -86,11 +86,12 @@ def backup_config(oldloc=default_loc, retry=True):
 
 def get_profiles(jsonConfig):
     try:
+        # TODO: FIX THIS MESSSSSSS
         profiles = []
         for parentobject in jsonConfig:
             if parentobject == "profiles":
-                for profilejson in parentobject:
-                    profile = prof.Profile(profilejson) 
+                for p in jsonConfig["profiles"]:
+                    profile = prof.Profile(settings=p["Profile"]) 
                     profiles.append(profile)
                     return profiles
     # TODO: test and catch correct exceptions
