@@ -33,7 +33,7 @@ def get_config(loc=default_loc):
                 logging.error("Config HJSon Object Empty")
                 raise HjsonDecodeError("Config HJSon Object Empty", config_file.readline(), 0)
             
-            return load(config_file)
+            return hjsonO
     except HjsonDecodeError as error:
         if len(configlines) < 10 or len(hjsonO) == 0:
             logging.warning("Config file is likely malformed, remaking config.")
