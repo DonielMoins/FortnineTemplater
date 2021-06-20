@@ -1,5 +1,5 @@
 from datetime import date
-from gui.GUI import GUIProc
+from GUI import GUIProc
 import logging
 
 from utils.settings import getOverrides

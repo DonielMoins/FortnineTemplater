@@ -8,10 +8,21 @@
                 Requests:
                 [
                     {
-                        Request:
+                        Request0:
                         {
                             uri: https://example.com/api?requestParm1={0}&requestParm2={1}
                             reqtype: get
+                            headers:
+                            {
+                                user-agent: FortnineActions/0.0.1
+                                content-type: text
+                            }
+                            ReuseSession: true
+                        },
+                        RequestName:
+                        {
+                            uri: https://example.com/api?requestParm1={0}&requestParm2={1}
+                            reqtype: post
                             headers:
                             {
                                 user-agent: FortnineActions/0.0.1

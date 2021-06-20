@@ -19,25 +19,23 @@ class Request():
 
 
 
-def comments():
-    return {
-            "request-uri (string)" : "anything between {} containing a number will be understood as a parameter,",
-            "~~~~~~~~~~~~~~~~~~~~" : "if it does not contain a number, you will be shamed!",
-            "~~~~~~~~~~~~~~~~~~~~" : "https://domain.tls/exampleParm1-999={0-999}",
-            "type (string)" : "one of the following options",
-            "~~~~~~~~~~~~~" : "request, get, head, post, patch, put, delete, options",
+# def comments():
+#     return {
+#             "request-uri (string)" : "anything between {} containing a number will be understood as a parameter,",
+#             "~~~~~~~~~~~~~~~~~~~~" : "if it does not contain a number, you will be shamed!",
+#             "~~~~~~~~~~~~~~~~~~~~" : "https://domain.tls/exampleParm1-999={0-999}",
+#             "type (string)" : "one of the following options",
+#             "~~~~~~~~~~~~~" : "request, get, head, post, patch, put, delete, options",
             
-            "headers (dict of str)" :
-                {
-                    "ex.":{
-                        "user-agent": "FortnineActions/0.0.1",
-                        "content-type":"text"
-                        },
-                    "DOCS": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers"
-                }
-                 
-                
-            }
+#             "headers (dict of str)" :
+#                 {
+#                     "ex.":{
+#                         "user-agent": "FortnineActions/0.0.1",
+#                         "content-type":"text"
+#                         },
+#                     "DOCS": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers"
+#                 }
+#             }
             
             
     

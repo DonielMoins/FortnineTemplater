@@ -1,5 +1,5 @@
 from typing import Dict, Optional
-from classes.requestObj import Request, comments as requestComments
+from classes.requestObj import Request # comments as requestComments
 
 class Profile():
     def __init__(self, ProfileName = "Default Name", Requests=[Request()], settings: Optional[dict] = {}):
@@ -10,10 +10,9 @@ class Profile():
         if len(settings) != 0: self.__dict__.update(settings) 
             
 
-def comments():
-    return [
-        # TODO add character limit
-            "ProfileName: Button Name",
-            "Requests: List of Request Objects that will be run using input data.",
-            {"Request:" : requestComments()}
-        ]
+# def comments():
+#     return [
+#             "ProfileName: Button Name",
+#             "Requests: List of Request Objects that will be run using input data.",
+#             {"Request:" : requestComments()}
+#         ]

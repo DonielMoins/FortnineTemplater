@@ -1,6 +1,7 @@
 # Config I/O Handler.
 import inspect
 from types import MappingProxyType
+from typing import Optional
 import hjson
 import pickle
 import logging
@@ -9,6 +10,7 @@ from pathlib import Path
 
 from classes import profileObj as prof, requestObj
 
+# TODO: Make settings file window.
 default_loc = Path(__file__).parent.parent.joinpath("config.hjson")
 
 def dumps(obj, **kwargs):
@@ -32,7 +34,7 @@ def get_config(loc=default_loc):
             if len(hjsonO) == 0:
                 logging.error("Config HJSon Object Empty")
                 raise HjsonDecodeError("Config HJSon Object Empty", config_file.readline(), 0)
-            
+            hjsonO.__delitem__("IGNORED")
             return hjsonO
     except HjsonDecodeError as error:
         if len(configlines) < 10 or len(hjsonO) == 0:
@@ -43,9 +45,20 @@ def get_config(loc=default_loc):
             logging.error(error)
         
             
+# Using Optional cause 
+def write_config_file(settings=Optional[list], loc=default_loc):
+    """Function to write config file
 
-# Write Config File from dict
-def write_config_file(settings={}, loc=default_loc):
+    Args:
+        settings (dict, optional): Dictionary of all settings to write to file. Defaults to build_config() if None is provided.
+        loc ([type], optional): [description]. Defaults to default_loc.
+
+    Raises:
+        IOError: Config not writable.
+
+    Returns:
+        str: return config string
+    """    
     if len(settings) < 1:
         settings = build_config()
 
@@ -90,8 +103,9 @@ def get_profiles(jsonConfig):
         profiles = []
         for parentobject in jsonConfig:
             if parentobject == "profiles":
-                for p in jsonConfig["profiles"]:
-                    profile = prof.Profile(settings=p["Profile"]) 
+                for profileItem in jsonConfig["profiles"]:
+                    profileDict = profileItem["Profile"]
+                    profile = prof.Profile(settings=profileDict) 
                     profiles.append(profile)
                     return profiles
     # TODO: test and catch correct exceptions
@@ -102,7 +116,8 @@ def get_profiles(jsonConfig):
 def build_config():
     default_config = {
                     "profiles": [prof.Profile()],
-                    "IGNORED": {"Profile Comments" : prof.comments()}
+                    # "IGNORED": {"Profile Comments" : prof.comments()}
+                    "IGNORED": {}
                     }
     return default_config
 
@@ -120,7 +135,7 @@ class _ConfigEncoder(HjsonEncoder):
         return {"_unknown_object": pickle.dumps(obj)}
 
 
-# TODO Fix this garbage code
+# TODO: Fix this garbage code
 # def DictToLines (Dict: dict, recursive=True):
 #     if len(Dict) > 0: 
 #         if isinstance(Dict, list):
