@@ -103,11 +103,11 @@ def get_profiles(jsonConfig):
         profiles = []
         for parentobject in jsonConfig:
             if parentobject == "profiles":
-                for profileItem in jsonConfig["profiles"]:
-                    profileDict = profileItem["Profile"]
-                    profile = prof.Profile(settings=profileDict) 
-                    profiles.append(profile)
-                    return profiles
+                for profileItems in jsonConfig["profiles"]:
+                    for profileDict in list(profileItems.values()):
+                        profile = prof.Profile(settings=profileDict) 
+                        profiles.append(profile)
+        return profiles
     # TODO: test and catch correct exceptions
     except Exception as error: # pylint: disable=broad-except
         print(error)

@@ -13,6 +13,8 @@ def makeRequest(requestTemplate: ReqObj, data: Optional[list[str]], session: req
     URL = parseLink(requestTemplate.uri, data)
     request = requests.Request(str(reqtype).upper(), URL)
     
+    
+    # TODO see what special options we need for each request method.
     match requestTemplate.reqtype:
         case "request":
             prepedreq = session.prepare_request(request)
