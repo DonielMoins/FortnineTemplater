@@ -56,7 +56,7 @@ def parseCSV(lines: list[str], newLines=True, strip=True, ignoreWhiteSpaces=Fals
     
     for line in newLines:
         paramLine = []
-        for param in line.split(","):
+        for param in line.split(sep):
             
             # Cleanup time!
             if strip:
@@ -79,4 +79,8 @@ def randomHex(len=5):
 
 def randomString(MAX_LIMIT=5):    
     ran = ''.join(random.choices(string.ascii_uppercase + string.digits, k = MAX_LIMIT))   
+    return str(ran)
+
+def randomSymbols(MAX_LIMIT=1):
+    ran = ''.join(random.choices('!@#$%^&*()_', k = MAX_LIMIT))   
     return str(ran)
