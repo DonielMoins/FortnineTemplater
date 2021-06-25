@@ -1,4 +1,3 @@
-
 {
     profiles:
     [
@@ -9,114 +8,10 @@
                 Requests:
                 [
                     {
-                        Request0:
+                        Request:
                         {
                             uri: https://example.com/api?requestParm1={0}&requestParm2={1}
                             reqtype: get
-                            headers:
-                            {
-                                user-agent: FortnineActions/0.0.1
-                                content-type: text
-                            }
-                            ReuseSession: true
-                        },
-                        RequestName:
-                        {
-                            uri: https://example.com/api?requestParm1={0}&requestParm2={1}
-                            reqtype: post
-                            headers:
-                            {
-                                user-agent: FortnineActions/0.0.1
-                                content-type: text
-                            }
-                            ReuseSession: true
-                        }
-                    }
-                ]
-            }
-            Profile2123:
-            {
-                ProfileName: Default Name
-                Requests:
-                [
-                    {
-                        Request0:
-                        {
-                            uri: https://example.com/api?requestParm1={0}&requestParm2={1}
-                            reqtype: get
-                            headers:
-                            {
-                                user-agent: FortnineActions/0.0.1
-                                content-type: text
-                            }
-                            ReuseSession: true
-                        },
-                        RequestName:
-                        {
-                            uri: https://example.com/api?requestParm1={0}&requestParm2={1}
-                            reqtype: post
-                            headers:
-                            {
-                                user-agent: FortnineActions/0.0.1
-                                content-type: text
-                            }
-                            ReuseSession: true
-                        }
-                    }
-                ]
-            }
-            Profile212:
-            {
-                ProfileName: Default Name
-                Requests:
-                [
-                    {
-                        Request0:
-                        {
-                            uri: https://example.com/api?requestParm1={0}&requestParm2={1}
-                            reqtype: get
-                            headers:
-                            {
-                                user-agent: FortnineActions/0.0.1
-                                content-type: text
-                            }
-                            ReuseSession: true
-                        },
-                        RequestName:
-                        {
-                            uri: https://example.com/api?requestParm1={0}&requestParm2={1}
-                            reqtype: post
-                            headers:
-                            {
-                                user-agent: FortnineActions/0.0.1
-                                content-type: text
-                            }
-                            ReuseSession: true
-                        }
-                    }
-                ]
-            }
-            Profile2:
-            {
-                ProfileName: Default Name
-                Requests:
-                [
-                    {
-                        Request0:
-                        {
-                            uri: https://example.com/api?requestParm1={0}&requestParm2={1}
-                            reqtype: get
-                            headers:
-                            {
-                                user-agent: FortnineActions/0.0.1
-                                content-type: text
-                            }
-                            ReuseSession: true
-                        },
-                        RequestName:
-                        {
-                            uri: https://example.com/api?requestParm1={0}&requestParm2={1}
-                            reqtype: post
                             headers:
                             {
                                 user-agent: FortnineActions/0.0.1
@@ -129,30 +24,5 @@
             }
         }
     ]
-    IGNORED:
-    {
-        "Profile Comments":
-        [
-            ProfileName: Button Name
-            Requests: List of Request Objects that will be run using input data.
-            {
-                "Request:":
-                {
-                    "request-uri (string)": anything between {} containing a number will be understood as a parameter,
-                    ~~~~~~~~~~~~~~~~~~~~: https://domain.tls/exampleParm1-999={0-999}
-                    "type (string)": one of the following options
-                    ~~~~~~~~~~~~~: request, get, head, post, patch, put, delete, options
-                    "headers (dict of str)":
-                    {
-                        ex.:
-                        {
-                            user-agent: FortnineActions/0.0.1
-                            content-type: text
-                        }
-                        DOCS: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers
-                    }
-                }
-            }
-        ]
-    }
+    IGNORED: {}
 }

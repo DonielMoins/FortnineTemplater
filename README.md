@@ -17,10 +17,12 @@ Currently project is in alpha, use with caution!
 5. [x] Drag n' drop CSV parser
 6. [ ] Add progress bar for each request button
 7. [ ] Specialize requests based on method
-8. [x] Make a better README
-9. [x] Basic config parser
-10. [x] Prototype DataEntry window
-11. [x] Prototype Profile Selector GUI
+8. [x] Communication between Pool and GUI
+9. [x] Make a better README
+10. [x] Basic config parser
+11. [x] Prototype DataEntry window
+12. [x] Prototype Profile Selector GUI
+13. [x] Finish Patient Thread in async.
 
 ## Config
 
@@ -36,7 +38,7 @@ For storing pre-made profiles, I chose [hjson](https://hjson.github.io) because 
 
 - Each Profile object under profiles should have a unique name/ID, E.g.
 
-``
+```hjson
 
 profiles:
     [
@@ -44,4 +46,4 @@ profiles:
             profID1029: {...}
             profID1023678: {...}
             profWithSpecialName: {...}
-``
+```

@@ -7,18 +7,30 @@ import pickle
 import logging
 from hjson import loads, HjsonEncoder, load, HjsonDecodeError
 from pathlib import Path 
-
-from classes import profileObj as prof, requestObj
+from objects import Profile, Request
 
 # TODO: Make settings file window.
-default_loc = Path(__file__).parent.parent.joinpath("config.hjson")
+home_dir = Path(__file__).parent.parent
+configPath = home_dir.joinpath("config.hjson")
 
 def dumps(obj, **kwargs):
     return hjson.dumps(obj, cls=_ConfigEncoder, indent=4)
 
 # Returns Json of config file
 # if file doesant exist, create one from hardcoded default
-def get_config(loc=default_loc):
+def get_config(loc: Path=configPath):
+    """Get config file from location.
+
+    Args:
+        loc (Path, optional): [description]. Defaults to configPath.
+
+    Raises:
+        IOError: Config is not readable. Check permissions, run as admin (unsafe), contact dev.
+        HjsonDecodeError: Config's HJSON empty.
+
+    Returns:
+        [type]: [description]
+    """    
     hjsonO = ""
     configlines = ""
     try:
@@ -46,12 +58,12 @@ def get_config(loc=default_loc):
         
             
 # Using Optional cause 
-def write_config_file(settings=Optional[list], loc=default_loc):
+def write_config_file(settings= {}, loc=configPath):
     """Function to write config file
 
     Args:
         settings (dict, optional): Dictionary of all settings to write to file. Defaults to build_config() if None is provided.
-        loc ([type], optional): [description]. Defaults to default_loc.
+        loc ([type], optional): Path of config.hjson file. Defaults to default_loc.
 
     Raises:
         IOError: Config not writable.
@@ -69,7 +81,7 @@ def write_config_file(settings=Optional[list], loc=default_loc):
         config_file.write(configstr)
         return configstr
         
-def backup_config(oldloc=default_loc, retry=True):
+def backup_config(oldloc=configPath, retry=True):
     
     def recursivebackuploc(oldloc):
         newloc = oldloc.__str__() + ".bak"
@@ -105,18 +117,17 @@ def get_profiles(jsonConfig):
             if parentobject == "profiles":
                 for profileItems in jsonConfig["profiles"]:
                     for profileDict in list(profileItems.values()):
-                        profile = prof.Profile(settings=profileDict) 
+                        profile = Profile(settings=profileDict) 
                         profiles.append(profile)
         return profiles
     # TODO: test and catch correct exceptions
-    except Exception as error: # pylint: disable=broad-except
+    except Exception as error: 
         print(error)
 
         
 def build_config():
     default_config = {
-                    "profiles": [prof.Profile()],
-                    # "IGNORED": {"Profile Comments" : prof.comments()}
+                    "profiles": [Profile()],
                     "IGNORED": {}
                     }
     return default_config
@@ -127,26 +138,9 @@ class _ConfigEncoder(HjsonEncoder):
             return HjsonEncoder.default(self, obj)
         if isinstance(obj, MappingProxyType):
             return dict(obj)
-        if isinstance(obj, type(list[requestObj.Request])):
+        if isinstance(obj, type(list[Request])):
             for i in obj.__iter__:
                 self.default(self, i)
-        if type(obj) is requestObj.Request or prof.Profile:
+        if type(obj) is Request or Profile:
             return {type(obj).__name__: obj.__dict__}
         return {"_unknown_object": pickle.dumps(obj)}
-
-
-# TODO: Fix this garbage code
-# def DictToLines (Dict: dict, recursive=True):
-#     if len(Dict) > 0: 
-#         if isinstance(Dict, list):
-#             return Dict 
-#         elif isinstance(Dict, dict):
-#             Dict = Dict.items()  
-#     else: 
-#         return []
-#     List = []
-#     for item in Dict:
-#         if isinstance(item, dict):
-#             List.append(DictToLines(item)) if recursive else str(item)
-#         else: List.append(str(item))
-#     return List

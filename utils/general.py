@@ -2,6 +2,9 @@ from doctest import UnexpectedException
 from pathlib import Path
 from os import scandir
 
+import random
+from re import L
+
 OverridesFolder = Path(__file__).parent.parent.joinpath("Overrides")
 Overrides = []
 checked = False
@@ -61,3 +64,11 @@ def parseCSV(lines: list[str], newLines=False, strip=True, ignoreWhiteSpaces=Fal
         CsvList.append(paramLine)
     
     return CsvList
+
+def randomHex(len=5):
+    maxHex = ''
+    for f in range(len):
+        maxHex += "F"
+    maxDec = int(maxHex, 16)
+    random_number = random.randint(0,maxDec)
+    return str(hex(random_number))
