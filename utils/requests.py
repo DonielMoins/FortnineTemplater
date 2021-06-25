@@ -1,26 +1,27 @@
 from multiprocessing.connection import Connection
 from typing import Optional
-import re 
+import re
 import requests
 from objects import Request as ReqObj
 import logging
 
 # NOTE USE IN THREAD FROM THREADPOOL OR ELSE BLOCKING
 # make single request checking what type from template
+
+
 def makeRequest(requestTemplate: ReqObj, data: list[str], session: requests.Session):
     reqtype = requestTemplate.reqtype
-    
-    
+
     URL = parseLink(requestTemplate.uri, data)
     request = requests.Request(str(reqtype).upper(), URL)
     response = None
-    
+
     # TODO see what special options we need for each request method.
     match requestTemplate.reqtype:
         case "request":
             prepedreq = session.prepare_request(request)
             response: requests.Response = session.send(prepedreq)
-            
+
         case "get":
             prepedreq = session.prepare_request(request)
             response: requests.Response = session.send(prepedreq)
@@ -43,11 +44,13 @@ def makeRequest(requestTemplate: ReqObj, data: list[str], session: requests.Sess
             prepedreq = session.prepare_request(request)
             response: requests.Response = session.send(prepedreq)
         case _:
-            logging.warn(f"Unknown request method {str(requestTemplate.reqtype)} in {repr(requestTemplate)}")
+            logging.warn(
+                f"Unknown request method {str(requestTemplate.reqtype)} in {repr(requestTemplate)}")
             logging.debug("How did this request get past checks")
     return response
-    
-def MakeRequests(requestList: list, dataList: list[list[str]], Identifier=None, progressConn: Connection=None, session=requests.Session())-> list[requests.Response]:
+
+
+def MakeRequests(requestList: list, dataList: list[list[str]], Identifier=None, progressConn: Connection = None, session=requests.Session()) -> list[requests.Response]:
     Responses = []
     if progressConn and Identifier:
         sendProg = True
@@ -60,11 +63,12 @@ def MakeRequests(requestList: list, dataList: list[list[str]], Identifier=None, 
                 Responses.append(makeRequest(request, data, session))
                 # progressConn.send({Identifier: float(index + 1)/len(dataList)})
         else:
-            
+
             Responses.append(makeRequest(request, None, session))
             if progressConn and Identifier:
                 progressConn.send({Identifier: 100.0})
     return Responses
+
 
 def parseLink(uri: str, data: Optional[list[str]]):
     finalURI = uri
@@ -76,6 +80,6 @@ def parseLink(uri: str, data: Optional[list[str]]):
         else:
             logging.warn("Not enough input present.")
     return finalURI
-        
+
 # def getMatches(Request: ReqObj.Request):
 #     return re.findall("/{([0-9])+}/g", Request.uri)

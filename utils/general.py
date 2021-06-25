@@ -1,7 +1,7 @@
 from doctest import UnexpectedException
 from pathlib import Path
 from os import scandir
-import string    
+import string
 
 import random
 from re import L
@@ -10,6 +10,7 @@ OverridesFolder = Path(__file__).parent.parent.joinpath("Overrides")
 Overrides = []
 checked = False
 
+
 def getOverrides():
     if OverridesFolder.exists():
         if checked is False:
@@ -17,7 +18,6 @@ def getOverrides():
                 Overrides.append(Override.name)
         return Overrides
     return None
-
 
 
 def parseCSV(lines: list[str], newLines=True, strip=True, ignoreWhiteSpaces=False, sep=","):
@@ -32,55 +32,60 @@ def parseCSV(lines: list[str], newLines=True, strip=True, ignoreWhiteSpaces=Fals
 
     Returns:
         list[list[list[x: str]]]: Returns list comprehensible by MakeRequests(). 
-        
+
     Throws:
         UnexpectedException: Throws incase lines is None or its len is 0.
-    """    
-    
+    """
+
     if not lines or len(lines) == 0:
-        raise UnexpectedException("Lines cannot be null and cannot have length of 0.")
+        raise UnexpectedException(
+            "Lines cannot be null and cannot have length of 0.")
     if isinstance(lines, str):
         lines = [lines]
     if newLines:
-        newLines=[]
+        newLines = []
         for line in lines:
-           if "\n" in line:
-               newLines = line.split("\n")
-           else: 
-               newLines.append(line)
-    else: 
+            if "\n" in line:
+                newLines = line.split("\n")
+            else:
+                newLines.append(line)
+    else:
         newLines = lines
-    
+
     # ResultCSV List
     CsvList = []
-    
+
     for line in newLines:
         paramLine = []
         for param in line.split(sep):
-            
+
             # Cleanup time!
             if strip:
                 param.strip()
             if ignoreWhiteSpaces:
                 param.replace(" ", "")
-                
+
             paramLine.append(param)
         CsvList.append(paramLine)
-    
+
     return CsvList
+
 
 def randomHex(len=5):
     maxHex = ''
     for f in range(len):
         maxHex += "F"
     maxDec = int(maxHex, 16)
-    random_number = random.randint(0,maxDec)
+    random_number = random.randint(0, maxDec)
     return str(hex(random_number))
 
-def randomString(MAX_LIMIT=5):    
-    ran = ''.join(random.choices(string.ascii_uppercase + string.digits, k = MAX_LIMIT))   
+
+def randomString(MAX_LIMIT=5):
+    ran = ''.join(random.choices(
+        string.ascii_uppercase + string.digits, k=MAX_LIMIT))
     return str(ran)
 
+
 def randomSymbols(MAX_LIMIT=1):
-    ran = ''.join(random.choices('!@#$%^&*()_', k = MAX_LIMIT))   
+    ran = ''.join(random.choices('!@#$%^&*()_', k=MAX_LIMIT))
     return str(ran)

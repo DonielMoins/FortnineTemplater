@@ -7,14 +7,15 @@ class Request():
 
     def __init__(self, **kwargs):
         self.reqtype = kwargs.get("reqtype", "get")
-        self.uri = kwargs.get("uri", "https://example.com/api?requestParm1={0}&requestParm2={1}")
+        self.uri = kwargs.get(
+            "uri", "https://example.com/api?requestParm1={0}&requestParm2={1}")
         self.headers = kwargs.get("headers", {
             "user-agent": "FortnineActions/0.0.1",
             "content-type": "text"
         })
         self.ReuseSession = kwargs.get("ReuseSession", True)
         self.__dict__.update(kwargs)
-        
+
         self.reqtype.lower()
         match self.reqtype:
             case "get":
@@ -33,7 +34,6 @@ class Request():
                 pass
             case _:
                 raise Exception("Malformed Request Type JSON")
-        
 
 
 class Profile():

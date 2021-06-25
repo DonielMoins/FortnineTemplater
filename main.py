@@ -83,7 +83,6 @@ class FrameController(tk.Tk):
         self.taskQueue = taskQueue
         self.progressReceiver = progressReceiver
         self.progressSender = progressSender
-        
 
         container.pack(side="top", fill="both", expand=True)
         container.grid_rowconfigure(0, weight=1)
@@ -101,7 +100,7 @@ class FrameController(tk.Tk):
 
         self.show_frame(SelectorFrame)
         # self.after(20000, printReceived, [progressReceiver])
-        # TODO this doesnt try to match against dict key 
+        # TODO this doesnt try to match against dict key
         # GUI Parameters, edit at EOF
         # if len(launchParams) > 0:
         #     match launchParams.keys():
@@ -220,9 +219,11 @@ class DataEntry(tk.Toplevel):
 
 def printReceived(progressReceiver: Connection):
     progressReceiver = progressReceiver[0]
-    
+
     print("Data:")
     print(progressReceiver.recv())
+
+
 class DragManager():
     def add_dragable(self, widget):
         widget.bind("<ButtonPress-1>", self.on_start)
@@ -271,10 +272,7 @@ else:
                         filename=f"templater-{dayDate}.log", level=logging.INFO)
 
 
-if __name__ == '__main__':
-    logging.info('Starting up Templater')
-    # logging.debug(f"Starting with following parameters: \n{kwargs}")
-
+def main():
     openEditor = False
     # if kwargs:
     #     __dict__.update(kwargs)
@@ -286,7 +284,8 @@ if __name__ == '__main__':
         progressSender, progressReceiver = mp.Pipe()
         Processes["TaskQueue"] = taskQueue
 
-        GUIProc = mp.Process(target=startGUI, args=(taskQueue, progressReceiver, GlobalLaunchParams.get("GUI", {})))
+        GUIProc = mp.Process(target=startGUI, args=(
+            taskQueue, progressReceiver, GlobalLaunchParams.get("GUI", {})))
         # Start our dearest GUI
         GUIProc.start()
         Processes["GUI"] = GUIProc
@@ -310,5 +309,12 @@ if __name__ == '__main__':
                     progressSender.close()
                     progressReceiver.close()
                 break
+
+
+if __name__ == '__main__':
+    logging.info('Starting up Templater')
+    # logging.debug(f"Starting with following parameters: \n{kwargs}")
+
+    main()
 
     logging.debug('All sub-processes dead, program ending.')
