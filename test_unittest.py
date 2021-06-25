@@ -1,6 +1,10 @@
 from typing import List
-import unittest
+import unittest, threading
+from utils.requests import MakeRequests, makeRequest
 from utils.general import parseCSV, randomString, randomSymbols
+import http.server, socketserver
+from objects import Profile, Request
+from unittest.mock import patch
 
 class CSV_Tests(unittest.TestCase):
 
@@ -51,6 +55,17 @@ class CSV_Tests(unittest.TestCase):
             for param in line:
                 self.assertIsInstance(param, str)
         
+class Request_Tests(unittest.TestCase):
+    def test_EmptyGetRequest(self):
+        request = Request(reqtype="get", uri="https://httpbin.org/get")
+        responses = MakeRequests(requestList=[request], dataList=[[""]])        
+        for response in responses:
+            # Get values in common
+            sameValues = (request.headers.items() & response.headers.items())
+            for v in sameValues:
+                self.assertEqual(request.headers[v], response.headers[v])
+            # Check return value
+            self.assertEqual(response.status_code, 200)
         
 if __name__ == "__main__":
     unittest.main()

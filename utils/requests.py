@@ -13,13 +13,14 @@ def makeRequest(requestTemplate: ReqObj, data: list[str], session: requests.Sess
     
     URL = parseLink(requestTemplate.uri, data)
     request = requests.Request(str(reqtype).upper(), URL)
-    
+    response = None
     
     # TODO see what special options we need for each request method.
     match requestTemplate.reqtype:
         case "request":
             prepedreq = session.prepare_request(request)
             response: requests.Response = session.send(prepedreq)
+            
         case "get":
             prepedreq = session.prepare_request(request)
             response: requests.Response = session.send(prepedreq)
@@ -44,8 +45,10 @@ def makeRequest(requestTemplate: ReqObj, data: list[str], session: requests.Sess
         case _:
             logging.warn(f"Unknown request method {str(requestTemplate.reqtype)} in {repr(requestTemplate)}")
             logging.debug("How did this request get past checks")
+    return response
     
-def MakeRequests(requestList: list, dataList: list[list[str]], Identifier=None, progressConn: Connection=None, session=requests.Session()):
+def MakeRequests(requestList: list, dataList: list[list[str]], Identifier=None, progressConn: Connection=None, session=requests.Session())-> list[requests.Response]:
+    Responses = []
     if progressConn and Identifier:
         sendProg = True
     else:
@@ -54,13 +57,14 @@ def MakeRequests(requestList: list, dataList: list[list[str]], Identifier=None, 
         request: ReqObj.Request = request
         if dataList is not None:
             for index, data in enumerate(dataList):
-                makeRequest(request, data, session)
+                Responses.append(makeRequest(request, data, session))
                 # progressConn.send({Identifier: float(index + 1)/len(dataList)})
         else:
             
-            makeRequest(request, None, session)
+            Responses.append(makeRequest(request, None, session))
             if progressConn and Identifier:
                 progressConn.send({Identifier: 100.0})
+    return Responses
 
 def parseLink(uri: str, data: Optional[list[str]]):
     finalURI = uri
