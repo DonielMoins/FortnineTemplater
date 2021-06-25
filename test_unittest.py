@@ -21,11 +21,11 @@ class CSV_Tests(unittest.TestCase):
         self.assertTrue(len(csv) == size[0])
         self.assertTrue(len(csv[0]) == size[1])
         # Check csvlist structure
-        self.assertTrue(isinstance(csv, list))
+        self.assertIsInstance(csv, list)
         for line in csv:
-            self.assertTrue(isinstance(line, list))
+            self.assertIsInstance(line, list)
             for param in line:
-                self.assertTrue(isinstance(param, str))
+                self.assertIsInstance(param, str)
     
     def test_LargeOneLine_RandomSeperator(self):
         maxParamSize = 10
@@ -45,11 +45,11 @@ class CSV_Tests(unittest.TestCase):
         self.assertTrue(len(csv) == size[0])
         self.assertTrue(len(csv[0]) == size[1])
         # Check csvlist structure
-        self.assertTrue(isinstance(csv, list))
+        self.assertIsInstance(csv, list)
         for line in csv:
-            self.assertTrue(isinstance(line, list))
+            self.assertIsInstance(line, list)
             for param in line:
-                self.assertTrue(isinstance(param, str))
+                self.assertIsInstance(param, str)
         
         
 if __name__ == "__main__":
