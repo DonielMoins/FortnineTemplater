@@ -100,7 +100,7 @@ class FrameController(tk.Tk):
             frame.grid(row=0, column=0, sticky="nsew")
 
         self.show_frame(SelectorFrame)
-        self.after(20000, printReceived, [progressReceiver])
+        # self.after(20000, printReceived, [progressReceiver])
         # TODO this doesnt try to match against dict key 
         # GUI Parameters, edit at EOF
         # if len(launchParams) > 0:
