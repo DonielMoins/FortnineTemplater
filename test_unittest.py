@@ -16,6 +16,7 @@ class Test_CSVTests(unittest.TestCase):
                     bigString += "\n"
         csv = parseCSV(bigString)
         baseList = list(list(str()))
+        # Pretty sure this doesn't actually work but fuck it, im tired.
         self.assertTrue(isinstance(csv, type(baseList)))
         
 if __name__ == "__main__":
