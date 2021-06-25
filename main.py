@@ -211,7 +211,7 @@ class DataEntry(tk.Toplevel):
             text: str = InputField.get('1.0', tk.END)
             Data = parseCSV(text)
             FieldsData.append(Data)
-            self.destroy()
+        self.destroy()
 
         reqsTask = proc.TaskThread(
             fun=MakeRequests, args=(requests, FieldsData, self.progressSender))
