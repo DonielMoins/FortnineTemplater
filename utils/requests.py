@@ -1,12 +1,13 @@
+from multiprocessing.connection import Connection
 from typing import Optional
 import re 
 import requests
-import classes.requestObj as ReqObj
+from objects import Request as ReqObj
 import logging
 
 # NOTE USE IN THREAD FROM THREADPOOL OR ELSE BLOCKING
 # make single request checking what type from template
-def makeRequest(requestTemplate: ReqObj, data: Optional[list[str]], session: requests.Session):
+def makeRequest(requestTemplate: ReqObj, data: list[str], session: requests.Session):
     reqtype = requestTemplate.reqtype
     
     
@@ -44,14 +45,22 @@ def makeRequest(requestTemplate: ReqObj, data: Optional[list[str]], session: req
             logging.warn(f"Unknown request method {str(requestTemplate.reqtype)} in {repr(requestTemplate)}")
             logging.debug("How did this request get past checks")
     
-def MakeRequests(requestList: list, dataList: Optional[list[list[str]]], session=requests.Session()):
+def MakeRequests(requestList: list, dataList: list[list[str]], Identifier=None, progressConn: Connection=None, session=requests.Session()):
+    if progressConn and Identifier:
+        sendProg = True
+    else:
+        sendProg = False
     for request in requestList:
         request: ReqObj.Request = request
         if dataList is not None:
-            for data in dataList:
+            for index, data in enumerate(dataList):
                 makeRequest(request, data, session)
+                progressConn.send({Identifier: float(index + 1)/len(dataList)})
         else:
+            
             makeRequest(request, None, session)
+            if progressConn and Identifier:
+                progressConn.send({Identifier: 100.0})
 
 def parseLink(uri: str, data: Optional[list[str]]):
     finalURI = uri
