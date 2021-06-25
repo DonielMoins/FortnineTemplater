@@ -55,7 +55,7 @@ def MakeRequests(requestList: list, dataList: list[list[str]], Identifier=None, 
         if dataList is not None:
             for index, data in enumerate(dataList):
                 makeRequest(request, data, session)
-                progressConn.send({Identifier: float(index + 1)/len(dataList)})
+                # progressConn.send({Identifier: float(index + 1)/len(dataList)})
         else:
             
             makeRequest(request, None, session)
