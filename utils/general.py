@@ -1,6 +1,7 @@
 from doctest import UnexpectedException
 from pathlib import Path
 from os import scandir
+import string    
 
 import random
 from re import L
@@ -19,7 +20,7 @@ def getOverrides():
 
 
 
-def parseCSV(lines: list[str], newLines=False, strip=True, ignoreWhiteSpaces=False, sep=","):
+def parseCSV(lines: list[str], newLines=True, strip=True, ignoreWhiteSpaces=False, sep=","):
     """Turn List of strings (lines) into list[list["param","param","param"...], list[...], list[...]]
 
     Args:
@@ -38,14 +39,17 @@ def parseCSV(lines: list[str], newLines=False, strip=True, ignoreWhiteSpaces=Fal
     
     if not lines or len(lines) == 0:
         raise UnexpectedException("Lines cannot be null and cannot have length of 0.")
-       
+    if isinstance(lines, str):
+        lines = [lines]
     if newLines:
+        newLines=[]
         for line in lines:
            if "\n" in line:
-               newLines.append(line.split("\n"))
+               newLines = line.split("\n")
            else: 
                newLines.append(line)
-    else: newLines = lines
+    else: 
+        newLines = lines
     
     # ResultCSV List
     CsvList = []
@@ -72,3 +76,7 @@ def randomHex(len=5):
     maxDec = int(maxHex, 16)
     random_number = random.randint(0,maxDec)
     return str(hex(random_number))
+
+def randomString(MAX_LIMIT=5):    
+    ran = ''.join(random.choices(string.ascii_uppercase + string.digits, k = MAX_LIMIT))   
+    return str(ran)
