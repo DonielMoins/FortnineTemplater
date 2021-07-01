@@ -54,11 +54,11 @@ Listed from most to least important.
 
 - Refactor Code:
   - main.py
-    - [ ] Add info / comments
+    - [x] Add info / comments
     - [ ] Cleanup code
   - utils
     - objects.py
-      - [x] Add info / comments
+      - [ ] Add info / comments
       - [ ] Cleanup code
     - config.py
       - [ ] Add info / comments
