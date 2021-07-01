@@ -1,4 +1,4 @@
-# Requests Templater
+# Requests Template Manager
 
 Simple Requests Manager/Profiler/Executer.
 Make request templates and run them easily using csv files as input params.
@@ -7,23 +7,44 @@ Currently project is in alpha, use with caution!
 ## Requirements
 
 - Python >= 3.10b3
+- venv: Run ``` pip install -r Requirements.txt ``` in venv
 
 ## TODO
 
-1. [ ] Make a template Editor
-2. [ ] Refactor Code
-3. [x] Add CSV parser
-4. [ ] Drag n' drop CSV files
-5. [x] Drag n' drop CSV parser
-6. [ ] Add progress bar for each request button
+Listed from most to least important.
+
+1. [ ] Make a template Editor (Most Important)
+2. [ ] Fix Config Profile Bug (WIP)
+3. [ ] Refactor Code (3/10)
+4. [ ] Drag n' drop CSV file
+5. [x] Disable busy Profile Buttons
+6. [ ] Finish Progress Pipes and Parse sent Data (2/5)
 7. [ ] Specialize requests based on method
-8. [ ] Make tests
-9. [x] Communication between Pool and GUI
-10. [x] Make a better README
-11. [x] Basic config parser
-12. [x] Prototype DataEntry window
-13. [x] Prototype Profile Selector GUI
-14. [x] Finish Patient Thread in async.
+8. [ ] Make tests:
+   1. Request Method Tests:
+        - [X] GET       (1 Test)
+        - [ ] POST      (WIP)
+        - [ ] HEAD      (Not Planned)
+        - [ ] PATCH     (Not Planned)
+        - [ ] PUT       (Not Planned)
+        - [ ] DELETE    (Not Planned)
+        - [ ] OPTIONS   (Not Planned)
+   2. ```Request.MakeRequests()```:
+        - [ ] Test Session Retention
+   3. CSV Parsing Tests:
+        - [x] One Line, Default             (100 x 2)
+        - [x] One Line, Random Separator    (100 x 2)
+        - [ ] Multiple Line, Special Characters
+   4. ```Request.ParseLink()```:
+      - [ ] Clean link of Illegal Chars
+9. [x] Add version migration / upgrading function.
+10. [X] Add CSV parser
+11. [x] Communication between Pool and GUI
+12. [x] Make a better README
+13. [x] Basic config parser
+14. [x] Prototype DataEntry window
+15. [x] Prototype Profile Selector GUI
+16. [x] Finish Patient Thread in async.
 
 ## Config
 

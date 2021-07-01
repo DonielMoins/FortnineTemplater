@@ -1,11 +1,7 @@
 # Config I/O Handler.
-import inspect
 from types import MappingProxyType
-from typing import Optional
-import hjson
-import pickle
-import logging
-from hjson import loads, HjsonEncoder, load, HjsonDecodeError
+import pickle, hjson, logging
+from hjson import HjsonEncoder, load, HjsonDecodeError
 from pathlib import Path 
 from objects import Profile, Request
 
@@ -44,7 +40,15 @@ def get_config(loc: Path=configPath):
             
             hjsonO = load(config_file)
             if len(hjsonO) == 0:
+    
                 logging.error("Config HJSon Object Empty")
+                try:
+                    logging.info(f"Trying to erase empty config at {configPath}")
+                    configPath.unlink()
+                except Exception as e:
+                    logging.error(e.__cause__)
+                    
+                
                 raise HjsonDecodeError("Config HJSon Object Empty", config_file.readline(), 0)
             hjsonO.__delitem__("IGNORED")
             return hjsonO
@@ -128,19 +132,50 @@ def get_profiles(jsonConfig):
 def build_config():
     default_config = {
                     "profiles": [Profile()],
+                    "settings": {},
                     "IGNORED": {}
                     }
     return default_config
 
 class _ConfigEncoder(HjsonEncoder):
     def default(self, obj):
+        print("Entered _ConfigEncoder")
+        # profiles key is dict, convert it to a list
+        if isinstance(obj, dict) and "profiles" in obj.keys() and isinstance(obj["profiles"], dict):
+            obj["profiles"] = obj["profiles"].values()
+            self.default(obj)
+            
+        if isinstance(obj, list) and len(obj) > 0:
+            print("Parsing List:")
+            self.ParseList(obj)
         if isinstance(obj, (list, dict, str, int, float, bool, type(None))):
-            return HjsonEncoder.default(self, obj)
+            return super().default(self, obj)
         if isinstance(obj, MappingProxyType):
             return dict(obj)
-        if isinstance(obj, type(list[Request])):
-            for i in obj.__iter__:
-                self.default(self, i)
-        if type(obj) is Request or Profile:
-            return {type(obj).__name__: obj.__dict__}
         return {"_unknown_object": pickle.dumps(obj)}
+
+    
+    def ParseList(self, obj):
+        # print(f"Encoding List of {type(obj[0])}")
+        if isinstance(obj[0], Request):
+            print("\t\tEncoding Request List")
+            for i in obj:
+                print("\t\t\tEncoding Request")
+                self.default(self, i)
+        elif isinstance(obj[0], Profile):
+            print("Encoding Profile List")
+            profileList = []
+            for profile in obj:
+                print("\tEncoding Profile")
+                profileList.append(profile.__dict__)
+            return profileList
+        else:
+            self.default(obj)
+        
+        
+    def ParseProfile(self, obj):
+        for profObj in obj.__dict__:
+            if isinstance(profObj, list) and len(profObj) > 0:
+                self.ParseList(profObj)
+            else: 
+                self.default(profObj)

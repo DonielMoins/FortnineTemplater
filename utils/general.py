@@ -1,7 +1,10 @@
 from doctest import UnexpectedException
+import enum
+from packaging import version
 from pathlib import Path
 from os import scandir
 import string
+
 
 import random
 from re import L
@@ -10,6 +13,7 @@ OverridesFolder = Path(__file__).parent.parent.joinpath("Overrides")
 Overrides = []
 checked = False
 
+ProgramVersion = version.parse("0.0.1")
 
 def getOverrides():
     if OverridesFolder.exists():
@@ -89,3 +93,18 @@ def randomString(MAX_LIMIT=5):
 def randomSymbols(MAX_LIMIT=1):
     ran = ''.join(random.choices('!@#$%^&*()_', k=MAX_LIMIT))
     return str(ran)
+
+class versionEnum(enum.IntEnum):
+    HIGHER = 0
+    SAME = 1
+    LOWER = 2
+
+def compareVersion(oldVersion: str, newVersion: str = ProgramVersion):
+    if not (oldVersion and newVersion):
+        raise ValueError("Invalid version values.")
+    if version.parse(oldVersion) < version.parse(newVersion):
+        return versionEnum.HIGHER
+    elif version.parse(oldVersion) == version.parse(newVersion):
+        return versionEnum.SAME
+    else:
+        return versionEnum.LOWER
