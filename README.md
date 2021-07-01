@@ -53,11 +53,22 @@ Listed from most to least important.
 ## Refactor Goalz
 
 - Refactor Code:
-  - [ ] Refactor Main
-  - [x] Add info to Objects
-  - [ ] Cleanup Objects
-  - [ ] Cleanup Config
-  - [ ] cleanup Requests
+  - main.py
+    - [ ] Add info / comments
+    - [ ] Cleanup code
+  - utils
+    - objects.py
+      - [x] Add info / comments
+      - [ ] Cleanup code
+    - config.py
+      - [ ] Add info / comments
+      - [ ] Cleanup Code
+    - requests.py
+      - [ ] Add info / comments
+      - [ ] Cleanup Code
+    - general.py
+      - [ ] Add info / comments
+      - [ ] Cleanup code
 
 ## Config
 
