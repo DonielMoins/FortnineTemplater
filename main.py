@@ -65,8 +65,8 @@ class SelectorFrame(tk.Frame):
             ProfilesLabel = tk.Label(self, text="Run profiles:")
             ProfilesLabel.pack(pady=10, padx=10)
             for profile in profiles:
-                button = tk.Button(self, text=profile.ProfileName,
-                                   command=lambda: DataEntry(requests=profile.Requests, taskQueue=controller.taskQueue, progressSender=progressSender))
+                button = tk.Button(self, text=profile.profileName,
+                                   command=lambda: DataEntry(requests=profile.requests, taskQueue=controller.taskQueue, progressSender=progressSender))
                 self.profileButtons.append(button)
                 button.pack(padx=10, pady=10)
         else:
@@ -76,7 +76,7 @@ class SelectorFrame(tk.Frame):
         
         if progressSender and progressReceiver:
             self.disabledButtons: list[tk.Button] = []
-            self.after_idle(self.checkInactiveButtons, args=(progressReceiver,))
+            self.after_idle(self.checkInactiveButtons, progressReceiver)
             
     # TODO Understand what button is being run, then add it to self.blockedButtons
     def checkInactiveButtons(self, progressReceiver: Connection):
@@ -99,7 +99,7 @@ class SelectorFrame(tk.Frame):
                 button.setvar("state", "disabled")
             else:
                 button.setvar("state", "normal")
-        self.after_idle(self.checkInactiveButtons, args=(progressReceiver,))
+        self.after(1500, self.checkInactiveButtons, progressReceiver)
     
 
 # God I love StackOverflow
@@ -150,11 +150,11 @@ class DataEntry(tk.Toplevel):
         Args:
             taskQueue ([JoinableQueue]): Task Queue to send Requests to.
             master ([type], optional): Master window that spawned frame. Defaults to None.
-            requests (list, optional): Requests list taken from Profile.Requests. Defaults to [].
+            requests (list, optional): Requests list taken from Profile.requests. Defaults to [].
         """
         super().__init__(master=master)
         self.title("Input Request variables")
-        self.requests = list(requests[0].values())
+        self.requests = requests
         self.CurrentInput = None
         self.InputFields = []
         self.taskQueue = taskQueue
@@ -167,10 +167,10 @@ class DataEntry(tk.Toplevel):
         if not self.CurrentInput:
             self.CurrentInput = 1
         ReqPreviewLabel = tk.Label(
-            self, text=f"Preview: {self.requests[self.CurrentInput - 1]['uri']}")
+            self, text=f"Preview: {self.requests[self.CurrentInput - 1].uri}")
         ReqPreviewLabel.grid(padx=10, row=0, rowspan=1)
         ReqMethodLabel = tk.Label(
-            self, text=f"Method: {self.requests[self.CurrentInput - 1]['reqtype'].upper()}")
+            self, text=f"Method: {self.requests[self.CurrentInput - 1].reqtype.upper()}")
         ReqMethodLabel.grid(padx=10, row=0, rowspan=1, column=1)
 
         if len(self.InputFields) > 1:

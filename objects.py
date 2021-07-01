@@ -9,10 +9,9 @@ Syntax:
                 Optional Settings to be used later.
 """
 
-import enum
+import hjson
 from typing import Optional
 
-import packaging
 from utils.general import compareVersion, ProgramVersion
 
 from packaging import version
@@ -81,17 +80,24 @@ class Request():
                                         Delete (Untested)
                                         Options (Untested)"""
                                         )
+    def to_hjson(self):
+        '''
+        convert the instance of this class to hjson
+        '''
+        return hjson.dumps(self, indent = 4, default=lambda o: o.__dict__)
 
 
 
 # Profile Contains Profile Name, List of Requests and an optional dictionary for profile settings.
 class Profile():
-    def __init__(self, ProfileName="Default Name", Requests=[Request()], Settings: Optional[dict] = {}, migrateData = False, version: Optional[version.Version] = ProgramVersion):
+    def __init__(self, ProfileName="Default Name", Requests=[Request()], Settings: Optional[dict] = {}, migrateData = False, version: Optional[version.Version] = ProgramVersion, **kwargs):
         self.profileName = ProfileName
         self.requests = Requests
         self.settings = Settings
         if migrateData:
             self.MigrateProfile(version)
+        if not kwargs:
+            self.__dict__.update(kwargs)
         
 
     def MigrateProfile(self, resultVersion):
@@ -104,5 +110,12 @@ class Profile():
                 pass
             case _:
                 pass
+        
+        
+    def to_hjson(self):
+        '''
+        convert the instance of this class to hjson
+        '''
+        return hjson.dumps(self, indent = 4, default=lambda o: o.__dict__)
         
 

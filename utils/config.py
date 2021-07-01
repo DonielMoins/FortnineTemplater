@@ -1,6 +1,6 @@
 # Config I/O Handler.
 from types import MappingProxyType
-import pickle, hjson, logging
+import hjson, logging
 from hjson import HjsonEncoder, load, HjsonDecodeError
 from pathlib import Path 
 from objects import Profile, Request
@@ -10,7 +10,7 @@ home_dir = Path(__file__).parent.parent
 configPath = home_dir.joinpath("config.hjson")
 
 def dumps(obj, **kwargs):
-    return hjson.dumps(obj, cls=_ConfigEncoder, indent=4)
+    return hjson.dumps(obj, cls=ConfigEncoder, indent=4)
 
 # Returns Json of config file
 # if file doesant exist, create one from hardcoded default
@@ -40,13 +40,16 @@ def get_config(loc: Path=configPath):
             
             hjsonO = load(config_file)
             if len(hjsonO) == 0:
-    
-                logging.error("Config HJSon Object Empty")
+                logging.debug("Config HJSon Object Empty")
                 try:
                     logging.info(f"Trying to erase empty config at {configPath}")
                     configPath.unlink()
+                except PermissionError as e:
+                    logging.debug(f"""Failed to delete config.hjson due to a Permission error:
+                                  {e.__cause__}""")
+                    logging.debug("Delete config.hjson manually!")
                 except Exception as e:
-                    logging.error(e.__cause__)
+                    logging.debug(e.__cause__)
                     
                 
                 raise HjsonDecodeError("Config HJSon Object Empty", config_file.readline(), 0)
@@ -119,10 +122,9 @@ def get_profiles(jsonConfig):
         profiles = []
         for parentobject in jsonConfig:
             if parentobject == "profiles":
-                for profileItems in jsonConfig["profiles"]:
-                    for profileDict in list(profileItems.values()):
-                        profile = Profile(settings=profileDict) 
-                        profiles.append(profile)
+                for profileDict in jsonConfig["profiles"]:
+                    profile = Profile(kwargs=profileDict) 
+                    profiles.append(profile)
         return profiles
     # TODO: test and catch correct exceptions
     except Exception as error: 
@@ -137,45 +139,50 @@ def build_config():
                     }
     return default_config
 
-class _ConfigEncoder(HjsonEncoder):
+class ConfigEncoder(HjsonEncoder):  
     def default(self, obj):
-        print("Entered _ConfigEncoder")
-        # profiles key is dict, convert it to a list
-        if isinstance(obj, dict) and "profiles" in obj.keys() and isinstance(obj["profiles"], dict):
-            obj["profiles"] = obj["profiles"].values()
-            self.default(obj)
+        
+        if type(obj) is Profile:
+            return self.ParseProfile(obj)
+            
+        if type(obj) is Request:
+            return self.ParseRequest(obj)
             
         if isinstance(obj, list) and len(obj) > 0:
             print("Parsing List:")
-            self.ParseList(obj)
+            return self.ParseList(obj)
+            
         if isinstance(obj, (list, dict, str, int, float, bool, type(None))):
-            return super().default(self, obj)
+            # if profiles key is a dict, convert it to a list
+            if type(obj) is dict and "profiles" in obj.keys() and isinstance(obj["profiles"], dict):
+                obj["profiles"] = obj["profiles"].values()
+                print("Converted dict profiles to list.")
+                return self.default(obj)
+            return HjsonEncoder.default(self, obj)
+        
         if isinstance(obj, MappingProxyType):
-            return dict(obj)
-        return {"_unknown_object": pickle.dumps(obj)}
+            return self.default(dict(obj))
+        
+        return HjsonEncoder.default(self, obj)
 
-    
     def ParseList(self, obj):
         # print(f"Encoding List of {type(obj[0])}")
         if isinstance(obj[0], Request):
             print("\t\tEncoding Request List")
             for i in obj:
-                print("\t\t\tEncoding Request")
-                self.default(self, i)
+                return self.default(i)
         elif isinstance(obj[0], Profile):
             print("Encoding Profile List")
-            profileList = []
             for profile in obj:
-                print("\tEncoding Profile")
-                profileList.append(profile.__dict__)
-            return profileList
+                self.default(profile)
         else:
-            self.default(obj)
+            HjsonEncoder.default(self, obj)
+    
+    def ParseRequest(self, obj: Request):
+        print("\t\t\tEncoding Request")
+        return obj.to_hjson()
         
-        
-    def ParseProfile(self, obj):
-        for profObj in obj.__dict__:
-            if isinstance(profObj, list) and len(profObj) > 0:
-                self.ParseList(profObj)
-            else: 
-                self.default(profObj)
+    def ParseProfile(self, obj: Profile):
+        print("\tEncoding Profile:")
+        return obj.to_hjson()
+            
