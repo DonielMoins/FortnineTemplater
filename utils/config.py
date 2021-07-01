@@ -1,6 +1,6 @@
 # Config I/O Handler.
 from types import MappingProxyType
-import hjson, logging
+import hjson, logging, os
 from hjson import HjsonEncoder, load, HjsonDecodeError
 from pathlib import Path 
 from objects import Profile, Request
@@ -43,17 +43,16 @@ def get_config(loc: Path=configPath):
                 logging.debug("Config HJSon Object Empty")
                 try:
                     logging.info(f"Trying to erase empty config at {configPath}")
-                    configPath.unlink()
+                    os.remove(configPath.absolute())
                 except PermissionError as e:
                     logging.debug(f"""Failed to delete config.hjson due to a Permission error:
                                   {e.__cause__}""")
                     logging.debug("Delete config.hjson manually!")
                 except Exception as e:
                     logging.debug(e.__cause__)
-                    
-                
                 raise HjsonDecodeError("Config HJSon Object Empty", config_file.readline(), 0)
-            hjsonO.__delitem__("IGNORED")
+            if "IGNORED" in hjsonO.keys():
+                hjsonO.__delitem__("IGNORED")
             return hjsonO
     except HjsonDecodeError as error:
         if len(configlines) < 10 or len(hjsonO) == 0:
@@ -117,25 +116,27 @@ def backup_config(oldloc=configPath, retry=True):
             raise IOError("Could not safely write backup config file! \n File not writable, check Folder permissions!")
 
 def get_profiles(jsonConfig):
-    try:
-        # TODO: FIX THIS MESSSSSSS
-        profiles = []
-        for parentobject in jsonConfig:
-            if parentobject == "profiles":
-                for profileDict in jsonConfig["profiles"]:
-                    profile = Profile(kwargs=profileDict) 
-                    profiles.append(profile)
-        return profiles
-    # TODO: test and catch correct exceptions
-    except Exception as error: 
-        print(error)
+    """Go through config, for each profile in config, create profile objects and then return them
+
+    Args:
+        jsonConfig (dict): The parsed Config.hjson as a dictionary.
+
+    Returns:
+        list[Profile]: List of Profile objects
+    """
+    profiles = []
+    for profileDict in jsonConfig["profiles"]:
+        profile = Profile(kwargs=profileDict) 
+        profiles.append(profile)
+    return profiles
 
         
 def build_config():
     default_config = {
-                    "profiles": [Profile()],
-                    "settings": {},
-                    "IGNORED": {}
+                    "profiles": [
+                        Profile(),
+                        Profile()
+                        ]
                     }
     return default_config
 
@@ -150,7 +151,15 @@ class ConfigEncoder(HjsonEncoder):
             
         if isinstance(obj, list) and len(obj) > 0:
             print("Parsing List:")
-            return self.ParseList(obj)
+            # print(f"Encoding List of {type(obj[0])}")
+            if isinstance(obj[0], Request):
+                print("\t\tEncoding Request List")
+                for i in obj:
+                    return self.default(i)
+            if isinstance(obj[0], Profile):
+                print("Encoding Profile List")
+                for profile in obj:
+                    self.default(profile)
             
         if isinstance(obj, (list, dict, str, int, float, bool, type(None))):
             # if profiles key is a dict, convert it to a list
@@ -180,9 +189,9 @@ class ConfigEncoder(HjsonEncoder):
     
     def ParseRequest(self, obj: Request):
         print("\t\t\tEncoding Request")
-        return obj.to_hjson()
+        return obj.json()
         
     def ParseProfile(self, obj: Profile):
         print("\tEncoding Profile:")
-        return obj.to_hjson()
+        return obj.json()
             

@@ -1,28 +1,41 @@
 {
     profiles:
     [
-        
-            '''
-            {
-                profileName: Default Name
-                requests:
-                [
+        {
+            profileName: Default Name
+            requests:
+            [
+                {
+                    reqtype: get
+                    uri: https://example.com/api?requestParm1={0}&requestParm2={1}
+                    headers:
                     {
-                        reqtype: get
-                        uri: https://example.com/api?requestParm1={0}&requestParm2={1}
-                        headers:
-                        {
-                            User-Agent: FortnineActions/<bound method Version.__str__ of <Version('0.0.1')>>
-                            Content-Type: text
-                            Accept: */*
-                        }
-                        reuseSession: true
+                        User-Agent: FortnineActions/<bound method Version.__str__ of <Version('0.0.1')>>
+                        Content-Type: text
+                        Accept: */*
                     }
-                ]
-                settings: {}
-            }
-            '''
+                    reuseSession: true
+                }
+            ]
+            settings: {}
+        }
+        {
+            profileName: Default Name
+            requests:
+            [
+                {
+                    reqtype: get
+                    uri: https://example.com/api?requestParm1={0}&requestParm2={1}
+                    headers:
+                    {
+                        User-Agent: FortnineActions/<bound method Version.__str__ of <Version('0.0.1')>>
+                        Content-Type: text
+                        Accept: */*
+                    }
+                    reuseSession: true
+                }
+            ]
+            settings: {}
+        }
     ]
-    settings: {}
-    IGNORED: {}
 }

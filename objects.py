@@ -80,11 +80,8 @@ class Request():
                                         Delete (Untested)
                                         Options (Untested)"""
                                         )
-    def to_hjson(self):
-        '''
-        convert the instance of this class to hjson
-        '''
-        return hjson.dumps(self, indent = 4, default=lambda o: o.__dict__)
+    def json(self):
+        return vars(self)
 
 
 
@@ -112,10 +109,7 @@ class Profile():
                 pass
         
         
-    def to_hjson(self):
-        '''
-        convert the instance of this class to hjson
-        '''
-        return hjson.dumps(self, indent = 4, default=lambda o: o.__dict__)
+    def json(self):
+        return vars(self)
         
 
