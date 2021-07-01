@@ -130,6 +130,13 @@ def get_profiles(jsonConfig):
         profiles.append(profile)
     return profiles
 
+def add_profile(config, profile):
+    profiles = get_profiles(config)
+    profiles.append(profile)
+    config["profiles"] = profiles
+    write_config_file(config)
+    
+
         
 def build_config():
     default_config = {

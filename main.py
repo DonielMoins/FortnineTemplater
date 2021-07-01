@@ -1,5 +1,8 @@
 from datetime import date
-import logging, time
+import logging
+import profile
+from turtle import width
+from objects import Profile, Request
 import multiprocessing as mp
 from multiprocessing.connection import Connection
 import tkinter as tk, tkinter.scrolledtext as tkscrolled
@@ -17,7 +20,7 @@ dayDate = today.strftime("%d-%m-%Y")
 _ov = getOverrides()
 GlobalLaunchParams = {
     "GUI": {
-        "openEditor": False
+        "openEditor": True
     }
 }
 
@@ -39,13 +42,132 @@ class EditorFrame(tk.Frame):
 
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
-        label = tk.Label(self, text="Options")
+        label = tk.Label(self, text="Editor Mode")
         label.pack(pady=10, padx=10)
 
-        button = tk.Button(self, text="Preview Selector Screen",
+        switchbtn = tk.Button(self, text="Switch to User Mode",
                            command=lambda: controller.show_frame(SelectorFrame))
-        button.pack()
+        createProfilebtn = tk.Button(self, text="Create new Profile",
+                           command=lambda: ProfileEditor(master=parent))
+        deleteProfilebtn = tk.Button(self, text="Delete pre-existing Profile",
+                           command=lambda: controller.show_frame(SelectorFrame))
+        editProfilesbtn = tk.Button(self, text="Edit Profile",
+                           command=lambda: controller.show_frame(SelectorFrame))
+        switchbtn.pack(pady=10, padx=10)
+        createProfilebtn.pack(pady=10, padx=10)
+        deleteProfilebtn.pack(pady=10, padx=10)
+        editProfilesbtn.pack(pady=10, padx=10)
+    
+# Making this GUI makes me wanna kill myself
+class ProfileEditor(tk.Toplevel):
+    def __init__(self, master = None, profile: Profile = None):
+        super().__init__(master=master)
+        self.title("Profile Creator")
+        self.minsize(height=400, width=400)
+        self.requestsList = []
+        # self.grid(sticky="nsew")
+        if profile is not None:
+            self.profileName = profile.profileName
+            self.requests = profile.requests
+        else:
+            self.profileName = tk.StringVar(self, "Default Name")
+            self.requests = [Request()]
+        
+        for index, item in enumerate(self.requests):
+            self.requestsList.append({"uri": tk.StringVar(self, item.uri), "reqtype": tk.StringVar(self, item.reqtype.upper())})
+            self.requestsList[index]["Entry"] = tk.Entry(self, textvariable=self.requestsList[index]["uri"], width=80)
 
+        self.currentRequest = 0
+        self.nameLabel = tk.Label(self, text="Profile Name:")
+        self.nameEntry = tk.Entry(self, textvariable=self.profileName, width=75)
+        self.currentRequestLabel = tk.Label(self, text=f"Viewing Request: {self.currentRequest + 1}/{len(self.requests)}")
+        
+        # Request part
+        self.requestUriLabel = tk.Label(self, text="Request Uri:")
+        self.requestMethodDropdown = [tk.OptionMenu(self, self.requestsList[0]["reqtype"], *("GET", "HEAD", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"))]
+        
+        self.nameLabel.grid(row=0, column=0, sticky="w")
+        self.nameEntry.grid(row=0, column=1, columnspan=2, rowspan=2, padx=5, sticky="n")
+        self.currentRequestLabel.grid(row=0, column=4, sticky="ne") 
+        
+        self.requestUriLabel.grid(row=1)
+        self.requestsList[0]["Entry"].grid(row=1, column=1)
+        self.requestMethodDropdown[0].grid(row=1, column=4)
+        
+        self.prevRequestbtn = tk.Button(self, text="Previous Request", command=lambda: self.prevReq(True))
+        self.newRequestbtn = tk.Button(self, text="New Request", command=lambda: self.CreateRequest(True))
+        self.nextRequestbtn = tk.Button(self, text="Next Request", command=lambda: self.nextReq(True))
+        self.saveProfilebtn = tk.Button(self, text="Save Profile", command=lambda: self.saveProfile)
+        self.redrawAll()
+        
+        
+    def saveProfile(self):
+        prof = Profile(ProfileName=self.profileName, Requests=self.requests)
+        cfg.add_profile(cfg.get_config(), prof)
+        self.destroy()
+    # Called whenever remaking window
+    def clearScreen(self):
+        for widget in self.winfo_children():
+            widget.grid_forget()
+    
+    def upperWidgets(self, redraw=False):
+        self.currentRequestLabel.config(text=f"Viewing Request: {self.currentRequest + 1}/{len(self.requests)}")
+        self.nameLabel.grid(row=0, column=0, sticky="w")
+        self.nameEntry.grid(row=0, column=1, columnspan=2, rowspan=2, padx=5, sticky="n")
+        self.currentRequestLabel.grid(row=0, column=4, sticky="ne") 
+        if redraw:
+            self.redrawAll()
+    
+    def bottomWidgets(self, redraw=False):
+        if len(self.requestsList) > 1:
+            self.prevRequestbtn.grid(row=4, column=1, sticky="SEW", columnspan=1, padx=5)
+            self.nextRequestbtn.grid(row=4, column=3, sticky="SEW", columnspan=1, padx=5)
+        self.newRequestbtn.grid(row=4, column=2, columnspan=1, sticky="SEW", padx=5)
+        self.saveProfilebtn.grid(row=5, column=2, columnspan=1, sticky="SEW", padx=5)
+        if redraw:
+            self.redrawAll()
+    
+    def showRequestWidgets(self, redraw=False):
+        self.requestUriLabel.grid(row=1)
+        self.requestsList[self.currentRequest]["Entry"].grid(row=1, column=1)
+        self.requestMethodDropdown[self.currentRequest].grid(row=1, column=4)
+        if redraw:
+            self.redrawAll()
+        
+    def prevReq(self, redraw=False):
+        if len(self.requestsList) > 1:
+            if self.currentRequest == 0:
+                self.currentRequest =  len(self.requestsList) - 1
+            else:
+                self.currentRequest -= 1
+            if redraw:
+                self.redrawAll()
+    
+    def nextReq(self, redraw=False):
+        if len(self.requestsList) > 1:
+            if self.currentRequest == len(self.requestsList) - 1:
+                self.currentRequest =  0
+            else:
+                self.currentRequest += 1
+            if redraw:
+                self.redrawAll()
+    
+    def CreateRequest(self, redraw=False):
+        newReq = Request()
+        self.requests.append(newReq)
+        self.requestsList.append({"uri": tk.StringVar(self, newReq.uri), "reqtype": tk.StringVar(self, newReq.reqtype.upper())})
+        self.requestsList[len(self.requestsList) - 1]["Entry"] = tk.Entry(self, textvariable=self.requestsList[len(self.requestsList) - 1]["uri"], width=80)
+        self.requestMethodDropdown.append(tk.OptionMenu(self, self.requestsList[len(self.requestsList) - 1]["reqtype"], *("GET", "HEAD", "POST", "PATCH", "PUT", "DELETE", "OPTIONS")))
+        if redraw:
+            self.redrawAll()
+        
+    def redrawAll(self):
+        self.clearScreen()
+        self.upperWidgets()
+        self.showRequestWidgets()
+        self.bottomWidgets()
+            
+        
 
 #  TODO Parse Progress Data 
 class SelectorFrame(tk.Frame):
@@ -126,10 +248,7 @@ class FrameController(tk.Tk):
             self.frames[F] = frame
             frame.grid(row=0, column=0, sticky="nsew")
 
-        # self.show_frame(SelectorFrame)
-        # self.after(20000, printReceived, [progressReceiver])
-        # TODO this doesnt try to match against dict key, 
-        # GUI Parameters, edit at EOF
+        # GUI Parameters, edit at Start of file
         if len(launchParams) > 0:
             if launchParams["openEditor"]:
                 self.show_frame(EditorFrame)
