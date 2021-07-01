@@ -13,21 +13,22 @@ Currently project is in alpha, use with caution!
 
 Listed from most to least important.
 
-1. [ ] Make a template Editor (Most Important)
-2. [ ] Drag n' drop CSV file
-3. [ ] Finish Progress Pipes and Parse sent Data (1/3)
+1. [x] Make a template Editor (Most Important)
+2. [ ] Now make the editor work!
+3. [ ] Drag n' drop CSV file
+4. [ ] Finish Progress Pipes and Parse sent Data (1/3)
    1. [x] Sending and Receiving Data
    2. [ ] Profile Button/Task Identifier
    3. [ ] Parse Data
-4. [x] Add version migration / upgrading function.
-5. [x] Disable busy Profile Buttons
-6. [X] Add CSV parser
-7. [x] Basic config parser
-8. [x] Communication between Pool and GUI
-9. [x] Prototype DataEntry window
-10. [x] Prototype Profile Selector GUI
-11. [x] Make a better README
-12. [x] Finish Patient Thread in async.
+5. [x] Add version migration / upgrading function.
+6. [x] Disable busy Profile Buttons
+7. [X] Add CSV parser
+8. [x] Basic config parser
+9. [x] Communication between Pool and GUI
+10. [x] Prototype DataEntry window
+11. [x] Prototype Profile Selector GUI
+12. [x] Make a better README
+13. [x] Finish Patient Thread in async.
 
 ## Tests
 

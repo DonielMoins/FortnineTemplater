@@ -104,6 +104,7 @@ class Request_Tests(unittest.TestCase):
         request = Request(reqtype="post", uri="http://ptsv2.com/t/wdr4p-1625102266/post?valueZero={0}?valueTwo={1}?valueTwo={2}")
         postData=[]
         for lines in range(lines):
+            Line = []
             Line = [Line.append(randomString(valuemaxlen)) for x in range(valuesPerLine)]
         
         responses = MakeRequests(requestList=[request], dataList=postData)
