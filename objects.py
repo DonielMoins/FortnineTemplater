@@ -20,7 +20,7 @@ from packaging import version
 class Request():
     def __init__(self, **kwargs):
         """Creeate Request Object for use with functions from requests.py
-        
+
         Args:
             reqtype ([string], optional): Set request type. Defaults to "GET". 
                 Supported Types: 
@@ -39,15 +39,15 @@ class Request():
                     'Accept': '*/*',
                 }
             reuseSession ([bool], optional): If MakeRequest should reuse Session Object. Defaults to True.
-            
+
         Raises:
             ValueError: Request type unknown.
             ValueError: Request Type unsupported.
-        """        
+        """
         self.reqtype = kwargs.get("reqtype", "get").lower()
         self.uri = kwargs.get(
             "uri", "https://example.com/api?requestParm1={0}&requestParm2={1}")
-        
+
         """
         If you update the default headers Change Docstring.
         Find headers @ https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers
@@ -59,13 +59,13 @@ class Request():
         })
         self.reuseSession = kwargs.get("reuseSession", True)
         self.__dict__.update(kwargs)
-        
+
         # Check if request type is supported with these 3 Cases:
         match self.reqtype:
             # If Request Type is supported, Ignore.
             case "get" | "head" | "post" | "patch" | "put" | "delete" | "options":
                 pass
-            # If not supported or if unknown request type, raise ValueError with appropriate message 
+            # If not supported or if unknown request type, raise ValueError with appropriate message
             case "connect" | "request" | "trace":
                 raise ValueError("Unsupported Request Type")
             case _:
@@ -79,15 +79,15 @@ class Request():
                                         Put (Untested)
                                         Delete (Untested)
                                         Options (Untested)"""
-                                        )
+                                 )
+
     def json(self):
         return vars(self)
 
 
-
 # Profile Contains Profile Name, List of Requests and an optional dictionary for profile settings.
 class Profile():
-    def __init__(self, ProfileName="Default Name", Requests=[Request()], Settings: Optional[dict] = {}, migrateData = False, version: Optional[version.Version] = ProgramVersion, **kwargs):
+    def __init__(self, ProfileName="Default Name", Requests=[Request()], Settings: Optional[dict] = {}, migrateData=False, version: Optional[version.Version | version.LegacyVersion] = ProgramVersion, **kwargs):
         self.profileName = ProfileName
         self.requests = Requests
         self.settings = Settings
@@ -95,7 +95,6 @@ class Profile():
             self.MigrateProfile(version)
         if not kwargs:
             self.__dict__.update(kwargs)
-        
 
     def MigrateProfile(self, resultVersion):
         if not resultVersion:
@@ -107,9 +106,6 @@ class Profile():
                 pass
             case _:
                 pass
-        
-        
+
     def json(self):
         return vars(self)
-        
-

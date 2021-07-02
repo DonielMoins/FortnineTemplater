@@ -1,11 +1,11 @@
 from datetime import date
 import logging
-import profile
-from turtle import width
 from objects import Profile, Request
 import multiprocessing as mp
 from multiprocessing.connection import Connection
-import tkinter as tk, tkinter.scrolledtext as tkscrolled
+import tkinter as tk
+import tkinter.scrolledtext as tkscrolled
+
 
 import utils.parallelProcessing as proc
 from utils.general import getOverrides, parseCSV
@@ -27,9 +27,10 @@ GlobalLaunchParams = {
 
 # Initialize the GUI then start FrameController with minimum size.
 # Finally run main tkinter's mainloop()
-def startGUI(launchParams={}, taskQueue: mp.JoinableQueue = None,  progressReceiver: Connection = None, progressSender: Connection = None):
+def startGUI(launchParams, taskQueue: mp.JoinableQueue,  progressReceiver: Connection, progressSender: Connection):
 
-    master = FrameController(launchParams, taskQueue, progressReceiver, progressSender)
+    master = FrameController(launchParams, taskQueue,
+                             progressReceiver, progressSender)
     master.geometry("")
     master.minsize(height=100, width=300)
 
@@ -46,21 +47,23 @@ class EditorFrame(tk.Frame):
         label.pack(pady=10, padx=10)
 
         switchbtn = tk.Button(self, text="Switch to User Mode",
-                           command=lambda: controller.show_frame(SelectorFrame))
+                              command=lambda: controller.show_frame(SelectorFrame))
         createProfilebtn = tk.Button(self, text="Create new Profile",
-                           command=lambda: ProfileEditor(master=parent))
+                                     command=lambda: ProfileEditor(master=parent))
         deleteProfilebtn = tk.Button(self, text="Delete pre-existing Profile",
-                           command=lambda: controller.show_frame(SelectorFrame))
+                                     command=lambda: controller.show_frame(SelectorFrame))
         editProfilesbtn = tk.Button(self, text="Edit Profile",
-                           command=lambda: controller.show_frame(SelectorFrame))
+                                    command=lambda: controller.show_frame(SelectorFrame))
         switchbtn.pack(pady=10, padx=10)
         createProfilebtn.pack(pady=10, padx=10)
         deleteProfilebtn.pack(pady=10, padx=10)
         editProfilesbtn.pack(pady=10, padx=10)
-    
+
 # Making this GUI makes me wanna kill myself
+
+
 class ProfileEditor(tk.Toplevel):
-    def __init__(self, master = None, profile: Profile = None):
+    def __init__(self, master=None, profile: Profile = None):
         super().__init__(master=master)
         self.title("Profile Creator")
         self.minsize(height=400, width=400)
@@ -72,104 +75,122 @@ class ProfileEditor(tk.Toplevel):
         else:
             self.profileName = tk.StringVar(self, "Default Name")
             self.requests = [Request()]
-        
+
         for index, item in enumerate(self.requests):
-            self.requestsList.append({"uri": tk.StringVar(self, item.uri), "reqtype": tk.StringVar(self, item.reqtype.upper())})
-            self.requestsList[index]["Entry"] = tk.Entry(self, textvariable=self.requestsList[index]["uri"], width=80)
+            self.requestsList.append({"uri": tk.StringVar(
+                self, item.uri), "reqtype": tk.StringVar(self, item.reqtype.upper())})
+            self.requestsList[index]["Entry"] = tk.Entry(
+                self, textvariable=self.requestsList[index]["uri"], width=80)
 
         self.currentRequest = 0
         self.nameLabel = tk.Label(self, text="Profile Name:")
-        self.nameEntry = tk.Entry(self, textvariable=self.profileName, width=75)
-        self.currentRequestLabel = tk.Label(self, text=f"Viewing Request: {self.currentRequest + 1}/{len(self.requests)}")
-        
+        self.nameEntry = tk.Entry(
+            self, textvariable=self.profileName, width=75)
+        self.currentRequestLabel = tk.Label(
+            self, text=f"Viewing Request: {self.currentRequest + 1}/{len(self.requests)}")
+
         # Request part
         self.requestUriLabel = tk.Label(self, text="Request Uri:")
-        self.requestMethodDropdown = [tk.OptionMenu(self, self.requestsList[0]["reqtype"], *("GET", "HEAD", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"))]
-        
+        self.requestMethodDropdown = [tk.OptionMenu(
+            self, self.requestsList[0]["reqtype"], *("GET", "HEAD", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"))]
+
         self.nameLabel.grid(row=0, column=0, sticky="w")
-        self.nameEntry.grid(row=0, column=1, columnspan=2, rowspan=2, padx=5, sticky="n")
-        self.currentRequestLabel.grid(row=0, column=4, sticky="ne") 
-        
+        self.nameEntry.grid(row=0, column=1, columnspan=2,
+                            rowspan=2, padx=5, sticky="n")
+        self.currentRequestLabel.grid(row=0, column=4, sticky="ne")
+
         self.requestUriLabel.grid(row=1)
         self.requestsList[0]["Entry"].grid(row=1, column=1)
         self.requestMethodDropdown[0].grid(row=1, column=4)
-        
-        self.prevRequestbtn = tk.Button(self, text="Previous Request", command=lambda: self.prevReq(True))
-        self.newRequestbtn = tk.Button(self, text="New Request", command=lambda: self.CreateRequest(True))
-        self.nextRequestbtn = tk.Button(self, text="Next Request", command=lambda: self.nextReq(True))
-        self.saveProfilebtn = tk.Button(self, text="Save Profile", command=lambda: self.saveProfile)
+
+        self.prevRequestbtn = tk.Button(
+            self, text="Previous Request", command=lambda: self.prevReq(True))
+        self.newRequestbtn = tk.Button(
+            self, text="New Request", command=lambda: self.CreateRequest(True))
+        self.nextRequestbtn = tk.Button(
+            self, text="Next Request", command=lambda: self.nextReq(True))
+        self.saveProfilebtn = tk.Button(
+            self, text="Save Profile", command=lambda: self.saveProfile)
         self.redrawAll()
-        
-        
+
     def saveProfile(self):
         prof = Profile(ProfileName=self.profileName, Requests=self.requests)
         cfg.add_profile(cfg.get_config(), prof)
         self.destroy()
     # Called whenever remaking window
+
     def clearScreen(self):
         for widget in self.winfo_children():
             widget.grid_forget()
-    
+
     def upperWidgets(self, redraw=False):
-        self.currentRequestLabel.config(text=f"Viewing Request: {self.currentRequest + 1}/{len(self.requests)}")
+        self.currentRequestLabel.config(
+            text=f"Viewing Request: {self.currentRequest + 1}/{len(self.requests)}")
         self.nameLabel.grid(row=0, column=0, sticky="w")
-        self.nameEntry.grid(row=0, column=1, columnspan=2, rowspan=2, padx=5, sticky="n")
-        self.currentRequestLabel.grid(row=0, column=4, sticky="ne") 
+        self.nameEntry.grid(row=0, column=1, columnspan=2,
+                            rowspan=2, padx=5, sticky="n")
+        self.currentRequestLabel.grid(row=0, column=4, sticky="ne")
         if redraw:
             self.redrawAll()
-    
+
     def bottomWidgets(self, redraw=False):
         if len(self.requestsList) > 1:
-            self.prevRequestbtn.grid(row=4, column=1, sticky="SEW", columnspan=1, padx=5)
-            self.nextRequestbtn.grid(row=4, column=3, sticky="SEW", columnspan=1, padx=5)
-        self.newRequestbtn.grid(row=4, column=2, columnspan=1, sticky="SEW", padx=5)
-        self.saveProfilebtn.grid(row=5, column=2, columnspan=1, sticky="SEW", padx=5)
+            self.prevRequestbtn.grid(
+                row=4, column=1, sticky="SEW", columnspan=1, padx=5)
+            self.nextRequestbtn.grid(
+                row=4, column=3, sticky="SEW", columnspan=1, padx=5)
+        self.newRequestbtn.grid(
+            row=4, column=2, columnspan=1, sticky="SEW", padx=5)
+        self.saveProfilebtn.grid(
+            row=5, column=2, columnspan=1, sticky="SEW", padx=5)
         if redraw:
             self.redrawAll()
-    
+
     def showRequestWidgets(self, redraw=False):
         self.requestUriLabel.grid(row=1)
         self.requestsList[self.currentRequest]["Entry"].grid(row=1, column=1)
         self.requestMethodDropdown[self.currentRequest].grid(row=1, column=4)
         if redraw:
             self.redrawAll()
-        
+
     def prevReq(self, redraw=False):
         if len(self.requestsList) > 1:
             if self.currentRequest == 0:
-                self.currentRequest =  len(self.requestsList) - 1
+                self.currentRequest = len(self.requestsList) - 1
             else:
                 self.currentRequest -= 1
             if redraw:
                 self.redrawAll()
-    
+
     def nextReq(self, redraw=False):
         if len(self.requestsList) > 1:
             if self.currentRequest == len(self.requestsList) - 1:
-                self.currentRequest =  0
+                self.currentRequest = 0
             else:
                 self.currentRequest += 1
             if redraw:
                 self.redrawAll()
-    
+
     def CreateRequest(self, redraw=False):
         newReq = Request()
         self.requests.append(newReq)
-        self.requestsList.append({"uri": tk.StringVar(self, newReq.uri), "reqtype": tk.StringVar(self, newReq.reqtype.upper())})
-        self.requestsList[len(self.requestsList) - 1]["Entry"] = tk.Entry(self, textvariable=self.requestsList[len(self.requestsList) - 1]["uri"], width=80)
-        self.requestMethodDropdown.append(tk.OptionMenu(self, self.requestsList[len(self.requestsList) - 1]["reqtype"], *("GET", "HEAD", "POST", "PATCH", "PUT", "DELETE", "OPTIONS")))
+        self.requestsList.append({"uri": tk.StringVar(
+            self, newReq.uri), "reqtype": tk.StringVar(self, newReq.reqtype.upper())})
+        self.requestsList[len(self.requestsList) - 1]["Entry"] = tk.Entry(
+            self, textvariable=self.requestsList[len(self.requestsList) - 1]["uri"], width=80)
+        self.requestMethodDropdown.append(tk.OptionMenu(self, self.requestsList[len(
+            self.requestsList) - 1]["reqtype"], *("GET", "HEAD", "POST", "PATCH", "PUT", "DELETE", "OPTIONS")))
         if redraw:
             self.redrawAll()
-        
+
     def redrawAll(self):
         self.clearScreen()
         self.upperWidgets()
         self.showRequestWidgets()
         self.bottomWidgets()
-            
-        
 
-#  TODO Parse Progress Data 
+
+#  TODO Parse Progress Data
 class SelectorFrame(tk.Frame):
     def __init__(self, parent, controller):
         """ 
@@ -195,11 +216,11 @@ class SelectorFrame(tk.Frame):
             ProfilesLabel = tk.Label(
                 self, text="Error: No profiles in config file.")
             ProfilesLabel.pack(pady=10, padx=10)
-        
+
         if progressSender and progressReceiver:
             self.disabledButtons: list[tk.Button] = []
             self.after_idle(self.checkInactiveButtons, progressReceiver)
-            
+
     # TODO Understand what button is being run, then add it to self.blockedButtons
     def checkInactiveButtons(self, progressReceiver: Connection):
         """
@@ -207,25 +228,27 @@ class SelectorFrame(tk.Frame):
             progressReceiver.recv() blocks, so if progressReceiver contains any data, progressReceiver.recv()
             then parse which Profile should be blocked.
             Add said button to sef.blockedButtons.
-            
+
             Poll progress Pipe with timeout of 0.3 seconds
-        """ 
+        """
         data = ""
         if progressReceiver.poll(0.3):
-                data = progressReceiver.recv()
+            data = progressReceiver.recv()
         if data != "":
             print(data)
-            
+
         for button in self.profileButtons:
             if button in self.disabledButtons:
                 button.setvar("state", "disabled")
             else:
                 button.setvar("state", "normal")
         self.after(1500, self.checkInactiveButtons, progressReceiver)
-    
+
 
 # God I love StackOverflow
 Screens = (EditorFrame, SelectorFrame)
+
+
 class FrameController(tk.Tk):
 
     def __init__(self, launchParams: dict, taskQueue: mp.JoinableQueue, progressReceiver: Connection, progressSender: Connection, *args, **kwargs):
@@ -260,6 +283,7 @@ class FrameController(tk.Tk):
         frame = self.frames[frame]
         frame.tkraise()
 
+
 class DataEntry(tk.Toplevel):
     def __init__(self, taskQueue, master=None, requests=[], progressSender=None):
         # TODO add drag and drop to facilitate Inputing CSV data
@@ -274,17 +298,14 @@ class DataEntry(tk.Toplevel):
         super().__init__(master=master)
         self.title("Input Request variables")
         self.requests = requests
-        self.CurrentInput = None
+        self.CurrentInput = 1
         self.InputFields = []
         self.taskQueue = taskQueue
         self.progressSender = progressSender
-        dnd = DragManager()
 
         for i in self.requests:
             input = tkscrolled.ScrolledText(self)
             self.InputFields.append(input)
-        if not self.CurrentInput:
-            self.CurrentInput = 1
         ReqPreviewLabel = tk.Label(
             self, text=f"Preview: {self.requests[self.CurrentInput - 1].uri}")
         ReqPreviewLabel.grid(padx=10, row=0, rowspan=1)
@@ -307,6 +328,8 @@ class DataEntry(tk.Toplevel):
 
 
 # Add buttons to end of DataEntry screen.
+
+
     def MakeButtons(self):
 
         if self.CurrentInput != 1:
@@ -358,48 +381,12 @@ class DataEntry(tk.Toplevel):
             text: str = InputField.get('1.0', tk.END)
             Data = parseCSV(text)
             FieldsData.append(Data)
-        
+
         reqsTask = proc.TaskThread(
             fun=MakeRequests, args=(requests, FieldsData, self.progressSender))
         self.taskQueue.put(reqsTask)
-        
+
         self.destroy()
-
-# Test function
-def printReceived(progressReceiver: Connection):
-    progressReceiver = progressReceiver[0]
-
-    print("Data:")
-    print(progressReceiver.recv())
-
-# TODO Finish Drag and drop.
-class DragManager():
-    def add_dragable(self, widget):
-        widget.bind("<ButtonPress-1>", self.on_start)
-        widget.bind("<B1-Motion>", self.on_drag)
-        widget.bind("<ButtonRelease-1>", self.on_drop)
-        widget.configure(cursor="hand1")
-
-    def on_start(self, event):
-        # you could use this method to create a floating window
-        # that represents what is being dragged.
-        pass
-
-    def on_drag(self, event):
-        # you could use this method to move a floating window that
-        # represents what you're dragging
-        pass
-
-    def on_drop(self, event):
-        # find the widget under the cursor
-        x, y = event.widget.winfo_pointerxy()
-        target = event.widget.winfo_containing(x, y)
-        try:
-            # image=event.widget.cget("image")
-            target.configure(text=event.widget.cget("text"))
-
-        except:
-            pass
 
 
 # If DEBUG file found in overrides folder, enable debug logging
@@ -435,44 +422,44 @@ else:
 
 Processes = {}
 
+
 def main():
-    with mp.Manager() as manager:
-        taskQueue = manager.JoinableQueue()
-        progressSender, progressReceiver = mp.Pipe()
-        Processes["TaskQueue"] = taskQueue
+    taskQueue = mp.JoinableQueue()
+    progressSender, progressReceiver = mp.Pipe()
+    Processes["TaskQueue"] = taskQueue
 
-        GUIProc = mp.Process(target=startGUI, args=(
-            GlobalLaunchParams.get("GUI", {}), taskQueue, progressReceiver, progressSender))
-        GUIProc.start()
-        Processes["GUI"] = GUIProc
+    GUIProc = mp.Process(target=startGUI, args=(
+        GlobalLaunchParams.get("GUI", {}), taskQueue, progressReceiver, progressSender))
+    GUIProc.start()
+    Processes["GUI"] = GUIProc
 
-        RequestExecPool = proc.AsyncParallel()
-        Processes["ReqExecPool"] = RequestExecPool
-        proc.runPatientThread(RequestExecPool, taskQueue, progressSender)
+    RequestExecPool = proc.AsyncParallel()
+    Processes["ReqExecPool"] = RequestExecPool
+    proc.runPatientThread(RequestExecPool, taskQueue, progressSender)
 
-        while(Processes):
-            if not Processes["GUI"].is_alive():
-                for name, thread in Processes.items():
-                    if name != "GUI":
-                        thread.join()
-                        logging.info(f"Joined Process {name}.")
+    while(Processes):
+        if not Processes["GUI"].is_alive():
+            for name, thread in Processes.items():
+                if name != "GUI":
+                    thread.join()
+                    logging.info(f"Joined Process {name}.")
 
-                taskQueue.put(proc._QueueEndSignal())
-                logging.info("Sent TaskQueue End Signal.")
-    
-                if progressSender or progressReceiver:
-                    progressSender.close()
-                    progressReceiver.close()
-                    logging.info("Closed Progress Pipes")
-                break
-            
-        logging.info("Ending program. Good night ;p")
-        logging.shutdown()
+            taskQueue.put(proc._QueueEndSignal())
+            logging.info("Sent TaskQueue End Signal.")
+
+            if progressSender or progressReceiver:
+                progressSender.close()
+                progressReceiver.close()
+                logging.info("Closed Progress Pipes")
+            break
+    logging.info("Ending program. Good night ;p")
+    logging.shutdown()
 
 
 if __name__ == '__main__':
     logging.info('Starting up Templater')
-    logging.debug(f"Starting with following parameters: \n{GlobalLaunchParams}")
+    logging.debug(
+        f"Starting with following parameters: \n{GlobalLaunchParams}")
 
     main()
 

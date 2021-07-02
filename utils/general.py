@@ -24,7 +24,7 @@ def getOverrides():
     return None
 
 
-def parseCSV(lines: list[str], newLines=True, strip=True, ignoreWhiteSpaces=False, sep=","):
+def parseCSV(lines, newLines=True, strip=True, ignoreWhiteSpaces=False, sep=","):
     """Turn List of strings (lines) into list[list["param","param","param"...], list[...], list[...]]
 
     Args:
@@ -38,11 +38,11 @@ def parseCSV(lines: list[str], newLines=True, strip=True, ignoreWhiteSpaces=Fals
         list[list[list[x: str]]]: Returns list comprehensible by MakeRequests(). 
 
     Throws:
-        UnexpectedException: Throws incase lines is None or its len is 0.
+        ValueError: Throws incase lines is None or its len is 0.
     """
 
     if not lines or len(lines) == 0:
-        raise UnexpectedException(
+        raise ValueError(
             "Lines cannot be null and cannot have length of 0.")
     if isinstance(lines, str):
         lines = [lines]
@@ -99,12 +99,15 @@ class versionEnum(enum.IntEnum):
     SAME = 1
     LOWER = 2
 
-def compareVersion(oldVersion: str, newVersion: str = ProgramVersion):
+def compareVersion(oldVersion, newVersion):
     if not (oldVersion and newVersion):
         raise ValueError("Invalid version values.")
-    if version.parse(oldVersion) < version.parse(newVersion):
+    if isinstance(newVersion, str) or isinstance(oldVersion, str): 
+        newVersion = version.parse(newVersion)
+        oldVersion = version.parse(oldVersion)
+    if oldVersion < newVersion:
         return versionEnum.HIGHER
-    elif version.parse(oldVersion) == version.parse(newVersion):
+    elif oldVersion == newVersion:
         return versionEnum.SAME
     else:
         return versionEnum.LOWER
