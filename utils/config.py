@@ -1,4 +1,5 @@
 # Config I/O Handler.
+import tkinter
 from types import MappingProxyType
 from typing import Optional
 import hjson, logging, os
@@ -15,14 +16,11 @@ from utils.general import ProgramVersion
 home_dir = Path(__file__).parent.parent
 configPath = home_dir.joinpath("config.hjson")
 class BaseConfig:
-    def __init__(self, loc: Path = None, **kwargs):
+    def __init__(self, *args, **kwargs):
         self.configVersion = ProgramVersion
         self.profiles = [Profile(), Profile()]
         self.settings = {}
-        if not loc:
-            self._location: Path = configPath
-        else:
-            self._location: Path = loc
+        self._location: Path = configPath
         if kwargs:
             self.__dict__.update(kwargs)
             
@@ -44,7 +42,7 @@ class BaseConfig:
         with open(self._location, "w") as config_file:
             if not config_file.writable():
                 raise IOError("Config File Not Writable")
-            configstr = dumps(self)
+            configstr = dumps(self.json())
             config_file.write(configstr)
             return configstr
 
@@ -77,7 +75,7 @@ def get_config(loc: Path=configPath):
     Returns:
         [type]: [description]
     """    
-    hjsonO = ""
+    hjsonO = {}
     configlines = ""
     try:
         if not Path(loc).exists():
@@ -101,7 +99,8 @@ def get_config(loc: Path=configPath):
                 logging.debug("Delete config.hjson manually!")
             except Exception as e:
                 logging.debug(e.__cause__)
-                config = BaseConfig(loc)
+                config = BaseConfig()
+                config._location = loc
                 return config
         else:     
             return BaseConfig(hjsonO)
@@ -109,7 +108,8 @@ def get_config(loc: Path=configPath):
         if len(configlines) < 10 or len(hjsonO) == 0:
             logging.warning("Config file is likely malformed, remaking config.")
             backup_config(loc)
-            config = BaseConfig(loc)
+            config = BaseConfig()
+            config._location = loc
             config.write_config_file()
         else:
             logging.error(error)
@@ -172,6 +172,8 @@ class ConfigEncoder(HjsonEncoder):
                     obj[index] = self.default(profile)
                 return list(obj)
             
+        if isinstance(obj, tkinter.StringVar):
+            return obj.get()
             
         if isinstance(obj, (list, dict, str, int, float, bool, type(None))):
             if isinstance(obj, dict):

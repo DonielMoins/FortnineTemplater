@@ -70,7 +70,7 @@ class ProfileEditor(tk.Toplevel):
         self.requestsList = []
         # self.grid(sticky="nsew")
         if profile is not None:
-            self.profileName = profile.profileName
+            self.profileName = tk.StringVar(self, profile.profileName)
             self.requests = profile.requests
         else:
             self.profileName = tk.StringVar(self, "Default Name")
@@ -110,7 +110,7 @@ class ProfileEditor(tk.Toplevel):
         self.nextRequestbtn = tk.Button(
             self, text="Next Request", command=lambda: self.nextReq(True))
         self.saveProfilebtn = tk.Button(
-            self, text="Save Profile", command=lambda: self.saveProfile)
+            self, text="Save Profile", command=lambda: self.saveProfile())
         self.redrawAll()
 
     def saveProfile(self):
