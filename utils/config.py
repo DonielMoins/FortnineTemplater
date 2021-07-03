@@ -1,13 +1,63 @@
 # Config I/O Handler.
 from types import MappingProxyType
+from typing import Optional
 import hjson, logging, os
-from hjson import HjsonEncoder, load, HjsonDecodeError
-from pathlib import Path 
+from hjson import HjsonEncoder, HjsonDecodeError, load 
+from pathlib import Path
+
+from packaging import version 
 from objects import Profile, Request
+from utils.general import ProgramVersion
 
 # TODO: Make settings file window.
+
+    
 home_dir = Path(__file__).parent.parent
 configPath = home_dir.joinpath("config.hjson")
+class BaseConfig:
+    def __init__(self, loc: Path = None, **kwargs):
+        self.configVersion = ProgramVersion
+        self.profiles = [Profile(), Profile()]
+        self.settings = {}
+        if not loc:
+            self._location: Path = configPath
+        else:
+            self._location: Path = loc
+        if kwargs:
+            self.__dict__.update(kwargs)
+            
+    def write_config_file(self, loc: Path = None):
+        """Function to write config file
+    
+        Args:
+            settings (dict, optional): Dictionary of all settings to write to file. Defaults to build_config() if None is provided.
+            loc ([type], optional): Path of config.hjson file. Defaults to default_loc.
+    
+        Raises:
+            IOError: Config not writable.
+    
+        Returns:
+            str: return config string
+        """    
+        if loc:
+            self._location = loc
+        with open(self._location, "w") as config_file:
+            if not config_file.writable():
+                raise IOError("Config File Not Writable")
+            configstr = dumps(self)
+            config_file.write(configstr)
+            return configstr
+
+    
+    def json(self):
+        json = vars(self)
+        itemsToDelete = []
+        for key in json.keys():
+            if key.startswith("_"):
+                itemsToDelete.append(key)
+        for key in itemsToDelete:
+            json.__delitem__(key)
+        return json
 
 def dumps(obj, **kwargs):
     return hjson.dumps(obj, cls=ConfigEncoder, indent=4)
@@ -31,7 +81,8 @@ def get_config(loc: Path=configPath):
     configlines = ""
     try:
         if not Path(loc).exists():
-            configlines = write_config_file(loc=loc)
+            config = BaseConfig()
+            config.write_config_file()
         
         with open(loc, "r") as config_file:
             if not config_file.readable():
@@ -39,56 +90,39 @@ def get_config(loc: Path=configPath):
                 raise IOError("Config File Not Readable")
             
             hjsonO = load(config_file)
-            if len(hjsonO) == 0:
-                logging.debug("Config HJSon Object Empty")
-                try:
-                    logging.info(f"Trying to erase empty config at {configPath}")
-                    os.remove(configPath.absolute())
-                except PermissionError as e:
-                    logging.debug(f"""Failed to delete config.hjson due to a Permission error:
-                                  {e.__cause__}""")
-                    logging.debug("Delete config.hjson manually!")
-                except Exception as e:
-                    logging.debug(e.__cause__)
-                raise HjsonDecodeError("Config HJSon Object Empty", config_file.readline(), 0)
-            if "IGNORED" in hjsonO.keys():
-                hjsonO.__delitem__("IGNORED")
-            return hjsonO
+        if len(hjsonO) == 0:
+            logging.debug("Config HJSon Object Empty")
+            try:
+                logging.info(f"Trying to erase empty config at {configPath}")
+                os.remove(configPath.absolute())
+            except PermissionError as e:
+                logging.debug(f"""Failed to delete config.hjson due to a Permission error:
+                              {e.__cause__}""")
+                logging.debug("Delete config.hjson manually!")
+            except Exception as e:
+                logging.debug(e.__cause__)
+                config = BaseConfig(loc)
+                return config
+        else:     
+            return BaseConfig(hjsonO)
     except HjsonDecodeError as error:
         if len(configlines) < 10 or len(hjsonO) == 0:
             logging.warning("Config file is likely malformed, remaking config.")
             backup_config(loc)
-            write_config_file(build_config(), loc=loc)
+            config = BaseConfig(loc)
+            config.write_config_file()
         else:
             logging.error(error)
-        
-            
-# Using Optional cause 
-def write_config_file(settings= {}, loc=configPath):
-    """Function to write config file
 
-    Args:
-        settings (dict, optional): Dictionary of all settings to write to file. Defaults to build_config() if None is provided.
-        loc ([type], optional): Path of config.hjson file. Defaults to default_loc.
 
-    Raises:
-        IOError: Config not writable.
+def get_profiles(config: BaseConfig):
+    return config.profiles
 
-    Returns:
-        str: return config string
-    """    
-    if len(settings) < 1:
-        settings = build_config()
-
-    with open(loc, "w") as config_file:
-        if not config_file.writable():
-            raise IOError("Config File Not Writable")
-        configstr = dumps(settings)
-        config_file.write(configstr)
-        return configstr
-        
-def backup_config(oldloc=configPath, retry=True):
+def add_profile(config: BaseConfig, profile: Profile):
+    config.profiles.append(profile)
+    config.write_config_file()
     
+def backup_config(oldloc=configPath, retry=True):        
     def recursivebackuploc(oldloc):
         newloc = oldloc.__str__() + ".bak"
         if Path(newloc).exists():
@@ -114,72 +148,49 @@ def backup_config(oldloc=configPath, retry=True):
         else:
             print("Could not safely write backup config file!")
             raise IOError("Could not safely write backup config file! \n File not writable, check Folder permissions!")
-
-def get_profiles(jsonConfig):
-    """Go through config, for each profile in config, create profile objects and then return them
-
-    Args:
-        jsonConfig (dict): The parsed Config.hjson as a dictionary.
-
-    Returns:
-        list[Profile]: List of Profile objects
-    """
-    profiles = []
-    for profileDict in jsonConfig["profiles"]:
-        profile = Profile(kwargs=profileDict) 
-        profiles.append(profile)
-    return profiles
-
-def add_profile(config, profile):
-    profiles = get_profiles(config)
-    profiles.append(profile)
-    config["profiles"] = profiles
-    write_config_file(config)
-    
-
-        
-def build_config():
-    default_config = {
-                    "profiles": [
-                        Profile(),
-                        Profile()
-                        ]
-                    }
-    return default_config
-
 class ConfigEncoder(HjsonEncoder):  
     def default(self, obj):
         
+        if isinstance(obj, BaseConfig):
+            return self.default(obj.json())
+        if isinstance(obj, version.Version | version.LegacyVersion):
+            return obj.__str__()
         if type(obj) is Profile:
-            return self.ParseProfile(obj)
-            
-        if type(obj) is Request:
-            return self.ParseRequest(obj)
+            return dict(self.ParseProfile(obj))
             
         if isinstance(obj, list) and len(obj) > 0:
             print("Parsing List:")
             # print(f"Encoding List of {type(obj[0])}")
-            if isinstance(obj[0], Request):
-                print("\t\tEncoding Request List")
-                for i in obj:
-                    return self.default(i)
+            # if isinstance(obj[0], Request):
+            #     print("\t\t\tEncoding Request List")
+            #     for index, req in enumerate(obj):
+            #         obj[index] = self.default(req)
+            #     return self.default(obj)
             if isinstance(obj[0], Profile):
-                print("Encoding Profile List")
-                for profile in obj:
-                    self.default(profile)
+                print("\tEncoding Profile List")
+                for index, profile in enumerate(obj):
+                    obj[index] = self.default(profile)
+                return list(obj)
+            
             
         if isinstance(obj, (list, dict, str, int, float, bool, type(None))):
-            # if profiles key is a dict, convert it to a list
-            if type(obj) is dict and "profiles" in obj.keys() and isinstance(obj["profiles"], dict):
-                obj["profiles"] = obj["profiles"].values()
-                print("Converted dict profiles to list.")
-                return self.default(obj)
-            return HjsonEncoder.default(self, obj)
+            if isinstance(obj, dict):
+                if ("profiles" or "requests") in obj.keys():
+                    # If obj looks like {profiles: [{?, requests: [{}]}]} or basically list[dict[list[dict]]]
+                    if isinstance(obj["profiles"], list) and isinstance(obj["profiles"][len(obj["profiles"]) - 1], dict) and isinstance(obj["profiles"][len(obj["profiles"]) - 1]["requests"], list) and isinstance(obj["profiles"][len(obj["profiles"]) - 1]["requests"][len(obj["profiles"][len(obj["profiles"]) - 1]["requests"]) - 1], dict):
+                        return obj
+                    else:
+                        finalDict = {}
+                        for key in obj:
+                            finalDict.update({key:self.default(obj[key])})
+                        return self.default(finalDict)
+                        
+                else: return obj
         
         if isinstance(obj, MappingProxyType):
             return self.default(dict(obj))
         
-        return HjsonEncoder.default(self, obj)
+        return HjsonEncoder.encode(self, obj)
 
     def ParseList(self, obj):
         # print(f"Encoding List of {type(obj[0])}")
@@ -192,13 +203,18 @@ class ConfigEncoder(HjsonEncoder):
             for profile in obj:
                 self.default(profile)
         else:
-            HjsonEncoder.default(self, obj)
+            return HjsonEncoder.default(self, obj)
     
     def ParseRequest(self, obj: Request):
-        print("\t\t\tEncoding Request")
-        return obj.json()
+        print("\t\t\t\t\tEncoding Request")
+        if isinstance(obj, Request):
+            return obj.json()
+        elif isinstance(obj, dict):
+            return obj
         
     def ParseProfile(self, obj: Profile):
-        print("\tEncoding Profile:")
-        return obj.json()
-            
+        print("\t\tEncoding Profile:")
+        profile =  obj.json()
+        for index, request in enumerate(profile["requests"]):
+            profile["requests"][index] = self.ParseRequest(request)
+        return profile

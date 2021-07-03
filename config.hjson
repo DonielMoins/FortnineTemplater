@@ -1,4 +1,5 @@
 {
+    configVersion: 0.0.1
     profiles:
     [
         {
@@ -10,7 +11,7 @@
                     uri: https://example.com/api?requestParm1={0}&requestParm2={1}
                     headers:
                     {
-                        User-Agent: FortnineActions/<bound method Version.__str__ of <Version('0.0.1')>>
+                        User-Agent: FortnineActions/0.0.1
                         Content-Type: text
                         Accept: */*
                     }
@@ -28,7 +29,7 @@
                     uri: https://example.com/api?requestParm1={0}&requestParm2={1}
                     headers:
                     {
-                        User-Agent: FortnineActions/<bound method Version.__str__ of <Version('0.0.1')>>
+                        User-Agent: FortnineActions/0.0.1
                         Content-Type: text
                         Accept: */*
                     }

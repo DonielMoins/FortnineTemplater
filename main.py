@@ -200,7 +200,7 @@ class SelectorFrame(tk.Frame):
         tk.Frame.__init__(self, parent)
 
         config = cfg.get_config()
-        profiles = cfg.get_profiles(config)
+        profiles = config.profiles
         progressReceiver: Connection = controller.progressReceiver
         progressSender: Connection = controller.progressSender
         self.profileButtons = []
@@ -428,7 +428,7 @@ def main():
     progressSender, progressReceiver = mp.Pipe()
     Processes["TaskQueue"] = taskQueue
 
-    GUIProc = mp.Process(target=startGUI, args=(
+    GUIProc = mp.Process(target=startGUI, name="GUI", args=(
         GlobalLaunchParams.get("GUI", {}), taskQueue, progressReceiver, progressSender))
     GUIProc.start()
     Processes["GUI"] = GUIProc

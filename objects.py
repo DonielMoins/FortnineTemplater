@@ -9,7 +9,7 @@ Syntax:
                 Optional Settings to be used later.
 """
 
-import hjson
+from pathlib import Path
 from typing import Optional
 
 from utils.general import compareVersion, ProgramVersion
@@ -17,7 +17,7 @@ from utils.general import compareVersion, ProgramVersion
 from packaging import version
 
 
-class Request():
+class Request:
     def __init__(self, **kwargs):
         """Creeate Request Object for use with functions from requests.py
 
@@ -53,7 +53,7 @@ class Request():
         Find headers @ https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers
         """
         self.headers = kwargs.get("headers", {
-            "User-Agent": f"FortnineActions/{ProgramVersion.__str__}",
+            "User-Agent": f"FortnineActions/{ProgramVersion.__str__()}",
             "Content-Type": "text",
             'Accept': '*/*',
         })
@@ -86,7 +86,7 @@ class Request():
 
 
 # Profile Contains Profile Name, List of Requests and an optional dictionary for profile settings.
-class Profile():
+class Profile:
     def __init__(self, ProfileName="Default Name", Requests=[Request()], Settings: Optional[dict] = {}, migrateData=False, version: Optional[version.Version | version.LegacyVersion] = ProgramVersion, **kwargs):
         self.profileName = ProfileName
         self.requests = Requests
@@ -109,3 +109,10 @@ class Profile():
 
     def json(self):
         return vars(self)
+    
+
+        
+
+        
+        
+            
