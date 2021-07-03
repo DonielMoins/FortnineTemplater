@@ -101,14 +101,17 @@ class Request_Tests(unittest.TestCase):
         valuesPerLine = 3
         valuemaxlen = 5
         
-        request = Request(reqtype="post", uri="http://ptsv2.com/t/wdr4p-1625102266/post?valueZero={0}?valueTwo={1}?valueTwo={2}")
+        request = Request(reqtype="post", uri="http://ptsv2.com/t/wdr4p-1625102266/post?valueZero={0}&valueOne={1}&valueTwo={2}")
         postData=[]
         for lines in range(lines):
             Line = []
-            Line = [Line.append(randomString(valuemaxlen)) for x in range(valuesPerLine)]
+            for _ in range(valuesPerLine):
+                Line.append(randomString(valuemaxlen))
+            postData.append(Line)
         
         responses = MakeRequests(requestList=[request], dataList=postData)
         self.verifyStatusCode(responsesList=responses)
+
         
         # resultsPage = BeautifulSoup(requests.get(resultsAt).text)
         # resultsPage.

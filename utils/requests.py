@@ -10,7 +10,7 @@ import logging
  * make single request checking what type from template
 """
 
-def makeRequest(requestTemplate: ReqObj, data: list[str], session: requests.Session):
+def makeRequest(requestTemplate: ReqObj, data: Optional[list[str]], session: requests.Session):
     reqtype = requestTemplate.reqtype
 
     URL = parseLink(requestTemplate.uri, data)
@@ -37,28 +37,32 @@ def makeRequest(requestTemplate: ReqObj, data: list[str], session: requests.Sess
     return response
 
 
-def MakeRequests(requestList: list, dataList: list[list[str]] = None, Identifier=None, progressConn: Connection = None, session=requests.Session()):
+def MakeRequests(requestList: list, dataList: list = None, Identifier=None, progressConn: Connection = None, session=requests.Session()):
     Responses = []
+    sendProg = False
+    if progressConn and Identifier:
+        sendProg = True
     for request in requestList:
-        request: ReqObj.Request = request
-        if not dataList:
+        request: ReqObj = request
+        if dataList:
             for index, data in enumerate(dataList):
                 Responses.append(makeRequest(request, data, session))
-                progressConn.send(f"{Identifier}: {float(index + 1)/len(dataList)}")
+                if sendProg:
+                    progressConn.send(f"{Identifier}: {float(index + 1)/len(dataList)}")
         else:
             Responses.append(makeRequest(request, None, session))
-            if progressConn and Identifier:
+            if sendProg:
                 progressConn.send(f"{Identifier} : 100.0")
     return Responses
 
 
 def parseLink(uri: str, data: Optional[list[str]]):
-    finalURI = uri
+    finalURI: str = uri
     if data is not None:
-        matches = re.findall("/{([0-9])+}/g", uri)
+        matches = re.findall("{[0-9]+}", uri)
         if len(matches) <= len(data):
             for index, match in enumerate(matches):
-                finalURI.replace(match, data[index])
+                finalURI = finalURI.replace(match, data[index])
         else:
             logging.warn("Not enough input present.")
     return finalURI
