@@ -85,7 +85,6 @@ def get_config(loc: Path=configPath):
         with open(loc, "r") as config_file:
             if not config_file.readable():
                 logging.error("Config File Not Readable")
-                raise IOError("Config File Not Readable")
             
             hjsonO = load(config_file)
         if len(hjsonO) == 0:
@@ -105,14 +104,13 @@ def get_config(loc: Path=configPath):
         else:     
             return BaseConfig(hjsonO)
     except HjsonDecodeError as error:
-        if len(configlines) < 10 or len(hjsonO) == 0:
-            logging.warning("Config file is likely malformed, remaking config.")
-            backup_config(loc)
-            config = BaseConfig()
-            config._location = loc
-            config.write_config_file()
-        else:
-            logging.error(error)
+        logging.warning("Config file is likely malformed, remaking config.")
+        backup_config(loc)
+        config = BaseConfig()
+        config._location = loc
+        config.write_config_file()
+        return BaseConfig()
+            
 
 
 def get_profiles(config: BaseConfig):

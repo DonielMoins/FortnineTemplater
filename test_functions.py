@@ -1,6 +1,6 @@
 from typing import List
 import unittest
-from bs4 import BeautifulSoup
+# from bs4 import BeautifulSoup
 from requests import Response
 import requests
 from utils.requests import MakeRequests, makeRequest
@@ -110,7 +110,7 @@ class Request_Tests(unittest.TestCase):
         responses = MakeRequests(requestList=[request], dataList=postData)
         self.verifyStatusCode(responsesList=responses)
         
-        resultsPage = BeautifulSoup(requests.get(resultsAt).text)
+        # resultsPage = BeautifulSoup(requests.get(resultsAt).text)
         # resultsPage.
         
         
