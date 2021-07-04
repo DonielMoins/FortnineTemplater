@@ -66,7 +66,10 @@ class ProfileEditor(tk.Toplevel):
     def __init__(self, master=None, profile: Profile = None):
         super().__init__(master=master)
         self.title("Profile Creator")
-        self.minsize(height=400, width=400)
+        self.width = 600
+        self.height = 400
+        self.mult = 35
+        self.minsize(self.width, self.height)
         self.requestsList = []
         # self.grid(sticky="nsew")
         if profile is not None:
@@ -94,14 +97,13 @@ class ProfileEditor(tk.Toplevel):
         self.requestMethodDropdown = [tk.OptionMenu(
             self, self.requestsList[0]["reqtype"], *("GET", "HEAD", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"))]
 
-        self.nameLabel.grid(row=0, column=0, sticky="w")
-        self.nameEntry.grid(row=0, column=1, columnspan=2,
-                            rowspan=2, padx=5, sticky="n")
-        self.currentRequestLabel.grid(row=0, column=4, sticky="ne")
+        self.nameLabel.place(x=self.mult, y=self.mult)
+        self.nameEntry.place(x=3*self.mult, y=self.mult)
+        self.currentRequestLabel.place(x=self.width-self.mult*2, y=self.mult)
 
         self.requestUriLabel.grid(row=1)
-        self.requestsList[0]["Entry"].grid(row=1, column=1)
-        self.requestMethodDropdown[0].grid(row=1, column=4)
+        self.requestsList[0]["Entry"].place(x=self.mult*2, y=self.mult* 2)
+        self.requestMethodDropdown[0].place(x=self.mult*2, y=self.width-self.mult*2)
 
         self.prevRequestbtn = tk.Button(
             self, text="Previous Request", command=lambda: self.prevReq(True))
@@ -126,30 +128,31 @@ class ProfileEditor(tk.Toplevel):
     def upperWidgets(self, redraw=False):
         self.currentRequestLabel.config(
             text=f"Viewing Request: {self.currentRequest + 1}/{len(self.requests)}")
-        self.nameLabel.grid(row=0, column=0, sticky="w")
-        self.nameEntry.grid(row=0, column=1, columnspan=2,
-                            rowspan=2, padx=5, sticky="n")
-        self.currentRequestLabel.grid(row=0, column=4, sticky="ne")
+        self.nameLabel.place(x=self.mult, y=self.mult)
+        self.nameEntry.place(x=3*self.mult, y=self.mult)
+        self.currentRequestLabel.place(x=self.width-self.mult*2, y=self.mult)
         if redraw:
             self.redrawAll()
 
     def bottomWidgets(self, redraw=False):
         if len(self.requestsList) > 1:
-            self.prevRequestbtn.grid(
-                row=4, column=1, sticky="SEW", columnspan=1, padx=5)
-            self.nextRequestbtn.grid(
-                row=4, column=3, sticky="SEW", columnspan=1, padx=5)
-        self.newRequestbtn.grid(
-            row=4, column=2, columnspan=1, sticky="SEW", padx=5)
-        self.saveProfilebtn.grid(
-            row=5, column=2, columnspan=1, sticky="SEW", padx=5)
+            self.prevRequestbtn.place(
+                x=self.width-self.mult*3, y=self.mult*2)
+            self.nextRequestbtn.place(
+                x=self.width-self.mult, y=self.mult*2)
+        self.newRequestbtn.place(
+                x=self.width-self.mult*2, y=self.mult*2)
+        self.saveProfilebtn.place(
+                x=self.width-self.mult*2, y=self.mult*3)
         if redraw:
             self.redrawAll()
 
     def showRequestWidgets(self, redraw=False):
         self.requestUriLabel.grid(row=1)
-        self.requestsList[self.currentRequest]["Entry"].grid(row=1, column=1)
-        self.requestMethodDropdown[self.currentRequest].grid(row=1, column=4)
+        self.requestsList[self.currentRequest]["Entry"].place(
+                x=self.mult*2, y=self.mult*2)
+        self.requestMethodDropdown[self.currentRequest].place(
+                x=self.width-self.mult*2, y=self.mult*4)
         if redraw:
             self.redrawAll()
 
@@ -188,6 +191,7 @@ class ProfileEditor(tk.Toplevel):
         self.upperWidgets()
         self.showRequestWidgets()
         self.bottomWidgets()
+
 
 
 #  TODO Parse Progress Data
