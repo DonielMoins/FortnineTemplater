@@ -10,9 +10,8 @@ from packaging import version
 from objects import Profile, Request
 from utils.general import ProgramVersion
 
-# TODO: Make settings file window.
 
-    
+# TODO: Make settings file window.
 home_dir = Path(__file__).parent.parent
 configPath = home_dir.joinpath("config.hjson")
 class BaseConfig:
@@ -63,20 +62,20 @@ def dumps(obj, **kwargs):
 # Returns Json of config file
 # if file doesant exist, create one from hardcoded default
 def get_config(loc: Path=configPath):
-    """Get config file from location.
+    """Make BaseConfig class from given config file. 
+    Defaults to config.configPath.
 
     Args:
-        loc (Path, optional): [description]. Defaults to configPath.
+        loc (Path, optional): Path of config file. Defaults to configPath.
 
     Raises:
         IOError: Config is not readable. Check permissions, run as admin (unsafe), contact dev.
         HjsonDecodeError: Config's HJSON empty.
 
     Returns:
-        [type]: [description]
+        BaseConfig: Serialized config data.
     """    
     hjsonO = {}
-    configlines = ""
     try:
         if not Path(loc).exists():
             config = BaseConfig()
@@ -133,7 +132,9 @@ def backup_config(oldloc=configPath, retry=True):
         if retry:
             backuploc = recursivebackuploc(oldloc)
         else:
-            raise FileExistsError("Config.yml already exists and retry mode is disabled")
+            # TODO Make this show a popup error screen.
+            # raise FileExistsError("Config.yml already exists and retry mode is disabled")
+            logging.error("Config.yml already exists and retry mode is disabled")
     else:
         backuploc = Path(oldloc.__str__() + ".bak")
         
@@ -144,31 +145,75 @@ def backup_config(oldloc=configPath, retry=True):
         if backup_file.writable():
             backup_file.writelines(old_data)
         else:
-            print("Could not safely write backup config file!")
-            raise IOError("Could not safely write backup config file! \n File not writable, check Folder permissions!")
+            # TODO Make this show a popup error screen.
+            logging.debug("Could not safely write backup config file!")
+            logging.error("Could not safely write backup config file! \n File not writable, check Folder permissions!")
+            
 class ConfigEncoder(HjsonEncoder):  
+    """Encoder that will turn BaseConfig onto an Hjson string.
+    Heavily used and hard to understand due to the heavy use of recursion and the un-debugability 
+    of custom json encoders.
+    
+    We use this to make BaseConfig serializable so we can save it and load it later.
+    Problem is, BaseConfig contains more non-serializable objects (a list of Profile objects, and a config version) which also
+        contain more of said non-serializable objects (a list of Request objects).
+    
+    Flow:
+        Object (BaseConfig) -> default(), 
+                                    ^                                                               
+                                config.vars() -> default()                                          
+                                                    |                                                
+                                      / -----------------------------\                              +- ProfileName
+                            /-----Version                      Profile List > for each item x ------|
+                            ^                                   set index of x to return of         +- Request List
+                       str(version)                                      default(x)                          |
+                                                                                                             ▼
+                                                                                                    for each request x
+                                                                                                    
+                                                                                                    
+    
+    
+    Explanations:
+    1st call to default()
+        First it checks if the object passed is an instance of BaseConfig, if yes, get all its variables using vars()
+            and send them as the next objects to serialize using default(). 2nd default()
+            
+            Next, for each object, we go through these checks:
+                A: Check if the obj is an instance of LegacyVersion or Version,
+                    if yes, we serialize the version using str().
+
+                B: Check if the object is an instance of a Profile. If it is, we send it to the ParseProfile Function. 
+                    The return of ParseProfile is mapped to a dictionary and returned.
+                    NOTE: Usually this is not called called first since BaseConfig contains a List of Profiles and not just a single
+                            profile object.
+                
+                C: Check if this is a list containing profiles. if yes, send each profile to default() 
+                    and set list value to return of default.
+                
+                
+    """
     def default(self, obj):
+        """
+        Function called when class is passed as cls variable. 
+        this function has to be overridden 
+        """
         
         if isinstance(obj, BaseConfig):
             return self.default(obj.json())
+        
+        # Check A
         if isinstance(obj, version.Version | version.LegacyVersion):
-            return obj.__str__()
-        if type(obj) is Profile:
+            return  str(obj)
+        # Check B
+        if isinstance(obj, Profile):
             return dict(self.ParseProfile(obj))
-            
-        if isinstance(obj, list) and len(obj) > 0:
-            print("Parsing List:")
-            # print(f"Encoding List of {type(obj[0])}")
-            # if isinstance(obj[0], Request):
-            #     print("\t\t\tEncoding Request List")
-            #     for index, req in enumerate(obj):
-            #         obj[index] = self.default(req)
-            #     return self.default(obj)
-            if isinstance(obj[0], Profile):
-                print("\tEncoding Profile List")
-                for index, profile in enumerate(obj):
-                    obj[index] = self.default(profile)
-                return list(obj)
+        
+        # Check C
+        if isinstance(obj, list) and len(obj) > 0 and isinstance(obj[0], Profile):
+            print("\tEncoding Profile List")
+            for index, profile in enumerate(obj):
+                obj[index] = self.default(profile)
+            return list(obj)
             
         if isinstance(obj, tkinter.StringVar):
             return obj.get()
