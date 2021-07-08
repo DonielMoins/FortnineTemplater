@@ -60,7 +60,6 @@ class EditorFrame(tk.Frame):
         deleteProfilebtn.pack(pady=10, padx=10)
         editProfilesbtn.pack(pady=10, padx=10)
 
-# Making this GUI makes me wanna kill myself
 
 
 class ProfileEditor(tk.Toplevel):
@@ -75,7 +74,7 @@ class ProfileEditor(tk.Toplevel):
         
         self.requestsList = []
         self.currentRequest = 0
-        
+
         if profile is not None:
             self.profileName = tk.StringVar(self, profile.profileName)
             self.requests = profile.requests
@@ -88,6 +87,8 @@ class ProfileEditor(tk.Toplevel):
                 self, item.uri), "reqtype": tk.StringVar(self, item.reqtype.upper())})
             self.requestsList[index]["Entry"] = tk.Entry(
                 self, textvariable=self.requestsList[index]["uri"], width=45)
+            self.requestsList[index]["reuseSession"] = tk.IntVar(self, value=int(item.reuseSession))
+            self.requestsList[index]["ReuseBox"] = tk.Checkbutton(self, text='Reuse Session',variable=self.requestsList[index]["reuseSession"], onvalue=1, offvalue=0)
 
         
         self.nameLabel = tk.Label(self, text="Profile Name:")
@@ -145,6 +146,8 @@ class ProfileEditor(tk.Toplevel):
         self.betterGrid(self.requestUriLabel, x=0.5, y=2)
         self.betterGrid(self.requestsList[self.currentRequest]["Entry"], x=3, y=2)
         self.betterGrid(self.requestMethodDropdown[self.currentRequest], x=14, y=1.90)
+        self.betterGrid(self.requestsList[self.currentRequest]["ReuseBox"], x=2, y=3)
+        self.betterGrid(self.requestMethodDropdown[self.currentRequest], x=14, y=4)
         if redraw:
             self.redrawAll()
 
@@ -175,6 +178,8 @@ class ProfileEditor(tk.Toplevel):
             self, textvariable=self.requestsList[len(self.requestsList) - 1]["uri"], width=45)
         self.requestMethodDropdown.append(tk.OptionMenu(self, self.requestsList[len(
             self.requestsList) - 1]["reqtype"], *("GET", "HEAD", "POST", "PATCH", "PUT", "DELETE", "OPTIONS")))
+        self.requestsList[len(self.requestsList) - 1]["reuseSession"] = tk.IntVar(value=int(newReq.reuseSession))
+        self.requestsList[len(self.requestsList) - 1]["ReuseBox"] = tk.Checkbutton(self, text='Reuse Session',variable=self.requestsList[len(self.requestsList) - 1]["reuseSession"], onvalue=1, offvalue=0)
         if redraw:
             self.redrawAll()
 
