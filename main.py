@@ -1,6 +1,5 @@
 from datetime import date
 import logging
-from turtle import width
 from objects import Profile, Request
 import multiprocessing as mp
 from multiprocessing.connection import Connection
@@ -69,13 +68,10 @@ class ProfileEditor(tk.Toplevel):
         self.title("Profile Creator")
         self.width = 600
         self.height = 400
-        self.minsize(self.width, self.height)
-        self.resizable(0, 0)
         self.mult = 35
-        
+        self.minsize(self.width, self.height)
         self.requestsList = []
-        self.currentRequest = 0
-        
+        # self.grid(sticky="nsew")
         if profile is not None:
             self.profileName = tk.StringVar(self, profile.profileName)
             self.requests = profile.requests
@@ -87,12 +83,12 @@ class ProfileEditor(tk.Toplevel):
             self.requestsList.append({"uri": tk.StringVar(
                 self, item.uri), "reqtype": tk.StringVar(self, item.reqtype.upper())})
             self.requestsList[index]["Entry"] = tk.Entry(
-                self, textvariable=self.requestsList[index]["uri"], width=45)
+                self, textvariable=self.requestsList[index]["uri"], width=80)
 
-        
+        self.currentRequest = 0
         self.nameLabel = tk.Label(self, text="Profile Name:")
         self.nameEntry = tk.Entry(
-            self, textvariable=self.profileName, width=40)
+            self, textvariable=self.profileName, width=75)
         self.currentRequestLabel = tk.Label(
             self, text=f"Viewing Request: {self.currentRequest + 1}/{len(self.requests)}")
 
@@ -101,6 +97,13 @@ class ProfileEditor(tk.Toplevel):
         self.requestMethodDropdown = [tk.OptionMenu(
             self, self.requestsList[0]["reqtype"], *("GET", "HEAD", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"))]
 
+        self.nameLabel.place(x=self.mult, y=self.mult)
+        self.nameEntry.place(x=3*self.mult, y=self.mult)
+        self.currentRequestLabel.place(x=self.width-self.mult*2, y=self.mult)
+
+        self.requestUriLabel.grid(row=1)
+        self.requestsList[0]["Entry"].place(x=self.mult*2, y=self.mult* 2)
+        self.requestMethodDropdown[0].place(x=self.mult*2, y=self.width-self.mult*2)
 
         self.prevRequestbtn = tk.Button(
             self, text="Previous Request", command=lambda: self.prevReq(True))
@@ -125,26 +128,31 @@ class ProfileEditor(tk.Toplevel):
     def upperWidgets(self, redraw=False):
         self.currentRequestLabel.config(
             text=f"Viewing Request: {self.currentRequest + 1}/{len(self.requests)}")
-        self.betterGrid(self.nameLabel, x=0.5, y=0.5)
-        self.betterGrid(self.nameEntry, x=3, y=0.5)
-        self.betterGrid(self.currentRequestLabel, x=12.5, y=0.5)
-        
+        self.nameLabel.place(x=self.mult, y=self.mult)
+        self.nameEntry.place(x=3*self.mult, y=self.mult)
+        self.currentRequestLabel.place(x=self.width-self.mult*2, y=self.mult)
         if redraw:
             self.redrawAll()
 
     def bottomWidgets(self, redraw=False):
         if len(self.requestsList) > 1:
-            self.betterGrid(self.prevRequestbtn, x=3, y=9.3)
-            self.betterGrid(self.nextRequestbtn, x=10.3, y=9.3)
-        self.betterGrid(self.newRequestbtn, x=7, y=9.3)
-        self.betterGrid(self.saveProfilebtn, x=7.1, y=10.4)
+            self.prevRequestbtn.place(
+                x=self.width-self.mult*3, y=self.mult*2)
+            self.nextRequestbtn.place(
+                x=self.width-self.mult, y=self.mult*2)
+        self.newRequestbtn.place(
+                x=self.width-self.mult*2, y=self.mult*2)
+        self.saveProfilebtn.place(
+                x=self.width-self.mult*2, y=self.mult*3)
         if redraw:
             self.redrawAll()
 
     def showRequestWidgets(self, redraw=False):
-        self.betterGrid(self.requestUriLabel, x=0.5, y=2)
-        self.betterGrid(self.requestsList[self.currentRequest]["Entry"], x=3, y=2)
-        self.betterGrid(self.requestMethodDropdown[self.currentRequest], x=14, y=1.90)
+        self.requestUriLabel.grid(row=1)
+        self.requestsList[self.currentRequest]["Entry"].place(
+                x=self.mult*2, y=self.mult*2)
+        self.requestMethodDropdown[self.currentRequest].place(
+                x=self.width-self.mult*2, y=self.mult*4)
         if redraw:
             self.redrawAll()
 
@@ -172,7 +180,7 @@ class ProfileEditor(tk.Toplevel):
         self.requestsList.append({"uri": tk.StringVar(
             self, newReq.uri), "reqtype": tk.StringVar(self, newReq.reqtype.upper())})
         self.requestsList[len(self.requestsList) - 1]["Entry"] = tk.Entry(
-            self, textvariable=self.requestsList[len(self.requestsList) - 1]["uri"], width=45)
+            self, textvariable=self.requestsList[len(self.requestsList) - 1]["uri"], width=80)
         self.requestMethodDropdown.append(tk.OptionMenu(self, self.requestsList[len(
             self.requestsList) - 1]["reqtype"], *("GET", "HEAD", "POST", "PATCH", "PUT", "DELETE", "OPTIONS")))
         if redraw:
@@ -183,16 +191,6 @@ class ProfileEditor(tk.Toplevel):
         self.upperWidgets()
         self.showRequestWidgets()
         self.bottomWidgets()
-    
-    def betterGrid(self, widget: tk.Widget, x: int, y: int):
-        self.mult = self.mult // 1
-        x = (x * self.mult) // 1
-        y = (y * self.mult) // 1
-        if y >= self.height:
-            y = self.height - self.mult
-        if x >= self.width:
-            x = self.width - self.mult
-        widget.place(x=x, y=y)
 
 
 
