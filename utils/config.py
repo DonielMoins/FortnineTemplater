@@ -119,6 +119,16 @@ def add_profile(config: BaseConfig, profile: Profile):
     config.profiles.append(profile)
     config.write_config_file()
     
+def del_profile(config: BaseConfig, profile: Profile):
+    to_remove = []
+    for prof in config.profiles:
+        if prof.uuid == profile.uuid:
+            to_remove.append(prof)
+    for i in to_remove:
+        config.profiles.remove(i)
+    
+    config.write_config_file()
+    
 def backup_config(oldloc=configPath, retry=True):        
     def recursivebackuploc(oldloc):
         newloc = oldloc.__str__() + ".bak"

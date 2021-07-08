@@ -13,7 +13,7 @@ OverridesFolder = Path(__file__).parent.parent.joinpath("Overrides")
 Overrides = []
 checked = False
 
-ProgramVersion = version.parse("0.0.1")
+ProgramVersion = version.parse("0.1.0")
 
 def getOverrides():
     if OverridesFolder.exists():

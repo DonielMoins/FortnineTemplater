@@ -11,6 +11,7 @@ Syntax:
 
 from pathlib import Path
 from typing import Optional
+import uuid
 
 from utils.general import compareVersion, ProgramVersion
 
@@ -89,6 +90,7 @@ class Request:
 class Profile:
     def __init__(self, ProfileName="Default Name", Requests=[Request()], Settings: Optional[dict] = {}, migrateData=False, version: Optional[version.Version | version.LegacyVersion] = ProgramVersion, **kwargs):
         self.profileName = ProfileName
+        self.uuid = str(uuid.uuid4())
         self.requests = Requests
         self.settings = Settings
         if migrateData:

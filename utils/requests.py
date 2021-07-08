@@ -37,10 +37,10 @@ def makeRequest(requestTemplate: ReqObj, data: Optional[list[str]], session: req
     return response
 
 
-def MakeRequests(requestList: list, dataList: list = None, Identifier=None, progressConn: Connection = None, session=requests.Session()):
+def MakeRequests(requestList: list, dataList: list = None, Identifier=None, stateSender: Connection = None, session=requests.Session()):
     Responses = []
     sendProg = False
-    if progressConn and Identifier:
+    if stateSender and Identifier:
         sendProg = True
     for request in requestList:
         request: ReqObj = request
@@ -48,11 +48,11 @@ def MakeRequests(requestList: list, dataList: list = None, Identifier=None, prog
             for index, data in enumerate(dataList):
                 Responses.append(makeRequest(request, data, session))
                 if sendProg:
-                    progressConn.send(f"{Identifier}: {float(index + 1)/len(dataList)}")
+                    stateSender.send(f"{Identifier}: {float(index + 1)/len(dataList)}")
         else:
             Responses.append(makeRequest(request, None, session))
             if sendProg:
-                progressConn.send(f"{Identifier} : 100.0")
+                stateSender.send(f"{Identifier} : 100.0")
     return Responses
 
 

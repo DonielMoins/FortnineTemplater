@@ -1,17 +1,18 @@
 {
-    configVersion: 0.0.1
+    configVersion: 0.1.0
     profiles:
     [
         {
             profileName: Default Name
+            uuid: 71d95222-8f60-44fe-bb08-079d10058612
             requests:
             [
                 {
-                    reqtype: get
+                    reqtype: GET
                     uri: https://example.com/api?requestParm1={0}&requestParm2={1}
                     headers:
                     {
-                        User-Agent: FortnineActions/0.0.1
+                        User-Agent: FortnineActions/0.1.0
                         Content-Type: text
                         Accept: */*
                     }
@@ -22,14 +23,34 @@
         }
         {
             profileName: Default Name
+            uuid: 94e5498a-ea0f-4a3b-88e4-2788684179a3
             requests:
             [
                 {
-                    reqtype: get
+                    reqtype: GET
                     uri: https://example.com/api?requestParm1={0}&requestParm2={1}
                     headers:
                     {
-                        User-Agent: FortnineActions/0.0.1
+                        User-Agent: FortnineActions/0.1.0
+                        Content-Type: text
+                        Accept: */*
+                    }
+                    reuseSession: true
+                }
+            ]
+            settings: {}
+        }
+        {
+            profileName: Default Name
+            uuid: 78bd649b-916d-4d6f-82c9-79ecf1649fe5
+            requests:
+            [
+                {
+                    reqtype: GET
+                    uri: https://example.com/api?requestParm1={0}&requestParm2={1}
+                    headers:
+                    {
+                        User-Agent: FortnineActions/0.1.0
                         Content-Type: text
                         Accept: */*
                     }
