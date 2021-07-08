@@ -63,7 +63,26 @@ class EditorFrame(tk.Frame):
 
 
 class ProfileEditor(tk.Toplevel):
+    """Explanation:
+            We create a non-resizable window, with the option to pass in a profile.
+                if we pass a profile, get data from profile like requests and name, for later use
+                if no profile was passed in, make a new one.
+            
+            then with self.profile, make a lbel using the profile name, another listing the number of profiles 
+                and which request you are currently editing.
+            
+            So for each request in self.profile, prep tkinter widgets and add the tkinter variable/widget pairs
+                to tkRequestItems list in a dictionary. I did this due to tkinter not supporting default variable
+                classes provided by python.
+            
+            I made a "betterGrid" function because i just feel like its more flexible unlike the grid provided
+                in tkinter.
+            
+            
+    """
     def __init__(self, master=None, profile: Profile = None):
+        self.profile = profile
+        
         super().__init__(master=master)
         self.title("Profile Creator")
         self.width = 600
@@ -72,23 +91,22 @@ class ProfileEditor(tk.Toplevel):
         self.resizable(0, 0)
         self.mult = 35
         
-        self.requestsList = []
+        self.tkRequestItems = []
         self.currentRequest = 0
-
-        if profile is not None:
-            self.profileName = tk.StringVar(self, profile.profileName)
-            self.requests = profile.requests
-        else:
-            self.profileName = tk.StringVar(self, "Default Name")
-            self.requests = [Request()]
-
-        for index, item in enumerate(self.requests):
-            self.requestsList.append({"uri": tk.StringVar(
-                self, item.uri), "reqtype": tk.StringVar(self, item.reqtype.upper())})
-            self.requestsList[index]["Entry"] = tk.Entry(
-                self, textvariable=self.requestsList[index]["uri"], width=45)
-            self.requestsList[index]["reuseSession"] = tk.IntVar(self, value=int(item.reuseSession))
-            self.requestsList[index]["ReuseBox"] = tk.Checkbutton(self, text='Reuse Session',variable=self.requestsList[index]["reuseSession"], onvalue=1, offvalue=0)
+        
+        if not self.profile:
+            self.profile = Profile()
+            
+        self.profileName = tk.StringVar(self, profile.profileName)
+        self.requests = profile.requests
+        
+        for reqIndex, request in enumerate(self.requests):
+            self.tkRequestItems.append({"uri": tk.StringVar(
+                self, request.uri), "reqtype": tk.StringVar(self, request.reqtype.upper())})
+            self.tkRequestItems[reqIndex]["Entry"] = tk.Entry(
+                self, textvariable=self.tkRequestItems[reqIndex]["uri"], width=45)
+            self.tkRequestItems[reqIndex]["reuseSession"] = tk.IntVar(self, value=int(request.reuseSession))
+            self.tkRequestItems[reqIndex]["ReuseBox"] = tk.Checkbutton(self, text='Reuse Session',variable=self.tkRequestItems[reqIndex]["reuseSession"], onvalue=1, offvalue=0)
 
         
         self.nameLabel = tk.Label(self, text="Profile Name:")
@@ -100,7 +118,7 @@ class ProfileEditor(tk.Toplevel):
         # Request part
         self.requestUriLabel = tk.Label(self, text="Request Uri:")
         self.requestMethodDropdown = [tk.OptionMenu(
-            self, self.requestsList[0]["reqtype"], *("GET", "HEAD", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"))]
+            self, self.tkRequestItems[0]["reqtype"], *("GET", "HEAD", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"))]
 
 
         self.prevRequestbtn = tk.Button(
@@ -121,7 +139,7 @@ class ProfileEditor(tk.Toplevel):
 
     def clearScreen(self):
         for widget in self.winfo_children():
-            widget.grid_forget()
+            widget.place_forget()
 
     def upperWidgets(self, redraw=False):
         self.currentRequestLabel.config(
@@ -134,7 +152,7 @@ class ProfileEditor(tk.Toplevel):
             self.redrawAll()
 
     def bottomWidgets(self, redraw=False):
-        if len(self.requestsList) > 1:
+        if len(self.tkRequestItems) > 1:
             self.betterGrid(self.prevRequestbtn, x=3, y=9.3)
             self.betterGrid(self.nextRequestbtn, x=10.3, y=9.3)
         self.betterGrid(self.newRequestbtn, x=7, y=9.3)
@@ -144,25 +162,25 @@ class ProfileEditor(tk.Toplevel):
 
     def showRequestWidgets(self, redraw=False):
         self.betterGrid(self.requestUriLabel, x=0.5, y=2)
-        self.betterGrid(self.requestsList[self.currentRequest]["Entry"], x=3, y=2)
+        self.betterGrid(self.tkRequestItems[self.currentRequest]["Entry"], x=3, y=2)
         self.betterGrid(self.requestMethodDropdown[self.currentRequest], x=14, y=1.90)
-        self.betterGrid(self.requestsList[self.currentRequest]["ReuseBox"], x=2, y=3)
+        self.betterGrid(self.tkRequestItems[self.currentRequest]["ReuseBox"], x=2, y=3)
         self.betterGrid(self.requestMethodDropdown[self.currentRequest], x=14, y=4)
         if redraw:
             self.redrawAll()
 
     def prevReq(self, redraw=False):
-        if len(self.requestsList) > 1:
+        if len(self.tkRequestItems) > 1:
             if self.currentRequest == 0:
-                self.currentRequest = len(self.requestsList) - 1
+                self.currentRequest = len(self.tkRequestItems) - 1
             else:
                 self.currentRequest -= 1
             if redraw:
                 self.redrawAll()
 
     def nextReq(self, redraw=False):
-        if len(self.requestsList) > 1:
-            if self.currentRequest == len(self.requestsList) - 1:
+        if len(self.tkRequestItems) > 1:
+            if self.currentRequest == len(self.tkRequestItems) - 1:
                 self.currentRequest = 0
             else:
                 self.currentRequest += 1
@@ -172,14 +190,14 @@ class ProfileEditor(tk.Toplevel):
     def CreateRequest(self, redraw=False):
         newReq = Request()
         self.requests.append(newReq)
-        self.requestsList.append({"uri": tk.StringVar(
+        self.tkRequestItems.append({"uri": tk.StringVar(
             self, newReq.uri), "reqtype": tk.StringVar(self, newReq.reqtype.upper())})
-        self.requestsList[len(self.requestsList) - 1]["Entry"] = tk.Entry(
-            self, textvariable=self.requestsList[len(self.requestsList) - 1]["uri"], width=45)
-        self.requestMethodDropdown.append(tk.OptionMenu(self, self.requestsList[len(
-            self.requestsList) - 1]["reqtype"], *("GET", "HEAD", "POST", "PATCH", "PUT", "DELETE", "OPTIONS")))
-        self.requestsList[len(self.requestsList) - 1]["reuseSession"] = tk.IntVar(value=int(newReq.reuseSession))
-        self.requestsList[len(self.requestsList) - 1]["ReuseBox"] = tk.Checkbutton(self, text='Reuse Session',variable=self.requestsList[len(self.requestsList) - 1]["reuseSession"], onvalue=1, offvalue=0)
+        self.tkRequestItems[len(self.tkRequestItems) - 1]["Entry"] = tk.Entry(
+            self, textvariable=self.tkRequestItems[len(self.tkRequestItems) - 1]["uri"], width=45)
+        self.requestMethodDropdown.append(tk.OptionMenu(self, self.tkRequestItems[len(
+            self.tkRequestItems) - 1]["reqtype"], *("GET", "HEAD", "POST", "PATCH", "PUT", "DELETE", "OPTIONS")))
+        self.tkRequestItems[len(self.tkRequestItems) - 1]["reuseSession"] = tk.IntVar(value=int(newReq.reuseSession))
+        self.tkRequestItems[len(self.tkRequestItems) - 1]["ReuseBox"] = tk.Checkbutton(self, text='Reuse Session',variable=self.tkRequestItems[len(self.tkRequestItems) - 1]["reuseSession"], onvalue=1, offvalue=0)
         if redraw:
             self.redrawAll()
 
