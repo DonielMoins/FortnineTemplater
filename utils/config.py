@@ -35,7 +35,7 @@ class BaseConfig:
     
         Args:
             settings (dict, optional): Dictionary of all settings to write to file. Defaults to build_config() if None is provided.
-            loc ([type], optional): Path of config.hjson file. Defaults to default_loc.
+            loc (Path, optional): Path of config.hjson file. Defaults to default_loc.
     
         Raises:
             IOError: Config not writable.

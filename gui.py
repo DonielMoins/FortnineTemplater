@@ -147,7 +147,7 @@ class ProfileEditor(tk.Toplevel):
         
         self.profile = profile
         if not self.profile:
-            self.profile = Profile()
+            self.profile = Profile(fromDict={})
             
             
         self.profileName = tk.StringVar(self, self.profile .profileName)

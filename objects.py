@@ -90,7 +90,7 @@ class Request:
 # Profile Contains Profile Name, List of Requests and an optional dictionary for profile settings.
 # UUID MUST BE UNIQUE
 class Profile:
-    def __init__(self, ProfileName: str = None, uuid: str = None, Requests: List[Request] = None, Settings: dict = None, version: Optional[version.Version | version.LegacyVersion] = None, migrateData: bool = False, fromDict: OrderedDict = None):
+    def __init__(self, ProfileName: str = "Default Name", uuid: str = str(id.uuid4()), Requests: List[Request] = None, Settings: dict = None, version: Optional[version.Version | version.LegacyVersion] = None, migrateData: bool = False, fromDict: OrderedDict = None):
         if fromDict:
             self.profileName = fromDict.get("profileName", "Default Name")
             self.uuid = fromDict.get("uuid", str(id.uuid4()))
@@ -102,8 +102,14 @@ class Profile:
         else:
             self.profileName = ProfileName
             self.uuid = uuid
-            self.requests = Requests
-            self.settings = Settings
+            if Requests:
+                self.requests = Requests
+            else:
+                self.requests = [Request()]
+            if Settings:
+                self.settings = Settings
+            else:
+                self.settings = {}
         
         if version:
             if migrateData:
