@@ -45,7 +45,8 @@ def parseCSV(lines, newLines=True, strip=True, ignoreWhiteSpaces=False, sep=",")
         raise ValueError(
             "Lines cannot be null and cannot have length of 0.")
     if isinstance(lines, str):
-        lines = [lines]
+        # Do not change this. Tk adds \n to the end of the input field, this should fix it.
+        lines = [lines.strip()]
     if newLines:
         newLines = []
         for line in lines:

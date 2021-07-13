@@ -1,10 +1,13 @@
-# Config I/O Handler.
+# Config I/O Handler file with multiple functions to manipulate the 
+# storing/deleting/editing of profiles in the config file.
+from collections import OrderedDict
 import tkinter
 from types import MappingProxyType
 from typing import Optional
 import hjson, logging, os
 from hjson import HjsonEncoder, HjsonDecodeError, load 
 from pathlib import Path
+from configparser import ConfigParser
 
 from packaging import version 
 from objects import Profile, Request
@@ -15,13 +18,16 @@ from utils.general import ProgramVersion
 home_dir = Path(__file__).parent.parent
 configPath = home_dir.joinpath("config.hjson")
 class BaseConfig:
-    def __init__(self, *args, **kwargs):
+    def __init__(self, fromDict: OrderedDict={}):
         self.configVersion = ProgramVersion
-        self.profiles = [Profile(), Profile()]
-        self.settings = {}
+        self.profiles = fromDict.get("profiles", [Profile(fromDict={}), Profile(fromDict={})]) 
+        self.settings = fromDict.get("settings", {}) 
         self._location: Path = configPath
-        if kwargs:
-            self.__dict__.update(kwargs)
+        for profile in self.profiles:
+            if isinstance(profile, OrderedDict):
+                profile = Profile(fromDict=profile)
+                
+            
             
     def write_config_file(self, loc: Path = None):
         """Function to write config file
@@ -55,6 +61,8 @@ class BaseConfig:
         for key in itemsToDelete:
             json.__delitem__(key)
         return json
+
+
 
 def dumps(obj, **kwargs):
     return hjson.dumps(obj, cls=ConfigEncoder, indent=4)
@@ -128,6 +136,11 @@ def del_profile(config: BaseConfig, profile: Profile):
         config.profiles.remove(i)
     
     config.write_config_file()
+
+def del_profile_uuid(config: BaseConfig, uuid: str):
+    print(f"Deleting profile by UUID: {uuid}")
+    #  TODO Delete by uuid
+    
     
 def backup_config(oldloc=configPath, retry=True):        
     def recursivebackuploc(oldloc):
@@ -247,7 +260,7 @@ class ConfigEncoder(HjsonEncoder):
         
         return HjsonEncoder.encode(self, obj)
 
-    def ParseList(self, obj):
+    def ParseList(self, obj: list):
         # print(f"Encoding List of {type(obj[0])}")
         if isinstance(obj[0], Request):
             print("\t\tEncoding Request List")
@@ -273,3 +286,10 @@ class ConfigEncoder(HjsonEncoder):
         for index, request in enumerate(profile["requests"]):
             profile["requests"][index] = self.ParseRequest(request)
         return profile
+
+
+class ConfigParserWrapper():
+    pass
+class HJSONConfigParser(ConfigParser):
+    def __init_subclass__(cls):
+        return super().__init_subclass__()

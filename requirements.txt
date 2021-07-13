@@ -1,6 +1,5 @@
+packaging==20.9
 hjson==3.0.2
-packaging>=20.9
 
-# Imports for Tests
-
+# For Tests
 beautifulsoup4==4.9.3

@@ -37,22 +37,23 @@ def makeRequest(requestTemplate: ReqObj, data: Optional[list[str]], session: req
     return response
 
 
-def MakeRequests(requestList: list, dataList: list = None, Identifier=None, stateSender: Connection = None, session=requests.Session()):
+def MakeRequests(requestList: list, fieldDataList: list = None, uuid=None, stateSender: Connection = None, session=requests.Session()):
     Responses = []
     sendProg = False
-    if stateSender and Identifier:
+    if stateSender and uuid:
         sendProg = True
-    for request in requestList:
+        stateSender.send(f"{uuid}: 0.0")
+    for reqIndex, request in enumerate(requestList):
         request: ReqObj = request
-        if dataList:
-            for index, data in enumerate(dataList):
+        if fieldDataList:
+            for inputDataIndex, data in enumerate(fieldDataList[reqIndex]):
                 Responses.append(makeRequest(request, data, session))
                 if sendProg:
-                    stateSender.send(f"{Identifier}: {float(index + 1)/len(dataList)}")
+                    stateSender.send(f"{uuid}: {(float(inputDataIndex + 1)/len(fieldDataList[reqIndex])+reqIndex/len(requestList))*100}")
         else:
             Responses.append(makeRequest(request, None, session))
             if sendProg:
-                stateSender.send(f"{Identifier} : 100.0")
+                stateSender.send(f"{uuid} : 100.0")
     return Responses
 
 

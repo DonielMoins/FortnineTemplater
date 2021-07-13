@@ -1,9 +1,12 @@
 import tkinter as tk
-import tkinter.scrolledtext as tkscrolled
+import tkinter.scrolledtext as tkscrolled, tkinter.messagebox as popupBox
+import gc
+# import Pmw.Pmw_2_0_1.lib.PmwBalloon as tooltip
 
 # Used for typing
 import multiprocessing as mp
 from multiprocessing.connection import Connection
+from typing import List
 import utils.parallelProcessing as proc
 
 from objects import Profile, Request
@@ -41,15 +44,16 @@ class EditorFrame(tk.Frame):
 
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
+        self.parent = parent
         label = tk.Label(self, text="Editor Mode")
         label.pack(pady=10, padx=10)
 
         switchbtn = tk.Button(self, text="Switch to User Mode",
                               command=lambda: controller.show_frame(SelectorFrame))
         createProfilebtn = tk.Button(self, text="Create new Profile",
-                                     command=lambda: self.openEditor(parent))
+                                     command=lambda: self.openEditor())
         deleteProfilebtn = tk.Button(self, text="Delete pre-existing Profile",
-                                     command=lambda: self.delProfile(controller))
+                                     command=lambda: self.delProfile())
         editProfilesbtn = tk.Button(self, text="Edit Profile",
                                     command=lambda: self.editProfile())
         switchbtn.pack(pady=10, padx=10)
@@ -57,19 +61,57 @@ class EditorFrame(tk.Frame):
         deleteProfilebtn.pack(pady=10, padx=10)
         editProfilesbtn.pack(pady=10, padx=10)
         
-    def openEditor(self, parent):
-        _ = ProfileEditor(master=parent)
-        del _
+    def openEditor(self):
+        _ = ProfileEditor(master=self.parent)
     
     def editProfile(self):
-        selectorWindow = FrameController({"editor": True}, None, None, None)
-        pass
+        EditorSelector(master=self.parent, mode=0)
     
-    def delProfile(self, controller):
-        selectorWindow = FrameController({"openEditor": False, "delMode": True}, None, None, None)
-        selectorWindow.show_frame(SelectorFrame)
+    def delProfile(self):
+        EditorSelector(master=self.parent, mode=1)
 
-
+class EditorSelector(tk.Toplevel):
+        def __init__(self, master=None, mode: int = -1):
+            super().__init__(master=master)
+            mainLabel = None
+            # self.tooltip = tooltip.Balloon(master)
+            match mode:
+                case 0: # Select to edit mode
+                    mainLabel = tk.Label(self, text="Select Profile to edit.")
+                    
+                case 1: # Select to delete
+                    mainLabel = tk.Label(self, text="Select Profile to delete")
+                    # self.tooltip.bind(mainLabel, "Warning!\nThis will delete the profile from the config file.\nThis is permanent!")
+                    pass
+                case _:
+                    popupBox.showerror("Error!", f"EditorSelector class initialized with the invalid mode {mode}.")
+                    self.destroy()
+            self.mode = mode
+            
+            mainLabel.pack(padx=5, pady=2)
+            
+            self.config = cfg.get_config()
+            profileList = cfg.get_profiles()
+            for profile in profileList:
+                profile: Profile
+                uuid = profile.uuid
+                if mode == 0:
+                    btn = tk.Button(self, text=profile.profileName, command=lambda: self.editProfile(uuid))
+                    # self.tooltip.bind(btn, f"Profile UUID:\n{uuid}")
+                    btn.pack(padx=3,pady=4)
+                if mode == 1:
+                    btn = tk.Button(self, text=profile.profileName, command=lambda: self.delProfile(uuid))
+                    # self.tooltip.bind(btn, f"Profile UUID:\n{uuid}")
+                    btn.pack(padx=3,pady=4)
+                    
+        
+        def delProfile(self, uuid):
+            cfg.del_profile_uuid(self.config, uuid)
+            pass
+        
+        def editProfile(self, uuid):
+            pass
+        
 
 class ProfileEditor(tk.Toplevel):
     """Explanation:
@@ -77,7 +119,7 @@ class ProfileEditor(tk.Toplevel):
                 if we pass a profile, get data from profile like requests and name, for later use
                 if no profile was passed in, make a new one.
             
-            then with self.profile, make a lbel using the profile name, another listing the number of profiles 
+            then with self.profile, make a label using the profile name, another listing the number of profiles 
                 and which request you are currently editing.
             
             So for each request in self.profile, prep tkinter widgets and add the tkinter variable/widget pairs
@@ -151,6 +193,12 @@ class ProfileEditor(tk.Toplevel):
             # self.requests[tkReqIndex].uri = tkItemDict["uri"].get()
             # self.requests[tkReqIndex].headers = tkItemDict["headers"].get()
         cfg.add_profile(cfg.get_config(), self.profile)
+        
+        # Cleanup properly?
+        del self.profile
+        del self.requests
+        del self.tkRequestItems
+        gc.collect()
         self.destroy()
 
     def clearScreen(self):
@@ -258,7 +306,7 @@ class SelectorFrame(tk.Frame):
                                    command=lambda: self.deleteProfile(config, profile, controller))
                 else:
                     button = tk.Button(self, text=profile.profileName,
-                                   command=lambda: DataEntry(requests=profile.requests, taskQueue=controller.taskQueue, stateSender=stateSender))
+                                   command=lambda: DataEntry(profile=profile, taskQueue=controller.taskQueue, stateSender=stateSender))
                 self.profileButtons.append(button)
                 button.pack(padx=10, pady=10)
         else:
@@ -310,7 +358,7 @@ class FrameController(tk.Tk):
         tk.Tk.__init__(
             self, className='Fortnine Request Templates', *args, **kwargs)
         container = tk.Frame(self)
-        self.taskQueue = taskQueue
+        self.taskQueue: mp.JoinableQueue = taskQueue
         self.stateReceiver = stateReceiver
         self.stateSender = stateSender
 
@@ -341,22 +389,24 @@ class FrameController(tk.Tk):
 
 
 class DataEntry(tk.Toplevel):
-    def __init__(self, taskQueue, master=None, requests=[], stateSender=None):
+    def __init__(self, taskQueue, master=None, profile: Profile= None, stateSender=None):
         # TODO add drag and drop to facilitate Inputing CSV data
-        """Create Data Entry window to paste in csv data then send request to ReqExecPool.
+        """Create Data Entry window to paste in csv data then send request to AsyncExecPool.
             Can handle multiple requests, each request hosting a page with an Input Field
 
         Args:
-            taskQueue ([JoinableQueue]): Task Queue to send Requests to.
-            master ([type], optional): Master window that spawned frame. Defaults to None.
+            taskQueue (JoinableQueue): Task Queue to send Requests to.
+            master (tk.Window?, optional): Master window that spawned frame. Defaults to None.
             requests (list, optional): Requests list taken from Profile.requests. Defaults to [].
         """
         super().__init__(master=master)
+        assert isinstance(profile, Profile)
         self.title("Input Request variables")
-        self.requests = requests
+        self.profile = profile
+        self.requests = profile.requests
         self.CurrentInput = 1
         self.InputFields = []
-        self.taskQueue = taskQueue
+        self.taskQueue: mp.JoinableQueue = taskQueue
         self.stateSender = stateSender
 
         for i in self.requests:
@@ -387,7 +437,6 @@ class DataEntry(tk.Toplevel):
 
 
     def MakeButtons(self):
-
         if self.CurrentInput != 1:
             self.PrevBtn = tk.Button(
                 self, text="Previous Request", command=lambda: self.ShowPrevField())
@@ -399,7 +448,7 @@ class DataEntry(tk.Toplevel):
             self.NextBtn.grid(padx=10, row=2, pady=5)
 
         self.SendBtn = tk.Button(
-            self, text="Make Request", command=lambda: self.SendRequest(self.requests))
+            self, text="Make Request", command=lambda: self.SendRequest(self.requests, uuid=self.profile.uuid))
         self.SendBtn.grid(padx=10, row=3, pady=5, columnspan=2)
 
 # Clears DataEntry screen and displays entry fields for the next request.
@@ -431,15 +480,14 @@ class DataEntry(tk.Toplevel):
         self.MakeButtons()
 
 # Get Input of every Request, parse data, then send a requestTask with requests, FieldsData and stateSender to TaskQueue.
-    def SendRequest(self, requests):
+    def SendRequest(self, requests: List[Request], uuid: str):
         FieldsData = []
         for InputField in self.InputFields:
-            text: str = InputField.get('1.0', tk.END)
-            Data = parseCSV(text)
-            FieldsData.append(Data)
+            fieldText: str = InputField.get('1.0', tk.END)
+            FieldsData.append(parseCSV(fieldText))
 
         reqsTask = proc.TaskThread(
-            fun=MakeRequests, args=(requests, FieldsData, self.stateSender))
+            fun=MakeRequests, args=(requests, FieldsData, uuid, self.stateSender, ))
         self.taskQueue.put(reqsTask)
 
         self.destroy()

@@ -9,9 +9,10 @@ Syntax:
                 Optional Settings to be used later.
 """
 
+from collections import OrderedDict
 from pathlib import Path
-from typing import Optional
-import uuid
+from typing import List, Optional
+import uuid as id
 
 from utils.general import compareVersion, ProgramVersion
 
@@ -19,7 +20,7 @@ from packaging import version
 
 
 class Request:
-    def __init__(self, **kwargs):
+    def __init__(self, dict={}):
         """Creeate Request Object for use with functions from requests.py
 
         Args:
@@ -45,21 +46,21 @@ class Request:
             ValueError: Request type unknown.
             ValueError: Request Type unsupported.
         """
-        self.reqtype = kwargs.get("reqtype", "get").lower()
-        self.uri = kwargs.get(
+        self.reqtype = str(dict.get("reqtype", "get")).lower()
+        self.uri = dict.get(
             "uri", "https://example.com/api?requestParm1={0}&requestParm2={1}")
 
         """
         If you update the default headers Change Docstring.
         Find headers @ https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers
         """
-        self.headers = kwargs.get("headers", {
+        self.headers = dict.get("headers", {
             "User-Agent": f"FortnineActions/{ProgramVersion.__str__()}",
             "Content-Type": "text",
             'Accept': '*/*',
         })
-        self.reuseSession = kwargs.get("reuseSession", True)
-        self.__dict__.update(kwargs)
+        self.reuseSession = dict.get("reuseSession", True)
+        # self.__dict__.update(dict)
 
         # Check if request type is supported with these 3 Cases:
         match self.reqtype:
@@ -87,16 +88,28 @@ class Request:
 
 
 # Profile Contains Profile Name, List of Requests and an optional dictionary for profile settings.
+# UUID MUST BE UNIQUE
 class Profile:
-    def __init__(self, ProfileName="Default Name", Requests=[Request()], Settings: Optional[dict] = {}, migrateData=False, version: Optional[version.Version | version.LegacyVersion] = ProgramVersion, **kwargs):
-        self.profileName = ProfileName
-        self.uuid = str(uuid.uuid4())
-        self.requests = Requests
-        self.settings = Settings
-        if migrateData:
-            self.MigrateProfile(version)
-        if not kwargs:
-            self.__dict__.update(kwargs)
+    def __init__(self, ProfileName: str = None, uuid: str = None, Requests: List[Request] = None, Settings: dict = None, version: Optional[version.Version | version.LegacyVersion] = None, migrateData: bool = False, fromDict: OrderedDict = None):
+        if fromDict:
+            self.profileName = fromDict.get("profileName", "Default Name")
+            self.uuid = fromDict.get("uuid", str(id.uuid4()))
+            self.requests = fromDict.get("requests", [Request()])
+            self.settings = fromDict.get("settings", {})
+            for index, req in enumerate(self.requests):
+                if isinstance(req, OrderedDict):
+                    self.requests[index] = Request(dict=req)
+        else:
+            self.profileName = ProfileName
+            self.uuid = uuid
+            self.requests = Requests
+            self.settings = Settings
+        
+        if version:
+            if migrateData:
+                self.MigrateProfile(version)
+
+        
 
     def MigrateProfile(self, resultVersion):
         if not resultVersion:

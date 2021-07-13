@@ -24,13 +24,18 @@
 
 
 
+from enum import Enum
 import threading as th
 import multiprocessing as mp
 import traceback
 from utils.general import randomHex
 
+class TaskTypes(Enum):
+    QUEUE_END_SIGNAL = -1
+    NORMAL = 0
+
 class TaskThread:
-    def __init__(self, fun=None, args=None, identifier=None):
+    def __init__(self, fun=None, args=None, identifier=None, tasktype: TaskTypes=TaskTypes.NORMAL):
         """Defines one function and its arguments to be executed in one thread.
 
         Attention, never use "_QueueEndSignal" as identifier unless you want to end the Queue.
@@ -46,11 +51,12 @@ class TaskThread:
         else:
             self.identifier = identifier
         if not fun:
-            if identifier != "_QueueEndSignal":
+            if identifier != "_QueueEndSignal" or tasktype != TaskTypes.QUEUE_END_SIGNAL:
                 raise ValueError("Func must be a reference to a function and not None.")
         else:
             self.fun = fun
-            self.args = args[:2] + (self.identifier, ) + args[2:]
+            self.args = args
+            # self.args = args[:2] + (self.identifier, ) + args[2:]
             
             
 
@@ -157,7 +163,7 @@ class AsyncParallel:
 
 class _QueueEndSignal(TaskThread):
     def __init__(self):
-        super().__init__(None, None, identifier="_QueueEndSignal")
+        super().__init__(None, None, identifier="_QueueEndSignal", tasktype=TaskTypes.QUEUE_END_SIGNAL)
 
 
 def runPatientThread(pool: AsyncParallel, taskQueue: mp.JoinableQueue, progressSender=None):

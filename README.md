@@ -14,11 +14,11 @@ Currently project is in alpha, use with caution!
 Listed from most to least important.
 
 1. [x] Make a template Editor (Most Important)
-2. [ ] Now make the editor work!
+2. [x] Now make the editor work!
 3. [ ] Drag n' drop CSV file
 4. [ ] Finish Progress Pipes and Parse sent Data (1/3)
    1. [x] Sending and Receiving Data
-   2. [ ] Profile Button/Task Identifier
+   2. [x] Profile Button/Task Identifier (using profile.uuid)
    3. [ ] Parse Data
 5. [x] Add version migration / upgrading function.
 6. [x] Disable busy Profile Buttons
@@ -50,7 +50,6 @@ Listed from most to least important.
    4. ```Request.ParseLink()```:
       - [ ] Clean link of Illegal Chars
 
-
 ## Refactor Goalz
 
 - Refactor Code:
@@ -75,8 +74,8 @@ Listed from most to least important.
 
 For storing pre-made profiles, I chose [hjson](https://hjson.github.io) because of the following reasons:
 
-1. It's pretty hard to f*ck up.
+1. It's pretty hard to mess up.
 2. You can add **comments**.
 3. No need for quotes.
-4. Serialize friendly (comes from json).
+4. Serializer-able (comes from json).
 5. And most importantly, human friendly json.

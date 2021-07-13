@@ -15,12 +15,9 @@ dayDate = today.strftime("%d-%m-%Y")
 _ov = getOverrides()
 GlobalLaunchParams = {
     "GUI": {
-        "openEditor": True
+        "openEditor": False
     }
 }
-
-
-
 
 
 # If DEBUG file found in overrides folder, enable debug logging
@@ -67,9 +64,9 @@ def main():
     GUIProc.start()
     Processes["GUI"] = GUIProc
 
-    RequestExecPool = proc.AsyncParallel()
-    Processes["ReqExecPool"] = RequestExecPool
-    proc.runPatientThread(RequestExecPool, taskQueue, stateSender)
+    AsyncExecPool = proc.AsyncParallel()
+    Processes["AsyncExecPool"] = AsyncExecPool
+    proc.runPatientThread(AsyncExecPool, taskQueue, stateSender)
 
     while(Processes):
         if not Processes["GUI"].is_alive():
