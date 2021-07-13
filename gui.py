@@ -457,10 +457,10 @@ class DataEntry(tk.Toplevel):
         for widget in self.winfo_children():
             widget.grid_forget()
         ReqPreviewLabel = tk.Label(
-            self, text=f"Preview: {self.requests[self.CurrentInput - 1]['uri']}")
+            self, text=f"Preview: {self.requests[self.CurrentInput - 1].uri}")
         ReqPreviewLabel.grid(padx=10, row=0, rowspan=1)
         ReqMethodLabel = tk.Label(
-            self, text=f"Method: {self.requests[self.CurrentInput - 1]['reqtype'].upper()}")
+            self, text=f"Method: {self.requests[self.CurrentInput - 1].reqtype.upper()}")
         ReqMethodLabel.grid(padx=10, row=0, rowspan=1, column=1)
         self.InputFields[self.CurrentInput - 1].grid(padx=10, row=1)
         self.MakeButtons()
@@ -471,10 +471,10 @@ class DataEntry(tk.Toplevel):
         for widget in self.winfo_children():
             widget.grid_forget()
         ReqPreviewLabel = tk.Label(
-            self, text=f"Preview: {self.requests[self.CurrentInput - 1]['uri']}")
+            self, text=f"Preview: {self.requests[self.CurrentInput - 1].uri}")
         ReqPreviewLabel.grid(padx=10, row=0, rowspan=1)
         ReqMethodLabel = tk.Label(
-            self, text=f"Method: {self.requests[self.CurrentInput - 1]['reqtype'].upper()}")
+            self, text=f"Method: {self.requests[self.CurrentInput - 1].reqtype.upper()}")
         ReqMethodLabel.grid(padx=10, row=0, rowspan=1, column=1)
         self.InputFields[self.CurrentInput - 1].grid(padx=10, row=1)
         self.MakeButtons()

@@ -23,9 +23,10 @@ class BaseConfig:
         self.profiles = fromDict.get("profiles", [Profile(fromDict={}), Profile(fromDict={})]) 
         self.settings = fromDict.get("settings", {}) 
         self._location: Path = configPath
-        for profile in self.profiles:
+        for index, profile in enumerate(self.profiles):
             if isinstance(profile, OrderedDict):
-                profile = Profile(fromDict=profile)
+                profileObj = Profile(fromDict=profile)
+                self.profiles[index]= profileObj
                 
             
             

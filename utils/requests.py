@@ -44,16 +44,16 @@ def MakeRequests(requestList: list, fieldDataList: list = None, uuid=None, state
         sendProg = True
         stateSender.send(f"{uuid}: 0.0")
     for reqIndex, request in enumerate(requestList):
-        request: ReqObj = request
+        request: ReqObj
         if fieldDataList:
             for inputDataIndex, data in enumerate(fieldDataList[reqIndex]):
                 Responses.append(makeRequest(request, data, session))
                 if sendProg:
-                    stateSender.send(f"{uuid}: {(float(inputDataIndex + 1)/len(fieldDataList[reqIndex])+reqIndex/len(requestList))*100}")
+                    stateSender.send(f"{uuid}: {((inputDataIndex + 1)/len(fieldDataList[reqIndex]))+((reqIndex + 1)/len(requestList))*100 - 1}")
         else:
             Responses.append(makeRequest(request, None, session))
             if sendProg:
-                stateSender.send(f"{uuid} : 100.0")
+                stateSender.send(f"{uuid} : {(reqIndex + 1)/len(requestList)*100}")
     return Responses
 
 
