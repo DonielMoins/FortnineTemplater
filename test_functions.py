@@ -1,6 +1,6 @@
 from typing import List
 import unittest
-# from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup
 from requests import Response
 import requests
 from utils.requests import MakeRequests, makeRequest

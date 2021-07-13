@@ -1,26 +1,21 @@
-from doctest import UnexpectedException
 import enum
-from packaging import version
 from pathlib import Path
+from packaging import version
 from os import scandir
 import string
-
-
+import webbrowser
 import random
-from re import L
 
-OverridesFolder = Path(__file__).parent.parent.joinpath("Overrides")
-Overrides = []
-checked = False
 
-ProgramVersion = version.parse("0.1.0")
-
-def getOverrides():
-    if OverridesFolder.exists():
-        if checked is False:
-            for Override in scandir(OverridesFolder):
-                Overrides.append(Override.name)
-        return Overrides
+def getOverrides(folder: Path):
+    items = []
+    if folder.exists() and folder.is_dir():
+        overrideGen = folder.glob("*.ov")
+        for Override in overrideGen:
+            items.append(Override.name.removesuffix(".ov").casefold())
+        return items
+    elif folder.exists():
+        return f"File exists en lieu of Overrides Folder.\n Check this location {folder.absolute()}"
     return None
 
 
@@ -95,15 +90,17 @@ def randomSymbols(MAX_LIMIT=1):
     ran = ''.join(random.choices('!@#$%^&*()_', k=MAX_LIMIT))
     return str(ran)
 
+
 class versionEnum(enum.IntEnum):
     HIGHER = 0
     SAME = 1
     LOWER = 2
 
+
 def compareVersion(oldVersion, newVersion):
     if not (oldVersion and newVersion):
         raise ValueError("Invalid version values.")
-    if isinstance(newVersion, str) or isinstance(oldVersion, str): 
+    if isinstance(newVersion, str) or isinstance(oldVersion, str):
         newVersion = version.parse(newVersion)
         oldVersion = version.parse(oldVersion)
     if oldVersion < newVersion:
@@ -112,3 +109,13 @@ def compareVersion(oldVersion, newVersion):
         return versionEnum.SAME
     else:
         return versionEnum.LOWER
+
+# Untested option to send emails using mailto:\\{str} in browser
+
+
+def open_url(str: str, email=False):
+    if not email:
+        url = str
+    else:
+        url = "mailto:\\\\" + str
+    webbrowser.open_new_tab(url)

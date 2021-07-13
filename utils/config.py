@@ -3,7 +3,6 @@
 from collections import OrderedDict
 import tkinter
 from types import MappingProxyType
-from typing import Optional
 import hjson, logging, os
 from hjson import HjsonEncoder, HjsonDecodeError, load 
 from pathlib import Path
@@ -11,18 +10,19 @@ from configparser import ConfigParser
 
 from packaging import version 
 from objects import Profile, Request
-from utils.general import ProgramVersion
+from constants import ProgramVersion
 
 
 # TODO: Make settings file window.
 home_dir = Path(__file__).parent.parent
 configPath = home_dir.joinpath("config.hjson")
-class BaseConfig:
-    def __init__(self, fromDict: OrderedDict={}):
-        self.configVersion = ProgramVersion
-        self.profiles = fromDict.get("profiles", [Profile(fromDict={}), Profile(fromDict={})]) 
-        self.settings = fromDict.get("settings", {}) 
-        self._location: Path = configPath
+class BaseConfig(object):
+    def __init__(self, configVersion = None, profiles = None, settings = {}, path: Path = None, **kwargs):
+        # Will first check if argument in kwargs, if not, check if passed as argument, if not use defaults.
+        self.configVersion = kwargs.get("configVersion", ProgramVersion if not configVersion else configVersion)            # Defaults to configVersion if settings is None
+        self.profiles = kwargs.get("profiles", [Profile(fromDict={}), Profile(fromDict={})] if not profiles else profiles)  # Defaults to [Profile(fromDict={}), Profile(fromDict={})] if profiles is None
+        self.settings = kwargs.get("settings", {} if not settings else settings)                                            # Defaults to {} if settings is None
+        self._location: Path = kwargs.get("path", configPath if not path else path)                                         # Defaults to configPath if path is None
         for index, profile in enumerate(self.profiles):
             if isinstance(profile, OrderedDict):
                 profileObj = Profile(fromDict=profile)
@@ -51,8 +51,8 @@ class BaseConfig:
             configstr = dumps(self.json())
             config_file.write(configstr)
             return configstr
-
-    
+        
+        
     def json(self):
         json = vars(self)
         itemsToDelete = []
@@ -110,14 +110,15 @@ def get_config(loc: Path=configPath):
                 config._location = loc
                 return config
         else:     
-            return BaseConfig(hjsonO)
+            
+            return BaseConfig(**hjsonO)
     except HjsonDecodeError as error:
         logging.warning("Config file is likely malformed, remaking config.")
         backup_config(loc)
         config = BaseConfig()
         config._location = loc
         config.write_config_file()
-        return BaseConfig()
+        return config
             
 
 
@@ -129,18 +130,31 @@ def add_profile(config: BaseConfig, profile: Profile):
     config.write_config_file()
     
 def del_profile(config: BaseConfig, profile: Profile):
-    to_remove = []
-    for prof in config.profiles:
-        if prof.uuid == profile.uuid:
-            to_remove.append(prof)
-    for i in to_remove:
-        config.profiles.remove(i)
     
+    del_profile_uuid(config=config, uuid=profile.uuid)
     config.write_config_file()
 
 def del_profile_uuid(config: BaseConfig, uuid: str):
-    print(f"Deleting profile by UUID: {uuid}")
-    #  TODO Delete by uuid
+    """Delete a profile by it's uuid from a given config.
+     
+    First goes through all profiles checking for a matching uuid, if one is found
+        add profile's index in list to the to_remove.
+            (Cannot remove it directly because you cannot change list size while iterating over it)
+    Then for each item in to_remove, get the index value stored and remove it from config.profiles using .pop
+        NOTE: Can use del instead of .pop, but .pop is prettier
+    
+    Args:
+        config (BaseConfig): [description]
+        uuid (str): uuid of profile to renove.
+    """
+    to_remove = []
+    for index, prof in enumerate(config.profiles):
+        if prof.uuid == uuid:
+            to_remove.append(index)
+    for i in to_remove:
+        logging.warning(f"Removing Profile {config.profiles[i].profileName}({config.profiles[i].uuid}).")
+        logging.warning(f"Printing backup of profile in-case of user 'error':\n {config.profiles[i].json()}")
+        config.profiles.pop(i)
     
     
 def backup_config(oldloc=configPath, retry=True):        
@@ -233,7 +247,7 @@ class ConfigEncoder(HjsonEncoder):
             return dict(self.ParseProfile(obj))
         
         # Check C
-        if isinstance(obj, list) and len(obj) > 0 and isinstance(obj[0], Profile):
+        if isinstance(obj, list) and len(obj) > 0 and any(isinstance(x, Profile) for x in obj):
             print("\tEncoding Profile List")
             for index, profile in enumerate(obj):
                 obj[index] = self.default(profile)
@@ -246,12 +260,13 @@ class ConfigEncoder(HjsonEncoder):
             if isinstance(obj, dict):
                 if ("profiles" or "requests") in obj.keys():
                     # If obj looks like {profiles: [{?, requests: [{}]}]} or basically list[dict[list[dict]]]
-                    if isinstance(obj["profiles"], list) and isinstance(obj["profiles"][len(obj["profiles"]) - 1], dict) and isinstance(obj["profiles"][len(obj["profiles"]) - 1]["requests"], list) and isinstance(obj["profiles"][len(obj["profiles"]) - 1]["requests"][len(obj["profiles"][len(obj["profiles"]) - 1]["requests"]) - 1], dict):
+                    dictionary: dict = obj # TODO Remove unecessary line, only used for typing hints
+                    if isinstance(obj["profiles"], list) and all(isinstance(x, Profile) for x in obj["profiles"]) and isinstance(obj["profiles"][len(obj["profiles"]) - 1]["requests"], list) and isinstance(obj["profiles"][len(obj["profiles"]) - 1]["requests"][len(obj["profiles"][len(obj["profiles"]) - 1]["requests"]) - 1], dict):
                         return obj
                     else:
                         finalDict = {}
                         for key in obj:
-                            finalDict.update({key:self.default(obj[key])})
+                            finalDict.update({key: self.default(obj[key])})
                         return self.default(finalDict)
                         
                 else: return obj

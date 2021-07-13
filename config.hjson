@@ -1,5 +1,5 @@
 {
-    configVersion: 0.1.0
+    configVersion: 0.1.8
     profiles:
     [
         {
@@ -33,8 +33,27 @@
             settings: {}
         }
         {
-            profileName: Random Req
-            uuid: e9a8dd13-b64a-444a-8ed2-00c1675b7846
+            profileName: Default Name
+            uuid: 5cf06baa-0735-4dd9-9aa6-d66b94759fb7
+            requests:
+            [
+                {
+                    reqtype: get
+                    uri: https://example.com/api?requestParm1={0}&requestParm2={1}
+                    headers:
+                    {
+                        User-Agent: FortnineActions/0.1.8
+                        Content-Type: text
+                        Accept: */*
+                    }
+                    reuseSession: true
+                }
+            ]
+            settings: {}
+        }
+        {
+            profileName: 4 Request Test
+            uuid: 6341e3c7-0300-452c-b2b5-c85a9790162d
             requests:
             [
                 {
@@ -42,7 +61,7 @@
                     uri: https://example.com/api?requestParm1={0}&requestParm2={1}
                     headers:
                     {
-                        User-Agent: FortnineActions/0.1.0
+                        User-Agent: FortnineActions/0.1.8
                         Content-Type: text
                         Accept: */*
                     }
@@ -53,7 +72,29 @@
                     uri: https://example.com/api?requestParm1={0}&requestParm2={1}
                     headers:
                     {
-                        User-Agent: FortnineActions/0.1.0
+                        User-Agent: FortnineActions/0.1.8
+                        Content-Type: text
+                        Accept: */*
+                    }
+                    reuseSession: true
+                }
+                {
+                    reqtype: GET
+                    uri: https://example.com/api?requestParm1={0}&requestParm2={1}
+                    headers:
+                    {
+                        User-Agent: FortnineActions/0.1.8
+                        Content-Type: text
+                        Accept: */*
+                    }
+                    reuseSession: true
+                }
+                {
+                    reqtype: GET
+                    uri: https://example.com/api?requestParm1={0}&requestParm2={1}
+                    headers:
+                    {
+                        User-Agent: FortnineActions/0.1.8
                         Content-Type: text
                         Accept: */*
                     }

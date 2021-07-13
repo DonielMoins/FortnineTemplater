@@ -134,4 +134,5 @@ dmypy.json
 # Pylint config
 .pylintrc
 
-# Custom
+# VSCode Prettier ext. Config
+.prettierrc

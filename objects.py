@@ -1,22 +1,15 @@
 """
-Python file containing objects used in FortnineTemplater
-
-Syntax: 
-    [Object ([Option : Option Type])] : [Description]
-    Profile (ProfileName : str, Requests : List[Request], Settings : Optional[Dict]) : 
-                Profile Object containing a List[Request], 
-                Profile Name used in config,
-                Optional Settings to be used later.
+Python file containing all objects used in FortnineTemplater
+*ahem* except BaseConfig (in config.py)
 """
 
+from packaging import version
 from collections import OrderedDict
-from pathlib import Path
 from typing import List, Optional
 import uuid as id
 
-from utils.general import compareVersion, ProgramVersion
-
-from packaging import version
+from utils.general import compareVersion
+from constants import ProgramVersion
 
 
 class Request:
@@ -110,12 +103,10 @@ class Profile:
                 self.settings = Settings
             else:
                 self.settings = {}
-        
+
         if version:
             if migrateData:
                 self.MigrateProfile(version)
-
-        
 
     def MigrateProfile(self, resultVersion):
         if not resultVersion:
@@ -128,12 +119,19 @@ class Profile:
             case _:
                 pass
 
+    def _serializeRequestList(self):
+        requests = [request.json() for request in self.requests]
+        return requests
+
+    # def __getattribute__(self, item):
+    #     if item == '__list__' and self.requests == item:
+    #         if any(isinstance(x, Request) for x in list):
+    #             self._serializeRequestList()
+    #         return object.__getattribute__(self, item)
+
+    #     return object.__getattribute__(self, item)
+
     def json(self):
-        return vars(self)
-    
-
-        
-
-        
-        
-            
+        v = vars(self)
+        v["requests"] = self._serializeRequestList()
+        return v

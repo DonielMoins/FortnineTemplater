@@ -10,6 +10,7 @@ import logging
  * make single request checking what type from template
 """
 
+
 def makeRequest(requestTemplate: ReqObj, data: Optional[list[str]], session: requests.Session):
     reqtype = requestTemplate.reqtype
 
@@ -32,7 +33,8 @@ def makeRequest(requestTemplate: ReqObj, data: Optional[list[str]], session: req
             logging.warn(
                 f"Unknown request method {str(requestTemplate.reqtype)} in {repr(requestTemplate)}")
             logging.debug("How did this request get past checks")
-            response = requests.Response()  # Create fake response to return with status_code 405
+            # Create fake response to return with status_code 405
+            response = requests.Response()
             response.status_code = 405      # Status Code 405: Method Not Allowed
     return response
 
@@ -49,11 +51,13 @@ def MakeRequests(requestList: list, fieldDataList: list = None, uuid=None, state
             for inputDataIndex, data in enumerate(fieldDataList[reqIndex]):
                 Responses.append(makeRequest(request, data, session))
                 if sendProg:
-                    stateSender.send(f"{uuid}: {((inputDataIndex + 1)/len(fieldDataList[reqIndex]))+((reqIndex + 1)/len(requestList))*100 - 1}")
+                    stateSender.send(
+                        f"{uuid}: {((inputDataIndex + 1)/len(fieldDataList[reqIndex]))+((reqIndex + 1)/len(requestList))*100 - 1}")
         else:
             Responses.append(makeRequest(request, None, session))
             if sendProg:
-                stateSender.send(f"{uuid} : {(reqIndex + 1)/len(requestList)*100}")
+                stateSender.send(
+                    f"{uuid} : {(reqIndex + 1)/len(requestList)*100}")
     return Responses
 
 
