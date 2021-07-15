@@ -371,10 +371,8 @@ class SelectorFrame(tk.Frame):
 
         for uuid, button in self.profileButtons.items():
             button: tk.Button
-            if uuid in self.disabledButtons:
-                button.setvar("state", "disabled")
-            else:
-                button.setvar("state", "normal")
+            button["state"] = tk.DISABLED if uuid in self.disabledButtons else button["state"] = tk.NORMAL
+               
         if self.frameController.activeFrame and self.frameController.activeFrame.lower() == self._name.removeprefix("!"):
             self.after(1500, self.stateListener, stateReceiver)
 
@@ -528,7 +526,7 @@ class DataEntry(tk.Toplevel):
         
         # Prepares InputFields of all requests in profile
         for i in self.requests:
-            input = tkscrolled.ScrolledText(self, name=lambda: test = 1; return str(test))
+            input = tkscrolled.ScrolledText(self)
             self.InputFields.append(input)
             
         # Labels for drawLabels() 
