@@ -12,6 +12,7 @@ from packaging import version
 from objects import Profile, Request
 from constants import ProgramVersion
 
+logger = logging.getLogger(__name__)
 
 # TODO: Make settings file window.
 home_dir = Path(__file__).parent.parent
@@ -92,20 +93,20 @@ def get_config(loc: Path=configPath):
         
         with open(loc, "r") as config_file:
             if not config_file.readable():
-                logging.error("Config File Not Readable")
+                logger.error("Config File Not Readable")
             
             hjsonO = load(config_file)
         if len(hjsonO) == 0:
-            logging.debug("Config HJSon Object Empty")
+            logger.debug("Config HJSon Object Empty")
             try:
-                logging.info(f"Trying to erase empty config at {configPath}")
+                logger.info(f"Trying to erase empty config at {configPath}")
                 os.remove(configPath.absolute())
             except PermissionError as e:
-                logging.debug(f"""Failed to delete config.hjson due to a Permission error:
+                logger.debug(f"""Failed to delete config.hjson due to a Permission error:
                               {e.__cause__}""")
-                logging.debug("Delete config.hjson manually!")
+                logger.debug("Delete config.hjson manually!")
             except Exception as e:
-                logging.debug(e.__cause__)
+                logger.debug(e.__cause__)
                 config = BaseConfig()
                 config._location = loc
                 return config
@@ -113,7 +114,7 @@ def get_config(loc: Path=configPath):
             
             return BaseConfig(**hjsonO)
     except HjsonDecodeError as error:
-        logging.warning("Config file is likely malformed, remaking config.")
+        logger.warning("Config file is likely malformed, remaking config.")
         backup_config(loc)
         config = BaseConfig()
         config._location = loc
@@ -152,8 +153,8 @@ def del_profile_uuid(config: BaseConfig, uuid: str):
         if prof.uuid == uuid:
             to_remove.append(index)
     for i in to_remove:
-        logging.warning(f"Removing Profile {config.profiles[i].profileName}({config.profiles[i].uuid}).")
-        logging.warning(f"Printing backup of profile in-case of user 'error':\n {config.profiles[i].json()}")
+        logger.warning(f"Removing Profile {config.profiles[i].profileName}({config.profiles[i].uuid}).")
+        logger.warning(f"Printing backup of profile in-case of user 'error':\n {config.profiles[i].json()}")
         config.profiles.pop(i)
     
     
@@ -172,7 +173,7 @@ def backup_config(oldloc=configPath, retry=True):
         else:
             # TODO Make this show a popup error screen.
             # raise FileExistsError("Config.yml already exists and retry mode is disabled")
-            logging.error("Config.yml already exists and retry mode is disabled")
+            logger.error("Config.yml already exists and retry mode is disabled")
     else:
         backuploc = Path(oldloc.__str__() + ".bak")
         
@@ -184,8 +185,8 @@ def backup_config(oldloc=configPath, retry=True):
             backup_file.writelines(old_data)
         else:
             # TODO Make this show a popup error screen.
-            logging.debug("Could not safely write backup config file!")
-            logging.error("Could not safely write backup config file! \n File not writable, check Folder permissions!")
+            logger.debug("Could not safely write backup config file!")
+            logger.error("Could not safely write backup config file! \n File not writable, check Folder permissions!")
             
 class ConfigEncoder(HjsonEncoder):  
     """Encoder that will turn BaseConfig onto an Hjson string.

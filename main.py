@@ -1,6 +1,6 @@
+import logging
 from threading import current_thread
 import multiprocessing as mp
-import logging
 import time
 import argparse
 
@@ -13,6 +13,7 @@ Processes = {}
 
 
 def main():
+    global logger
     current_thread().name = "Main Thread/Program Exit Handler"
     taskQueue = mp.JoinableQueue()
 
@@ -34,17 +35,17 @@ def main():
                 for name, thread in Processes.items():
                     if name != "GUI":
                         thread.join()
-                        logging.info(f"Joined Process {name}.")
+                        logger.info(f"Joined Process {name}.")
 
                 taskQueue.put(proc._QueueEndSignal())
-                logging.info("Sent TaskQueue End Signal.")
+                logger.info("Sent TaskQueue End Signal.")
 
                 if stateSender or stateReceiver:
                     stateSender.close()
                     stateReceiver.close()
-                    logging.info("Closed Progress Pipes")
+                    logger.info("Closed Progress Pipes")
                 break
-        logging.info("Ending program. Good night ;p")
+        logger.info("Ending program. Good night ;p")
         logging.shutdown()
     # Intercept ctrl+c and end program gracefully
     except KeyboardInterrupt:
@@ -52,54 +53,55 @@ def main():
             1. Send taskQueue End Signal
             2. Kill GUI proc
             3. block until is_alive is false
-            4. Flush GUI recources using .close()
+            4. Flush GUI resources using .close()
         """
-        logging.warning(
+        logger.warning(
             "Received KeyboardInterrupt, attempting to end Program gracefully")
 
         taskQueue.put(proc._QueueEndSignal())
-        logging.warning("QueueEndSignal sent to taskQueue")
+        logger.warning("QueueEndSignal sent to taskQueue")
 
         try:
-            logging.warning("Trying to kill GUI proc")
+            logger.warning("Trying to kill GUI proc")
             Processes["GUI"].kill()
 
             while(Processes["GUI"].is_alive()):
                 time.sleep(0.1)
-                logging.warning(
+                logger.warning(
                     "Blocked for (an additional?) 500 milliseconds to wait for program to be killed.")
-            logging.warning(
-                "GUI proc killed, attempting to release any recources held by GUI process.")
+            logger.warning(
+                "GUI proc killed, attempting to release any resources held by GUI process.")
 
             Processes["GUI"].close()
-            logging.warning(
-                "GUI proc recources flushed gracefully.\n\tProceeding with normal exit procedure.")
+            logger.warning(
+                "GUI proc resources flushed gracefully; Proceeding with normal exit procedure.")
         except Exception as e:
-            logging.error(e)
-            logging.error("Error occured while killing/cleaning GUI proc!")
-            logging.error(
+            logger.error(e)
+            logger.error("Error occurred while killing/cleaning GUI proc!")
+            logger.error(
                 "Please use TaskManager to make sure all python processes belonging to\n\tthe templater are closed!!")
-            logging.error(
-                "This is important as unkilled processed will take up open ports and system recources!!!")
+            logger.error(
+                "This is important as un-killed processed will take up open ports and system resources!!!")
 
 
 def makeLogger(type: str):
     match type.lower():
         case "debug":
             logging.basicConfig(format="%(levelname)s: %(module)s:  %(message)s",
-                                filename=f"templater-{dayDate}.log", level=logging.DEBUG)
+                                filename=logFile.absolute(), level=logging.DEBUG, force=True)
         case "info":
             logging.basicConfig(format="%(levelname)s: %(module)s:  %(message)s",
-                                filename=f"templater-{dayDate}.log", level=logging.INFO)
+                                filename=logFile.absolute(), level=logging.INFO, force=True)
         case "critical":
             logging.basicConfig(format="%(levelname)s: %(module)s:  %(message)s",
-                                filename=f"templater-{dayDate}.log", level=logging.CRITICAL)
+                                filename=logFile.absolute(), level=logging.CRITICAL, force=True)
         case "error":
             logging.basicConfig(format="%(levelname)s: %(module)s:  %(message)s",
-                                filename=f"templater-{dayDate}.log", level=logging.ERROR)
+                                filename=logFile.absolute(), level=logging.ERROR, force=True)
         case "fatal":
             logging.basicConfig(format="%(levelname)s: %(module)s:  %(message)s",
-                                filename=f"templater-{dayDate}.log", level=logging.FATAL)
+                                filename=logFile.absolute(), level=logging.FATAL, force=True)
+    
 
     """            So, this is complicated but here we go.
     
@@ -123,8 +125,7 @@ def makeLogger(type: str):
     Shutdown logger, because its 5 o'clock and I need to go home.
      
     """
-
-
+    
 if __name__ == '__main__':
     # parser = argparse.ArgumentParser(description='Request profile creater/manager made for  Fortnine.ca (Boutique Linus Inc.)')
     # parser.add_argument('editor', metavar='N', type=int, nargs='+',
@@ -145,17 +146,25 @@ if __name__ == '__main__':
             logging.debug("Attention: Logger started in logging.DEBUG mode")
         else:
             makeLogger("info")
+        
 
+        logger = logging.getLogger("main")
+        ch = logging.StreamHandler()
+        ch.setLevel(logging.DEBUG)
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        ch.setFormatter(formatter)
+        logger.addHandler(ch)
+        
     except Exception as e:
         makeLogger("info")
         logging.error(
-            "Error occured while getting overrides, defaulting to logging.INFO, Stack trace will follow:")
+            "Error occurred while getting overrides, defaulting to logging.INFO, Stack trace will follow:")
         logging.exception(e)
 
-    logging.info('Starting up Templater')
-    logging.debug(
+    logger.info('Starting up Templater')
+    logger.debug(
         f"Launched with following parameters: \n{GlobalLaunchParams}")
 
     main()
 
-    logging.debug('All sub-processes dead, program ending.')
+    logger.debug('All sub-processes dead, program ending.')
