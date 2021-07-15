@@ -371,7 +371,7 @@ class SelectorFrame(tk.Frame):
 
         for uuid, button in self.profileButtons.items():
             button: tk.Button
-            button["state"] = tk.DISABLED if uuid in self.disabledButtons else button["state"] = tk.NORMAL
+            button["state"] = tk.DISABLED if uuid in self.disabledButtons else tk.NORMAL
                
         if self.frameController.activeFrame and self.frameController.activeFrame.lower() == self._name.removeprefix("!"):
             self.after(1500, self.stateListener, stateReceiver)
