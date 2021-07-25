@@ -9,7 +9,7 @@ import logging
  * NOTE USE IN THREAD FROM THREADPOOL OR ELSE BLOCKING
  * make single request checking what type from template
 """
-
+logger = logging.getLogger(__name__)
 
 def makeRequest(requestTemplate: ReqObj, data: Optional[list[str]], session: requests.Session):
     reqtype = requestTemplate.reqtype
@@ -30,9 +30,9 @@ def makeRequest(requestTemplate: ReqObj, data: Optional[list[str]], session: req
             prepedreq = session.prepare_request(request)
             response: requests.Response = session.send(prepedreq)
         case _:
-            logging.warn(
+            logger.warn(
                 f"Unknown request method {str(requestTemplate.reqtype)} in {repr(requestTemplate)}")
-            logging.debug("How did this request get past checks")
+            logger.debug("How did this request get past checks")
             # Create fake response to return with status_code 405
             response = requests.Response()
             response.status_code = 405      # Status Code 405: Method Not Allowed
@@ -69,7 +69,7 @@ def parseLink(uri: str, data: Optional[list[str]]):
             for index, match in enumerate(matches):
                 finalURI = finalURI.replace(match, data[index])
         else:
-            logging.warn("Not enough input present.")
+            logger.warn("Not enough input present.")
     return finalURI
 
 # def getMatches(Request: ReqObj.Request):

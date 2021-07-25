@@ -6,25 +6,25 @@ import string
 import webbrowser
 import random
 
-from constants import dayDate
+from constants import dayDate, logFile
 
 def makeLogger(type: str):
     match type.lower():
         case "debug":
             logging.basicConfig(format="%(levelname)s: %(module)s:  %(message)s",
-                                filename=f"templater-{dayDate}.log", level=logging.DEBUG)
+                                filename=logFile.absolute(), level=logging.DEBUG, force=True)
         case "info":
             logging.basicConfig(format="%(levelname)s: %(module)s:  %(message)s",
-                                filename=f"templater-{dayDate}.log", level=logging.INFO)
+                                filename=logFile.absolute(), level=logging.INFO, force=True)
         case "critical":
             logging.basicConfig(format="%(levelname)s: %(module)s:  %(message)s",
-                                filename=f"templater-{dayDate}.log", level=logging.CRITICAL)
+                                filename=logFile.absolute(), level=logging.CRITICAL, force=True)
         case "error":
             logging.basicConfig(format="%(levelname)s: %(module)s:  %(message)s",
-                                filename=f"templater-{dayDate}.log", level=logging.ERROR)
+                                filename=logFile.absolute(), level=logging.ERROR, force=True)
         case "fatal":
             logging.basicConfig(format="%(levelname)s: %(module)s:  %(message)s",
-                                filename=f"templater-{dayDate}.log", level=logging.FATAL)
+                                filename=logFile.absolute(), level=logging.FATAL, force=True)
 
 def getOverrides(folder: Path):
     items = []

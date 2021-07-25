@@ -15,11 +15,11 @@ Listed from most to least important.
 
 1. [x] Make a template Editor (Most Important)
 2. [x] Now make the editor work!
-3. [ ] Drag n' drop CSV file
-4. [ ] Finish Progress Pipes and Parse sent Data (1/3)
+3. [ ] Drag n' drop CSV file (Tk is very limited so this is a hard maybe)
+4. [x] Finish Progress Pipes and Parse sent Data.
    1. [x] Sending and Receiving Data
    2. [x] Profile Button/Task Identifier (using profile.uuid)
-   3. [ ] Parse Data
+   3. [x] Parse Data
 5. [x] Add version migration / upgrading function.
 6. [x] Disable busy Profile Buttons
 7. [X] Add CSV parser
@@ -54,6 +54,9 @@ Listed from most to least important.
 
 - Refactor Code:
   - main.py
+    - [x] Add info / comments
+    - [ ] Cleanup code
+  - gui.py
     - [x] Add info / comments
     - [ ] Cleanup code
   - utils
