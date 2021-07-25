@@ -5,7 +5,7 @@ import time
 import argparse
 
 from constants import *
-from utils.general import getOverrides
+from utils.general import getOverrides, makeLogger 
 from gui import startGUI
 import utils.parallelProcessing as proc
 
@@ -82,24 +82,6 @@ def main():
             logging.error(
                 "This is important as unkilled processed will take up open ports and system recources!!!")
 
-
-def makeLogger(type: str):
-    match type.lower():
-        case "debug":
-            logging.basicConfig(format="%(levelname)s: %(module)s:  %(message)s",
-                                filename=f"templater-{dayDate}.log", level=logging.DEBUG)
-        case "info":
-            logging.basicConfig(format="%(levelname)s: %(module)s:  %(message)s",
-                                filename=f"templater-{dayDate}.log", level=logging.INFO)
-        case "critical":
-            logging.basicConfig(format="%(levelname)s: %(module)s:  %(message)s",
-                                filename=f"templater-{dayDate}.log", level=logging.CRITICAL)
-        case "error":
-            logging.basicConfig(format="%(levelname)s: %(module)s:  %(message)s",
-                                filename=f"templater-{dayDate}.log", level=logging.ERROR)
-        case "fatal":
-            logging.basicConfig(format="%(levelname)s: %(module)s:  %(message)s",
-                                filename=f"templater-{dayDate}.log", level=logging.FATAL)
 
     """            So, this is complicated but here we go.
     

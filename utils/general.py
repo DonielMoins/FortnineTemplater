@@ -1,11 +1,30 @@
+import logging
 import enum
 from pathlib import Path
 from packaging import version
-from os import scandir
 import string
 import webbrowser
 import random
 
+from constants import dayDate
+
+def makeLogger(type: str):
+    match type.lower():
+        case "debug":
+            logging.basicConfig(format="%(levelname)s: %(module)s:  %(message)s",
+                                filename=f"templater-{dayDate}.log", level=logging.DEBUG)
+        case "info":
+            logging.basicConfig(format="%(levelname)s: %(module)s:  %(message)s",
+                                filename=f"templater-{dayDate}.log", level=logging.INFO)
+        case "critical":
+            logging.basicConfig(format="%(levelname)s: %(module)s:  %(message)s",
+                                filename=f"templater-{dayDate}.log", level=logging.CRITICAL)
+        case "error":
+            logging.basicConfig(format="%(levelname)s: %(module)s:  %(message)s",
+                                filename=f"templater-{dayDate}.log", level=logging.ERROR)
+        case "fatal":
+            logging.basicConfig(format="%(levelname)s: %(module)s:  %(message)s",
+                                filename=f"templater-{dayDate}.log", level=logging.FATAL)
 
 def getOverrides(folder: Path):
     items = []
