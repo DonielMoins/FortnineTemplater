@@ -5,7 +5,7 @@ import time
 import argparse
 
 from constants import *
-from utils.general import getOverrides, makeLogger 
+from utils.general import getOverrides, makeLogger
 from gui import startGUI
 import utils.parallelProcessing as proc
 
@@ -83,7 +83,6 @@ def main():
             logger.error(
                 "This is important as un-killed processed will take up open ports and system resources!!!")
 
-
     """            So, this is complicated but here we go.
     
     MultiProcessing.Manager creates a Task Queue, Progress Sender and Receiver
@@ -106,40 +105,36 @@ def main():
     Shutdown logger, because its 5 o'clock and I need to go home.
      
     """
-    
+
+
 if __name__ == '__main__':
     # parser = argparse.ArgumentParser(description='Request profile creator/manager made for  Fortnine.ca (Boutique Linus Inc.)')
     # parser.add_argument('editor', metavar='N', type=int, nargs='+',
     #                 help='an integer for the accumulator')
     try:
-        # Have no idea why checked value exists but im pretty sure its needed at a certain point
-        checked = False
         _ov = getOverrides(OverridesFolder)
-        checked = True
-        
-        if isinstance(_ov, str):
-            makeLogger("info")
-            logging.error(_ov)
-        
+
         # If DEBUG file found in overrides folder, enable debug logging
-        if _ov is not None and "debug" in _ov:
+        if _ov and "debug" in _ov:
             makeLogger("debug")
             logging.debug("Attention: Logger started in logging.DEBUG mode")
         else:
             makeLogger("info")
-        
 
+        formatter = logging.Formatter(
+            '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
         logger = logging.getLogger("main")
+
         ch = logging.StreamHandler()
-        ch.setLevel(logging.DEBUG)
-        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        ch.setLevel(logger.level)
         ch.setFormatter(formatter)
+
         logger.addHandler(ch)
-        
+
     except Exception as e:
         makeLogger("info")
         logging.error(
-            "Error occurred while getting overrides, defaulting to logging.INFO, Stack trace will follow:")
+            "Following error raised while getting overrides, defaulting to logging.INFO:")
         logging.exception(e)
 
     logger.info('Starting up Templater')

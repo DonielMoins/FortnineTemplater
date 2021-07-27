@@ -6,7 +6,8 @@ import string
 import webbrowser
 import random
 
-from constants import dayDate, logFile
+from constants import logFile
+
 
 def makeLogger(type: str):
     match type.lower():
@@ -16,36 +17,24 @@ def makeLogger(type: str):
         case "info":
             logging.basicConfig(format="%(levelname)s: %(module)s:  %(message)s",
                                 filename=logFile.absolute(), level=logging.INFO, force=True)
-        case "critical":
-            logging.basicConfig(format="%(levelname)s: %(module)s:  %(message)s",
-                                filename=logFile.absolute(), level=logging.CRITICAL, force=True)
-        case "error":
-            logging.basicConfig(format="%(levelname)s: %(module)s:  %(message)s",
-                                filename=logFile.absolute(), level=logging.ERROR, force=True)
-        case "fatal":
-            logging.basicConfig(format="%(levelname)s: %(module)s:  %(message)s",
-                                filename=logFile.absolute(), level=logging.FATAL, force=True)
+
 
 def getOverrides(folder: Path):
-    items = []
-    if folder.exists() and folder.is_dir():
-        overrideGen = folder.glob("*.ov")
-        for Override in overrideGen:
-            items.append(Override.name.removesuffix(".ov").casefold())
-        return items
-    elif folder.exists():
-        return f"File exists en lieu of Overrides Folder.\n Check this location {folder.absolute()}"
-    return None
+    if not folder.exists():
+        return None
+
+    assert not folder.is_file()
+    return [Override.name.casefold().removesuffix(".ov") for Override in folder.glob("*.ov")]
 
 
-def parseCSV(lines, newLines=True, strip=True, ignoreWhiteSpaces=False, sep=","):
+def parseCSV(lines, newLines=True, strip=True, removeSpaces=True, sep=","):
     """Turn List of strings (lines) into list[list["param","param","param"...], list[...], list[...]]
 
     Args:
         lines (list[str]): Input lines to parse.
-        newLines (bool, optional): Split at all "\n"? Defaults to False.
+        newLines (bool, optional): Split at all "\n"? Defaults to True.
         strip (bool, optional): strip() all params?. Defaults to True.
-        ignoreWhiteSpaces (bool, optional): replace(" ", "") all params?. Defaults to False.
+        ignoreWhiteSpaces (bool, optional): replace(" ", "") all params. Defaults to True.
         sep (str, optional): Set CSV param seperator. Defaults to ",".
 
     Returns:
@@ -59,41 +48,18 @@ def parseCSV(lines, newLines=True, strip=True, ignoreWhiteSpaces=False, sep=",")
         raise ValueError(
             "Lines cannot be null and cannot have length of 0.")
     if isinstance(lines, str):
-        # Do not change this. Tk adds \n to the end of the input field, this should fix it.
+        #! Do not change this. Tk adds "\n" to the end of the input field, this should fix it.
         lines = [lines.strip()]
-    if newLines:
-        newLines = []
-        for line in lines:
-            if "\n" in line:
-                newLines = line.split("\n")
-            else:
-                newLines.append(line)
-    else:
-        newLines = lines
-
-    # ResultCSV List
-    CsvList = []
-
-    for line in newLines:
-        paramLine = []
-        for param in line.split(sep):
-
-            # Cleanup time!
-            if strip:
-                param.strip()
-            if ignoreWhiteSpaces:
-                param.replace(" ", "")
-
-            paramLine.append(param)
-        CsvList.append(paramLine)
-
+    # I am tempted to make this all one line... God save us all.
+    newLines = [line.split(
+        "\n") if "\n" in line else line for line in lines] if newLines else lines
+    CsvList = [[param.strip() if strip else param for param in line.split(sep)]
+               for line in newLines]
     return CsvList
 
 
 def randomHex(len=5):
-    maxHex = ''
-    for f in range(len):
-        maxHex += "F"
+    maxHex = ''.join(list(["F" for f in range(len)]))
     maxDec = int(maxHex, 16)
     random_number = random.randint(0, maxDec)
     return str(hex(random_number))
@@ -117,11 +83,13 @@ class versionEnum(enum.IntEnum):
 
 
 def compareVersion(oldVersion, newVersion):
-    if not (oldVersion and newVersion):
-        raise ValueError("Invalid version values.")
-    if isinstance(newVersion, str) or isinstance(oldVersion, str):
-        newVersion = version.parse(newVersion)
-        oldVersion = version.parse(oldVersion)
+    assert not (oldVersion and newVersion)
+
+    newVersion = version.parse(newVersion) if isinstance(
+        newVersion, str) else newVersion
+    oldVersion = version.parse(oldVersion) if isinstance(
+        oldVersion, str) else oldVersion
+
     if oldVersion < newVersion:
         return versionEnum.HIGHER
     elif oldVersion == newVersion:

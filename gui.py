@@ -361,7 +361,7 @@ class SelectorFrame(tk.Frame):
                 r"([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}):\s(([+-]?)\s*(?:(?:(?:[^.]?(\d+))|(\d+\.\d+(?!\w+)))(?!\w+|\.))(?![([{]))", data)
             if len(uuidMatcher.groups()) >= 2:
                 uuid = uuidMatcher.group(1)
-                prog = float(uuidMatcher.group(2)) # Convert str to float
+                prog = float(uuidMatcher.group(2))  # Convert str to float
 
                 if prog >= 100:
                     self.disabledButtons.remove(uuid)
@@ -372,7 +372,7 @@ class SelectorFrame(tk.Frame):
         for uuid, button in self.profileButtons.items():
             button: tk.Button
             button["state"] = tk.DISABLED if uuid in self.disabledButtons else tk.NORMAL
-               
+
         if self.frameController.activeFrame and self.frameController.activeFrame.lower() == self._name.removeprefix("!"):
             self.after(1500, self.stateListener, stateReceiver)
 
@@ -509,10 +509,10 @@ class DataEntry(tk.Toplevel):
             requests (list, optional): Requests list taken from Profile.requests. Defaults to [].
         """
         super().__init__(master=master)
-        
+
         assert isinstance(profile, Profile)
-        
-        self.resizable(0,0)
+
+        self.resizable(0, 0)
         self.title("Input Request variables")
         self.profile = profile
         self.requests = profile.requests
@@ -523,18 +523,18 @@ class DataEntry(tk.Toplevel):
 
         self.profLabel = tk.Label(
             self, text=f"Profile Name: {self.profile.profileName}\t UUID: {self.profile.uuid}")
-        
+
         # Prepares InputFields of all requests in profile
         for i in self.requests:
             input = tkscrolled.ScrolledText(self)
             self.InputFields.append(input)
-            
-        # Labels for drawLabels() 
+
+        # Labels for drawLabels()
         self.ReqPreviewLabel = tk.Label(
             self, text=f"Preview: {self.requests[self.CurrentInput - 1].uri}")
         self.ReqMethodLabel = tk.Label(
             self, text=f"Method: {self.requests[self.CurrentInput - 1].reqtype.upper()}")
-        
+
         # Buttons for drawButtons()
         self.NextBtn = tk.Button(
             self, text="Next Request", command=lambda: self.ShowNextField())
@@ -542,17 +542,16 @@ class DataEntry(tk.Toplevel):
             self, text="Previous Request", command=lambda: self.ShowPrevField())
         self.makeReqBtn = tk.Button(
             self, text="Make Request", command=lambda: self.SendRequest(self.requests, uuid=self.profile.uuid))
-        
+
         self.drawLabels()
         if len(self.InputFields) >= 1:
             self.drawInputField()
         self.drawButtons()
         self.sizes()
-        
-
 
 
 # .grid() cleared labels to begining of DataEntry screen.
+
 
     def drawLabels(self):
         self.profLabel.grid(padx=10, pady=10, sticky="new", columnspan=5)
@@ -572,19 +571,23 @@ class DataEntry(tk.Toplevel):
                 self.PrevBtn.grid(padx=5, row=7, pady=5, columnspan=1)
 
             if self.CurrentInput != len(self.InputFields):
-                self.NextBtn.grid(padx=5, row=7, pady=5, column=3, columnspan=1)
-                
+                self.NextBtn.grid(padx=5, row=7, pady=5,
+                                  column=3, columnspan=1)
+
         self.makeReqBtn.grid(padx=5, row=7, pady=5, column=2, columnspan=1)
-        
+
 
 # .grid() InputField from self.CurrentInput
 # To facilitate changing GUI placement
 
+
     def drawInputField(self):
-        self.InputFields[self.CurrentInput - 1].grid(row=2, rowspan=4, columnspan=10) 
+        self.InputFields[self.CurrentInput -
+                         1].grid(row=2, rowspan=4, columnspan=10)
 
 
 # Clears DataEntry screen and displays entry fields for the next request.
+
     def ShowNextField(self):
         self.clear()
         self.CurrentInput += 1
@@ -601,7 +604,7 @@ class DataEntry(tk.Toplevel):
         self.drawInputField()
         self.drawButtons()
         self.sizes()
-        
+
     def sizes(self):
         self.columnconfigure(0, weight=1)
         self.columnconfigure(1, weight=1)
@@ -618,7 +621,7 @@ class DataEntry(tk.Toplevel):
             FieldsData.append(parseCSV(fieldText))
 
         reqsTask = proc.TaskThread(
-            fun=MakeRequests, args=(requests, FieldsData, uuid, self.stateSender, ))
+            fun=MakeRequests, args=(self.profile, requests, FieldsData, uuid, self.stateSender, ))
         self.taskQueue.put(reqsTask)
 
         self.destroy()

@@ -3,64 +3,61 @@ Python file containing all objects used in FortnineTemplater
 *ahem* except BaseConfig (in config.py)
 """
 
+import re
 from packaging import version
 from collections import OrderedDict
 from typing import List, Optional
 import uuid as id
 
-from utils.general import compareVersion
 from constants import ProgramVersion
 
 
 class Request:
-    def __init__(self, dict={}):
+    def __init__(self, reqtype, uri, headers, reuseSession, **kwargs):
         """Creeate Request Object for use with functions from requests.py
 
         Args:
-            reqtype ([string], optional): Set request type. Defaults to "GET". 
+            reqtype (string): Set request type. Defaults to "get". 
                 Supported Types: 
-                        Get
-                        Head
-                        Post
-                        Patch
-                        Put
-                        Delete
-                        Options
-            uri ([string], optional): Set request uri. Defaults to "https://example.com/api?requestParm1={0}&requestParm2={1}".
+                        get
+                        head
+                        post
+                        patch
+                        put
+                        delete
+                        options
+            uri (string): Set request uri.
             headers ([dict], optional): Set request headers. 
                 Defaults to {
                     "User-Agent": "FortnineActions/0.0.1",
                     "Content-Type": "text",
                     'Accept': '*/*',
                 }
+            Info @ https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers
             reuseSession ([bool], optional): If MakeRequest should reuse Session Object. Defaults to True.
 
         Raises:
             ValueError: Request type unknown.
             ValueError: Request Type unsupported.
         """
-        self.reqtype = str(dict.get("reqtype", "get")).lower()
-        self.uri = dict.get(
-            "uri", "https://example.com/api?requestParm1={0}&requestParm2={1}")
 
-        """
-        If you update the default headers Change Docstring.
-        Find headers @ https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers
-        """
-        self.headers = dict.get("headers", {
+        self.__dict__.update(kwargs)
+
+        self.reqtype: str = reqtype.casefold()
+        self.uri = uri
+        self.reuseSession = reuseSession
+        self.headers = {
             "User-Agent": f"FortnineActions/{ProgramVersion.__str__()}",
             "Content-Type": "text",
             'Accept': '*/*',
-        })
-        self.reuseSession = dict.get("reuseSession", True)
-        # self.__dict__.update(dict)
+        } if not headers else headers
 
         # Check if request type is supported with these 3 Cases:
+        # If Request Type is supported, Ignore.
+        # If not supported or if unknown request type, raise ValueError with appropriate message
         match self.reqtype:
-            # If Request Type is supported, Ignore.
             case "get" | "head" | "post" | "patch" | "put" | "delete" | "options":
                 pass
-            # If not supported or if unknown request type, raise ValueError with appropriate message
             case "connect" | "request" | "trace":
                 raise ValueError("Unsupported Request Type")
             case _:
@@ -76,33 +73,47 @@ class Request:
                                         Options (Untested)"""
                                  )
 
+    @property
+    def uri(self):
+        return self._uri
+
+    @uri.getter
+    def uri(self):
+        match = re.match(r"((?:https|http)?:\/\/){1}((?:[-a-z0-9._~!$&\'()*+,;=]|%[0-9a-f]{2})+(?::(?:[-a-z0-9._~!$&\'()*+,;=]|%[0-9a-f]{2})+)?@)?(?:((?:(?:\d|[1-9]\d|1\d{2}|2[0-4]\d|25[0-5])\.){3}(?:\d|[1-9]\d|1\d{2}|2[0-4]\d|25[0-5]))|((?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z][a-z0-9-]*[a-z0-9]))(:\d+)?((?:\/(?:[-a-z0-9._~!$&\'()*+,;=:@]|%[0-9a-f]{2})+)*\/?)(\?(?:[-a-z0-9._~!$&\'()*+,;=:@\/?]|%[0-9a-f]{2})*)?",
+                         self._uri)
+        assert match
+        return self._uri
+
+    @uri.setter
+    def uri(self, value):
+        match = re.match(r"((?:https|http)?:\/\/){1}((?:[-a-z0-9._~!$&\'()*+,;=]|%[0-9a-f]{2})+(?::(?:[-a-z0-9._~!$&\'()*+,;=]|%[0-9a-f]{2})+)?@)?(?:((?:(?:\d|[1-9]\d|1\d{2}|2[0-4]\d|25[0-5])\.){3}(?:\d|[1-9]\d|1\d{2}|2[0-4]\d|25[0-5]))|((?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z][a-z0-9-]*[a-z0-9]))(:\d+)?((?:\/(?:[-a-z0-9._~!$&\'()*+,;=:@]|%[0-9a-f]{2})+)*\/?)(\?(?:[-a-z0-9._~!$&\'()*+,;=:@\/?]|%[0-9a-f]{2})*)?",
+                         value)
+        assert match
+        self._uri = match.string
+
     def json(self):
         return vars(self)
 
 
 # Profile Contains Profile Name, List of Requests and an optional dictionary for profile settings.
 # UUID MUST BE UNIQUE
+# ? **kwargs overrides all settings
 class Profile:
-    def __init__(self, ProfileName: str = "Default Name", uuid: str = str(id.uuid4()), Requests: List[Request] = None, Settings: dict = None, version: Optional[version.Version | version.LegacyVersion] = None, migrateData: bool = False, fromDict: OrderedDict = None):
-        if fromDict:
-            self.profileName = fromDict.get("profileName", "Default Name")
-            self.uuid = fromDict.get("uuid", str(id.uuid4()))
-            self.requests = fromDict.get("requests", [Request()])
-            self.settings = fromDict.get("settings", {})
-            for index, req in enumerate(self.requests):
-                if isinstance(req, OrderedDict):
-                    self.requests[index] = Request(dict=req)
-        else:
-            self.profileName = ProfileName
-            self.uuid = uuid
-            if Requests:
-                self.requests = Requests
-            else:
-                self.requests = [Request()]
-            if Settings:
-                self.settings = Settings
-            else:
-                self.settings = {}
+    def __init__(self, profileName: str = "Default Name", uuid: str = str(id.uuid4()), requests: List[Request] = [], settings: dict = None, version: Optional[version.Version | version.LegacyVersion] = None, migrateData: bool = False, **kwargs):
+        self.profileName = profileName
+        self.uuid = uuid
+        self.settings = {}
+
+        self.__dict__.update(kwargs)
+        # "requests" in vars(self).keys()
+        if requests and isinstance(requests, list):
+            if all([isinstance(req, OrderedDict) for req in requests]):
+                self.requests = [Request(**req) for req in requests]
+            elif all([isinstance(req, Request) for req in requests]):
+                self.requests = requests
+
+        # Check if required variables exist.
+        assert (self.profileName and self.uuid and self.requests)
 
         if version:
             if migrateData:
