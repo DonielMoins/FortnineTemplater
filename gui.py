@@ -621,7 +621,7 @@ class DataEntry(tk.Toplevel):
             FieldsData.append(parseCSV(fieldText))
 
         reqsTask = proc.TaskThread(
-            fun=MakeRequests, args=(self.profile, requests, FieldsData, uuid, self.stateSender, ))
+            fun=MakeRequests, args=(requests, FieldsData, uuid, self.stateSender, ))
         self.taskQueue.put(reqsTask)
 
         self.destroy()

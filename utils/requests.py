@@ -48,7 +48,7 @@ def makeRequest(requestTemplate: ReqObj, data: Optional[list[str]], session: req
     return response
 
 
-def MakeRequests(profile: Profile, requestList: list, fieldDataList: list = None, uuid=None, stateSender: Connection = None):
+def MakeRequests(requestList: list, fieldDataList: list = None, uuid=None, stateSender: Connection = None):
 
     Responses = []
     session = requests.Session()
