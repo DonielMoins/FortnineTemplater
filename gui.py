@@ -426,7 +426,7 @@ class CreditsFrame(tk.Frame):
             import git
             repo = git.Repo(search_parent_directories=True)
             localSHA = repo.head.commit.hexsha
-            remoteSHA = repo.remote("origin").repo.head.commit.hexsha
+            remoteSHA = repo.remote("origin").refs.main.commit.hexsha
             if localSHA == remoteSHA:
                 label['text'] = f"Current Version: Up-To-Date, {ProjDetails['version']}"
             else:
