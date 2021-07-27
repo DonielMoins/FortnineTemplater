@@ -80,13 +80,11 @@ def parseURL(uri: str, data: Optional[list[str]]):
     return finalURI
 
 def makeData(uri: str, data: Optional[list[str]]):
-    # This regex is gonna be a headache :)
-    keys = re.split(uri, r"Regex Pattern That gets the Keys from the url")
+    # Thank god for list comprehensions.
+    # Matches the queries into groups that start with "?" or "&", then before adding matches clean up the "?" and "&"
+    keys = [match.replace("&", "").replace("?", "") for match in re.split(uri, r"[\?&](\w+)=(\w+)")]
     cleanURL = uri[ : uri.rfind("?")]
-    payload = {}
-    for index, keyVal in enumerate(keys):
-        assert isinstance(keyVal, str)
-        payload[keyVal] = data[index]
+    payload = {keyVal: data[index] for index, keyVal in enumerate(keys)}
     return cleanURL, payload
 
 # def getMatches(Request: ReqObj.Request):
