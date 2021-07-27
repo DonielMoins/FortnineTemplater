@@ -11,7 +11,7 @@ import logging
 """
 logger = logging.getLogger(__name__)
 
-def makeRequest(requestTemplate: ReqObj, data: Optional[list[str]], session: requests.Session):
+def makeRequest(requestTemplate: ReqObj, keys: Optional[list[str]], data: Optional[list[str]], session: requests.Session):
     reqtype = requestTemplate.reqtype
 
     URL = parseLink(requestTemplate.uri, data)
@@ -26,9 +26,17 @@ def makeRequest(requestTemplate: ReqObj, data: Optional[list[str]], session: req
     If Unknown reqtype, warn in logs, then return response with status code 405.
     """
     match requestTemplate.reqtype:
-        case "get" | "head" | "post" | "patch" | "put" | "delete" | "options":
+        
+        case  "post" | "put":
+            payload = {}
+            for index, keyVal in enumerate(keys):
+                assert isinstance(keyVal, str)
+                payload[keyVal] = data[index]
+            request.data = payload
+            
+        case "get" | "head" | "patch" | "delete" | "options":
             prepedreq = session.prepare_request(request)
-            response: requests.Response = session.send(prepedreq)
+            
         case _:
             logger.warn(
                 f"Unknown request method {str(requestTemplate.reqtype)} in {repr(requestTemplate)}")
@@ -36,6 +44,9 @@ def makeRequest(requestTemplate: ReqObj, data: Optional[list[str]], session: req
             # Create fake response to return with status_code 405
             response = requests.Response()
             response.status_code = 405      # Status Code 405: Method Not Allowed
+        
+    prepedreq = session.prepare_request(request)
+    response: requests.Response = session.send(prepedreq)
     return response
 
 

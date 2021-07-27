@@ -52,7 +52,7 @@ class TaskThread:
             self.identifier = identifier
         if not fun:
             if identifier != "_QueueEndSignal" or tasktype != TaskTypes.QUEUE_END_SIGNAL:
-                raise ValueError("Func must be a reference to a function and not None.")
+                raise ValueError(f"fun must be a reference to a function and not {type(fun)}")
         else:
             self.fun = fun
             self.args = args
