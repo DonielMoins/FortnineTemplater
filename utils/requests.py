@@ -13,9 +13,6 @@ logger = logging.getLogger(__name__)
 
 def makeRequest(requestTemplate: ReqObj, keys: Optional[list[str]], data: Optional[list[str]], session: requests.Session):
     reqtype = requestTemplate.reqtype
-
-    URL = parseLink(requestTemplate.uri, data)
-    request = requests.Request(str(reqtype).upper(), URL)
     response = None
 
     """
@@ -26,15 +23,14 @@ def makeRequest(requestTemplate: ReqObj, keys: Optional[list[str]], data: Option
     If Unknown reqtype, warn in logs, then return response with status code 405.
     """
     match requestTemplate.reqtype:
-        
         case  "post" | "put":
-            payload = {}
-            for index, keyVal in enumerate(keys):
-                assert isinstance(keyVal, str)
-                payload[keyVal] = data[index]
+            URL, payload = makeData(requestTemplate.uri, data)
+            request = requests.Request(str(reqtype).upper(), URL, data=payload)
             request.data = payload
             
         case "get" | "head" | "patch" | "delete" | "options":
+            URL = parseURL(requestTemplate.uri, data)
+            request = requests.Request(str(reqtype).upper(), URL)
             prepedreq = session.prepare_request(request)
             
         case _:
@@ -72,7 +68,7 @@ def MakeRequests(requestList: list, fieldDataList: list = None, uuid=None, state
     return Responses
 
 
-def parseLink(uri: str, data: Optional[list[str]]):
+def parseURL(uri: str, data: Optional[list[str]]):
     finalURI: str = uri
     if data is not None:
         matches = re.findall("{[0-9]+}", uri)
@@ -82,6 +78,16 @@ def parseLink(uri: str, data: Optional[list[str]]):
         else:
             logger.warn("Not enough input present.")
     return finalURI
+
+def makeData(uri: str, data: Optional[list[str]]):
+    # This regex is gonna be a headache :)
+    keys = re.split(uri, r"Regex Pattern That gets the Keys from the url")
+    cleanURL = uri[ : uri.rfind("?")]
+    payload = {}
+    for index, keyVal in enumerate(keys):
+        assert isinstance(keyVal, str)
+        payload[keyVal] = data[index]
+    return cleanURL, payload
 
 # def getMatches(Request: ReqObj.Request):
 #     return re.findall("/{([0-9])+}/g", Request.uri)
