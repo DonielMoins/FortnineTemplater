@@ -146,7 +146,7 @@ def del_profile_uuid(config: BaseConfig, uuid: str):
     
     Args:
         config (BaseConfig): [description]
-        uuid (str): uuid of profile to renove.
+        uuid (str): uuid of profile to remove.
     """
     to_remove = []
     for index, prof in enumerate(config.profiles):
@@ -261,7 +261,7 @@ class ConfigEncoder(HjsonEncoder):
             if isinstance(obj, dict):
                 if ("profiles" or "requests") in obj.keys():
                     # If obj looks like {profiles: [{?, requests: [{}]}]} or basically list[dict[list[dict]]]
-                    dictionary: dict = obj # TODO Remove unecessary line, only used for typing hints
+                    dictionary: dict = obj # TODO Remove unnecessary line, only used for typing hints
                     if isinstance(obj["profiles"], list) and all(isinstance(x, Profile) for x in obj["profiles"]) and isinstance(obj["profiles"][len(obj["profiles"]) - 1]["requests"], list) and isinstance(obj["profiles"][len(obj["profiles"]) - 1]["requests"][len(obj["profiles"][len(obj["profiles"]) - 1]["requests"]) - 1], dict):
                         return obj
                     else:

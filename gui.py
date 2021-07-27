@@ -24,14 +24,14 @@ def startGUI(launchParams, taskQueue: mp.JoinableQueue,  stateReceiver: Connecti
     def key(x):
         # Ctrl + = (Equals key) switches to Selector Window
         # Ctrl + - (Minus Key) switches to Editor Frame
-        # Ctrl + Home switches to Credits Frame with an update checker
+        # Ctrl + / switches to Credits Frame with an update checker
         if x.state == 4:
-            match x.keysym.lower():
+            match x.keysym.casefold():
                 case 'equal':
                     master.show_frame(SelectorFrame, True)
                 case 'minus':
                     master.show_frame(EditorFrame)
-                case 'home':
+                case 'slash':
                     master.show_frame(CreditsFrame)
                 case 'h':
                     # TODO ctrl + h opens screen with all shortcuts.

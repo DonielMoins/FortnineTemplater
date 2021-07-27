@@ -108,7 +108,7 @@ def main():
     """
     
 if __name__ == '__main__':
-    # parser = argparse.ArgumentParser(description='Request profile creater/manager made for  Fortnine.ca (Boutique Linus Inc.)')
+    # parser = argparse.ArgumentParser(description='Request profile creator/manager made for  Fortnine.ca (Boutique Linus Inc.)')
     # parser.add_argument('editor', metavar='N', type=int, nargs='+',
     #                 help='an integer for the accumulator')
     try:
