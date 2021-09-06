@@ -158,10 +158,12 @@ class ProfileEditor(tk.Toplevel):
 
         self.tkRequestItems = []
         self.currentRequest = 0
-
+        
+        self.bind("WM_DELETE_WINDOW", self.on_close)
+        
         self.profile = profile
         if not self.profile:
-            self.profile = Profile(fromDict={})
+            self.profile = Profile()
 
         self.profileName = tk.StringVar(self, self.profile .profileName)
         self.requests = self.profile.requests
@@ -300,6 +302,11 @@ class ProfileEditor(tk.Toplevel):
         if x >= self.width:
             x = self.width - self.mult
         widget.place(x=x, y=y)
+    
+    def on_close(self):
+        for var in vars(self):
+            de
+        self.destroy()
 
 
 #  TODO Parse Progress Data
@@ -629,3 +636,5 @@ class DataEntry(tk.Toplevel):
     def clear(self):
         for widget in self.winfo_children():
             widget.grid_forget()
+            
+

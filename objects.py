@@ -13,7 +13,7 @@ from constants import ProgramVersion
 
 
 class Request:
-    def __init__(self, reqtype, uri, headers, reuseSession, **kwargs):
+    def __init__(self, reqtype: str = "GET", uri: str = "https://example.com/test?", headers: dict = None, reuseSession: bool = True, **kwargs):
         """Creeate Request Object for use with functions from requests.py
 
         Args:
@@ -99,7 +99,7 @@ class Request:
 # UUID MUST BE UNIQUE
 # ? **kwargs overrides all settings
 class Profile:
-    def __init__(self, profileName: str = "Default Name", uuid: str = str(id.uuid4()), requests: List[Request] = [], settings: dict = None, version: Optional[version.Version | version.LegacyVersion] = None, migrateData: bool = False, **kwargs):
+    def __init__(self, profileName: str = "Default Name", uuid: str = str(id.uuid4()), requests: List[Request] = [Request()], settings: dict = None, version: Optional[version.Version | version.LegacyVersion] = None, migrateData: bool = False, **kwargs):
         self.profileName = profileName
         self.uuid = uuid
         self.settings = {}
@@ -113,7 +113,9 @@ class Profile:
                 self.requests = requests
 
         # Check if required variables exist.
-        assert (self.profileName and self.uuid and self.requests)
+        assert self.profileName 
+        assert self.uuid
+        assert self.requests
 
         if version:
             if migrateData:
