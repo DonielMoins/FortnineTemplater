@@ -25,7 +25,7 @@ def startGUI(launchParams, taskQueue: mp.JoinableQueue,  stateReceiver: Connecti
         # Ctrl + = (Equals key) switches to Selector Window
         # Ctrl + - (Minus Key) switches to Editor Frame
         # Ctrl + / switches to Credits Frame with an update checker
-        if x.state == 4 or 20:
+        if x.state == 4:
             match x.keysym.casefold():
                 case 'equal':
                     master.show_frame(SelectorFrame, True)
@@ -304,10 +304,9 @@ class ProfileEditor(tk.Toplevel):
         widget.place(x=x, y=y)
     
     def on_close(self):
-        for var in vars(self):
-            de
         self.destroy()
-
+        for var in vars(self):
+            del var
 
 #  TODO Parse Progress Data
 class SelectorFrame(tk.Frame):
@@ -524,7 +523,8 @@ class DataEntry(tk.Toplevel):
         self.profile = profile
         self.requests = profile.requests
         self.CurrentInput = 1
-        self.InputFields = []
+        self.URLInputFields = []
+        self.DataInputFields = []
         self.taskQueue: mp.JoinableQueue = taskQueue
         self.stateSender = stateSender
 
@@ -533,8 +533,8 @@ class DataEntry(tk.Toplevel):
 
         # Prepares InputFields of all requests in profile
         for i in self.requests:
-            input = tkscrolled.ScrolledText(self)
-            self.InputFields.append(input)
+            self.URLInputFields.append(tkscrolled.ScrolledText(self))
+            self.DataInputFields.append(tkscrolled.ScrolledText(self) if i.data_params else None)
 
         # Labels for drawLabels()
         self.ReqPreviewLabel = tk.Label(
@@ -551,7 +551,7 @@ class DataEntry(tk.Toplevel):
             self, text="Make Request", command=lambda: self.SendRequest(self.requests, uuid=self.profile.uuid))
 
         self.drawLabels()
-        if len(self.InputFields) >= 1:
+        if len(self.URLInputFields) >= 1:
             self.drawInputField()
         self.drawButtons()
         self.sizes()
@@ -573,11 +573,11 @@ class DataEntry(tk.Toplevel):
 # .grid() cleared buttons to end of DataEntry screen.
 
     def drawButtons(self):
-        if len(self.InputFields) > 1:
+        if len(self.URLInputFields) > 1:
             if self.CurrentInput != 1:
                 self.PrevBtn.grid(padx=5, row=7, pady=5, columnspan=1)
 
-            if self.CurrentInput != len(self.InputFields):
+            if self.CurrentInput != len(self.URLInputFields):
                 self.NextBtn.grid(padx=5, row=7, pady=5,
                                   column=3, columnspan=1)
 
@@ -589,8 +589,11 @@ class DataEntry(tk.Toplevel):
 
 
     def drawInputField(self):
-        self.InputFields[self.CurrentInput -
-                         1].grid(row=2, rowspan=4, columnspan=10)
+        self.URLInputFields[self.CurrentInput -
+                         1].grid(row=1, rowspan=4, columnspan=10)
+        if self.DataInputFields[self.CurrentInput -1]:
+            self.DataInputFields[self.CurrentInput -
+                                1].grid(row=2, rowspan=4, columnspan=10)
 
 
 # Clears DataEntry screen and displays entry fields for the next request.
@@ -613,22 +616,23 @@ class DataEntry(tk.Toplevel):
         self.sizes()
 
     def sizes(self):
-        self.columnconfigure(0, weight=1)
-        self.columnconfigure(1, weight=1)
-        self.columnconfigure(2, weight=4)
-        self.columnconfigure(3, weight=1)
-        self.columnconfigure(4, weight=1)
+        # self.columnconfigure(0, weight=1)
+        # self.columnconfigure(1, weight=1)
+        # self.columnconfigure(2, weight=4)
+        # self.columnconfigure(3, weight=1)
+        # self.columnconfigure(4, weight=1)
         self.geometry()
 
 # Get Input of every Request, parse data, then send a requestTask with requests, FieldsData and stateSender to TaskQueue.
     def SendRequest(self, requests: List[Request], uuid: str):
-        FieldsData = []
-        for InputField in self.InputFields:
+        LinkFieldsData = []
+        DataParamData = []
+        for InputField in self.URLInputFields:
             fieldText: str = InputField.get('1.0', tk.END)
-            FieldsData.append(parseCSV(fieldText))
+            LinkFieldsData.append(parseCSV(fieldText))
 
         reqsTask = proc.TaskThread(
-            fun=MakeRequests, args=(requests, FieldsData, uuid, self.stateSender, ))
+            fun=MakeRequests, args=(requests, LinkFieldsData, DataParamData, uuid, self.stateSender, ))
         self.taskQueue.put(reqsTask)
 
         self.destroy()

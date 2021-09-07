@@ -84,7 +84,7 @@ class Request_Tests(unittest.TestCase):
     
     def test_Get_Empty(self):
         request = Request(reqtype="get", uri="https://httpbin.org/get")
-        responses = MakeRequests(requestList=[request], fieldDataList=[[""]])
+        responses = MakeRequests(requestList=[request], linkDataList=[[""]])
         for response in responses:
             # Get values in common
             sameValues = (request.headers.items() & response.headers.items())
@@ -109,7 +109,7 @@ class Request_Tests(unittest.TestCase):
                 Line.append(randomString(valuemaxlen))
             postData.append(Line)
         
-        responses = MakeRequests(requestList=[request], fieldDataList=postData)
+        responses = MakeRequests(requestList=[request], linkDataList=postData)
         self.verifyStatusCode(responsesList=responses)
 
         
