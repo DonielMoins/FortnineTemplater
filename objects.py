@@ -13,7 +13,7 @@ from constants import ProgramVersion
 
 
 class Request:
-    def __init__(self, reqtype: str = "GET", uri: str = "https://example.com/test?", headers: dict = None, reuseSession: bool = True, **kwargs):
+    def __init__(self, reqtype: str = "GET", uri: str = "https://example.com/test?", data_params: str = None, headers: dict = None, reuseSession: bool = True, **kwargs):
         """Creeate Request Object for use with functions from requests.py
 
         Args:
@@ -51,7 +51,8 @@ class Request:
             "Content-Type": "text",
             'Accept': '*/*',
         } if not headers else headers
-
+        self.data_params = data_params
+        
         # Check if request type is supported with these 3 Cases:
         # If Request Type is supported, Ignore.
         # If not supported or if unknown request type, raise ValueError with appropriate message

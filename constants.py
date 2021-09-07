@@ -27,7 +27,7 @@ logFolder = Path(__file__).parent.joinpath("logs")
 logFile = logFolder.absolute().joinpath(f"templater-{dayDate}.log")
 
 
-ProgramVersion = parse("0.1.8")
+ProgramVersion = parse("0.2.0")
 
 ProjDetails = {
     "github": "https://github.com/DonielMoins/FortnineTemplater/",

@@ -25,7 +25,7 @@ def startGUI(launchParams, taskQueue: mp.JoinableQueue,  stateReceiver: Connecti
         # Ctrl + = (Equals key) switches to Selector Window
         # Ctrl + - (Minus Key) switches to Editor Frame
         # Ctrl + / switches to Credits Frame with an update checker
-        if x.state == 4:
+        if x.state == 4 or 20:
             match x.keysym.casefold():
                 case 'equal':
                     master.show_frame(SelectorFrame, True)
