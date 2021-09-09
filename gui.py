@@ -590,10 +590,10 @@ class DataEntry(tk.Toplevel):
 
     def drawInputField(self):
         self.URLInputFields[self.CurrentInput -
-                         1].grid(row=1, rowspan=4, columnspan=10)
+                         1].grid(row=2, rowspan=1, columnspan=5, column=0)
         if self.DataInputFields[self.CurrentInput -1]:
             self.DataInputFields[self.CurrentInput -
-                                1].grid(row=2, rowspan=4, columnspan=10)
+                                1].grid(row=2, rowspan=1, columnspan=5, column=1)
 
 
 # Clears DataEntry screen and displays entry fields for the next request.
