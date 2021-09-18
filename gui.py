@@ -427,7 +427,6 @@ class CreditsFrame(tk.Frame):
             label: tk.Widget
             label.pack()
 
-    # TODO: make an update checker
     def checkUpdate(self, label):
         label: tk.Button
         try:
@@ -619,14 +618,10 @@ class DataEntry(tk.Toplevel):
         self.sizes()
 
     def sizes(self):
-        # self.columnconfigure(0, weight=1)
-        # self.columnconfigure(1, weight=1)
-        # self.columnconfigure(2, weight=4)
-        # self.columnconfigure(3, weight=1)
-        # self.columnconfigure(4, weight=1)
         self.geometry()
 
 # Get Input of every Request, parse data, then send a requestTask with requests, FieldsData and stateSender to TaskQueue.
+# TODO: Fix Nullbeing put recursively
     def SendRequest(self, requests: List[Request], uuid: str):
         LinkFieldsData = []
         DataParamData = []

@@ -49,12 +49,10 @@ def makeRequest(requestTemplate: ReqObj, linkData: Optional[list[str]], postData
             # Create fake response to return with status_code 405
             response = requests.Response()
             response.status_code = 405      # Status Code 405: Method Not Allowed
+            return response
 
-    prepedreq = session.prepare_request(request)
     response: requests.Response = session.send(prepedreq)
     return response
-
-# TODO: Fix Get requests sending as post
 
 
 def MakeRequests(requestList: list, linkDataList: list = None, postDataList: list = None, uuid=None, stateSender: Connection = None):
@@ -74,30 +72,26 @@ def MakeRequests(requestList: list, linkDataList: list = None, postDataList: lis
         session.headers = request.headers if request.reuseSession else _oldHeaders
         if linkDataList:
             for inputDataIndex, linkData in enumerate(linkDataList[reqIndex]):
-                if postDataList and request.reqtype != "post" or "put":
-                    for postDataIndex, postDataList in enumerate(postDataList):
-                        if isinstance(postDataList, list):
-                            Responses.append(makeRequest(
-                                request, linkData, postDataList[postDataIndex], session))
-                            if sendProg:
-                                stateSender.send(
-                                    f"{uuid}: {((inputDataIndex + 1)/len(linkDataList[reqIndex]))+((reqIndex + 1)/len(requestList))*100 - 1}")
-
-                Responses.append(makeRequest(
-                    request, linkData, None, session))
-                if sendProg:
-                    stateSender.send(
-                        f"{uuid}: {((inputDataIndex + 1)/len(linkDataList[reqIndex]))+((reqIndex + 1)/len(requestList))*100 - 1}")
-                else:
-                    Responses.append(makeRequest(
-                        request, linkData, None, session))
-                    if sendProg:
-                        stateSender.send(
-                            f"{uuid}: {((inputDataIndex + 1)/len(linkDataList[reqIndex]))+((reqIndex + 1)/len(requestList))*100 - 1}")
+                match request.reqtype:
+                    case "post" | "put":
+                        for postDataIndex, postData in enumerate(postDataList[reqIndex]):
+                            # just a sanity check
+                            if isinstance(postData, list):
+                                Responses.append(makeRequest(
+                                    request, linkData, postData, session))
+                                if sendProg:
+                                    stateSender.send(
+                                        f"{uuid}: {((inputDataIndex + 1)/len(linkDataList[reqIndex]))+((reqIndex + 1)/len(requestList))*100 - 1}")
+                    case _:
+                        Responses.append(makeRequest(
+                            request, linkData, None, session))
+                        if sendProg:
+                            stateSender.send(
+                                f"{uuid}: {((inputDataIndex + 1)/len(linkDataList[reqIndex]))+((reqIndex + 1)/len(requestList))*100 - 1}")
 
         else:
             Responses.append(makeRequest(
-                request, None, request.data_params, session))
+                request, None, None if not request.data_params or "NULL" else request.data_params, session))
             if sendProg:
                 stateSender.send(
                     f"{uuid} : {(reqIndex + 1)/len(requestList)*100}")
@@ -122,14 +116,14 @@ def makeData(template_json: str, data: Optional[list[str]]):
     # incase data is empty
     assert template_json
 # TODO: Add string / number parsing
-    if data:
+    if data and data != "NULL":
         pJson = template_json
         matches = re.findall("{[0-9]+}", template_json)
         if len(matches) <= len(data):
             for index, match in enumerate(matches):
                 payload = pJson.replace(match, data[index])
     else:
-        payload = json.loads(template_json)
+        payload = template_json
     return payload
 
 # def getMatches(Request: ReqObj.Request):
