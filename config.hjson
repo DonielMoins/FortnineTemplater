@@ -1,9 +1,9 @@
 {
-    configVersion: 0.1.8
+    configVersion: 0.3.0
     profiles:
     [
         {
-            profileName: Test Toilet
+            profileName: post + get request
             uuid: 20e9b5a2-92a4-4955-b108-3d4a62771a49
             settings: {}
             requests:
@@ -35,7 +35,7 @@
             ]
         }
         {
-            profileName: Default Name
+            profileName: 1 get request
             uuid: 5cf06baa-0735-4dd9-9aa6-d66b94759fb7
             settings: {}
             requests:
@@ -47,94 +47,6 @@
                     headers:
                     {
                         User-Agent: FortnineActions/0.1.8
-                        Content-Type: text
-                        Accept: */*
-                    }
-                    data_params: null
-                }
-            ]
-        }
-        {
-            profileName: 4 Request Test
-            uuid: 6341e3c7-0300-452c-b2b5-c85a9790162d
-            settings: {}
-            requests:
-            [
-                {
-                    reqtype: get
-                    uri: https://example.com/api?requestParm1={0}&requestParm2={1}
-                    reuseSession: true
-                    headers:
-                    {
-                        User-Agent: FortnineActions/0.1.8
-                        Content-Type: text
-                        Accept: */*
-                    }
-                    data_params: null
-                }
-                {
-                    reqtype: get
-                    uri: https://example.com/api?requestParm1={0}&requestParm2={1}
-                    reuseSession: true
-                    headers:
-                    {
-                        User-Agent: FortnineActions/0.1.8
-                        Content-Type: text
-                        Accept: */*
-                    }
-                    data_params: null
-                }
-                {
-                    reqtype: get
-                    uri: https://example.com/api?requestParm1={0}&requestParm2={1}
-                    reuseSession: true
-                    headers:
-                    {
-                        User-Agent: FortnineActions/0.1.8
-                        Content-Type: text
-                        Accept: */*
-                    }
-                    data_params: null
-                }
-                {
-                    reqtype: get
-                    uri: https://example.com/api?requestParm1={0}&requestParm2={1}
-                    reuseSession: true
-                    headers:
-                    {
-                        User-Agent: FortnineActions/0.1.8
-                        Content-Type: text
-                        Accept: */*
-                    }
-                    data_params: null
-                }
-            ]
-        }
-        {
-            profileName: Default Name
-            uuid: 55f6dee2-7295-4e0a-8f40-9c90638bee38
-            settings: {}
-            requests:
-            [
-                {
-                    reqtype: GET
-                    uri: https://example.com/test?
-                    reuseSession: true
-                    headers:
-                    {
-                        User-Agent: FortnineActions/0.2.0
-                        Content-Type: text
-                        Accept: */*
-                    }
-                    data_params: null
-                }
-                {
-                    reqtype: GET
-                    uri: https://example.com/test?
-                    reuseSession: true
-                    headers:
-                    {
-                        User-Agent: FortnineActions/0.2.0
                         Content-Type: text
                         Accept: */*
                     }

@@ -2,7 +2,6 @@ import logging
 from threading import current_thread
 import multiprocessing as mp
 import time
-import argparse
 
 from constants import *
 from utils.general import getOverrides, makeLogger

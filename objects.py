@@ -8,7 +8,6 @@ from packaging import version
 from collections import OrderedDict
 from typing import List, Optional
 import uuid as id
-
 from constants import ProgramVersion
 
 
@@ -29,7 +28,7 @@ class Request:
             uri (string): Set request uri.
             headers ([dict], optional): Set request headers. 
                 Defaults to {
-                    "User-Agent": "FortnineActions/0.0.1",
+                    "User-Agent": "FortnineActions/Constants.ProgramVersion",
                     "Content-Type": "text",
                     'Accept': '*/*',
                 }
@@ -128,7 +127,7 @@ class Profile:
             resultVersion = ProgramVersion
         # Check if specific version needs specific migration
         match resultVersion:
-            case version.Version("Broken.Profile.Version"):
+            case version.Version("99.99.99"):  # Add broken config fixes
                 # Specific Fixes
                 pass
             case _:

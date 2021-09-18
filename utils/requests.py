@@ -1,11 +1,8 @@
-from doctest import UnexpectedException
-import json
 from multiprocessing.connection import Connection
-from tokenize import group
-from typing import List, Optional
+from typing import Optional
 import re
 import requests
-from objects import Profile, Request as ReqObj
+from objects import Request as ReqObj
 import logging
 
 """
@@ -34,7 +31,6 @@ def makeRequest(requestTemplate: ReqObj, linkData: Optional[list[str]], postData
         case  "post" | "put":
             URL = parseURL(requestTemplate.uri, linkData)
             payload = makeData(requestTemplate.data_params, postData)
-            print(payload)
             request = requests.Request(str(reqtype).upper(), URL, data=payload)
 
         case "get" | "head" | "patch" | "delete" | "options":
@@ -113,7 +109,7 @@ def parseURL(uri: str, data: Optional[list[str]]):
 
 
 def makeData(template_json: str, data: Optional[list[str]]):
-    # incase data is empty
+    # in case data is empty
     assert template_json
 # TODO: Add string / number parsing
     if data and data != "NULL":

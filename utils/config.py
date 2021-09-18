@@ -26,7 +26,7 @@ class BaseConfig(object):
         # Will first check if argument in kwargs, if not, check if passed as argument, if not use defaults.
         # Defaults to configVersion if settings is None
         self.configVersion = kwargs.get(
-            "configVersion", ProgramVersion if not configVersion else configVersion)
+            "configVersion", str(ProgramVersion) if not configVersion else configVersion)
         # Defaults to [Profile(fromDict={}), Profile(fromDict={})] if profiles is None
         self.profiles = kwargs.get(
             "profiles", [Profile(), Profile()] if not profiles else profiles)

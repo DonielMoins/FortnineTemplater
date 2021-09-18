@@ -363,7 +363,7 @@ class SelectorFrame(tk.Frame):
         if stateReceiver.poll(0.3):
             data = stateReceiver.recv()
         if data != "":
-            print(data)
+            # print(data) # print pipe messages to debug
             data: str
             uuidMatcher = re.match(
                 r"([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}):\s(([+-]?)\s*(?:(?:(?:[^.]?(\d+))|(\d+\.\d+(?!\w+)))(?!\w+|\.))(?![([{]))", data)

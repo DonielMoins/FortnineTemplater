@@ -6,7 +6,7 @@ from packaging.version import parse
 Constants that are used almost everywhere in program, these are expected not to change during runtime and
     should be changed manually from the file to achieve desired effect.
     
-GlobalLaunchParams should be replaced by an argparser
+    TODO: GlobalLaunchParams should be replaced by an argparser
 """
 
 today = date.today()
@@ -27,7 +27,7 @@ logFolder = Path(__file__).parent.joinpath("logs")
 logFile = logFolder.absolute().joinpath(f"templater-{dayDate}.log")
 
 
-ProgramVersion = parse("0.2.0")
+ProgramVersion = parse("0.3.0")
 
 ProjDetails = {
     "github": "https://github.com/DonielMoins/FortnineTemplater/",
