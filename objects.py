@@ -43,8 +43,9 @@ class Request:
 
         self.__dict__.update(kwargs)
 
+        self._uri = None
         self.reqtype: str = reqtype.casefold()
-        self.uri = uri
+        self._uri = uri
         self.reuseSession = reuseSession
         self.headers = {
             "User-Agent": f"FortnineActions/{ProgramVersion.__str__()}",
@@ -52,7 +53,7 @@ class Request:
             'Accept': '*/*',
         } if not headers else headers
         self.data_params = data_params
-        
+
         # Check if request type is supported with these 3 Cases:
         # If Request Type is supported, Ignore.
         # If not supported or if unknown request type, raise ValueError with appropriate message
@@ -114,7 +115,7 @@ class Profile:
                 self.requests = requests
 
         # Check if required variables exist.
-        assert self.profileName 
+        assert self.profileName
         assert self.uuid
         assert self.requests
 

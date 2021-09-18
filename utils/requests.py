@@ -2,7 +2,7 @@ from doctest import UnexpectedException
 import json
 from multiprocessing.connection import Connection
 from tokenize import group
-from typing import Optional
+from typing import List, Optional
 import re
 import requests
 from objects import Profile, Request as ReqObj
@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 def makeRequest(requestTemplate: ReqObj, linkData: Optional[list[str]], postData: Optional[list[str]], session: requests.Session):
     reqtype = requestTemplate.reqtype
     response = None
-    
+
     if not (isinstance(requestTemplate, ReqObj) and isinstance(linkData, list or None) and isinstance(postData, list or None), isinstance(session, requests.Session)):
         logger.error(
             f"""Incorrect parameters passed to makeRequest Function.
@@ -27,15 +27,15 @@ def makeRequest(requestTemplate: ReqObj, linkData: Optional[list[str]], postData
             postData: {type(postData)}, {postData}
             session: {type(session)}, {session}
             """)
-    
-    #If Unknown reqtype, warn in logs, then return response with status code 405.
+
+    # If Unknown reqtype, warn in logs, then return response with status code 405.
 
     match reqtype:
         case  "post" | "put":
             URL = parseURL(requestTemplate.uri, linkData)
             payload = makeData(requestTemplate.data_params, postData)
+            print(payload)
             request = requests.Request(str(reqtype).upper(), URL, data=payload)
-            request.data = payload
 
         case "get" | "head" | "patch" | "delete" | "options":
             URL = parseURL(requestTemplate.uri, linkData)
@@ -54,6 +54,8 @@ def makeRequest(requestTemplate: ReqObj, linkData: Optional[list[str]], postData
     response: requests.Response = session.send(prepedreq)
     return response
 
+# TODO: Fix Get requests sending as post
+
 
 def MakeRequests(requestList: list, linkDataList: list = None, postDataList: list = None, uuid=None, stateSender: Connection = None):
 
@@ -69,22 +71,38 @@ def MakeRequests(requestList: list, linkDataList: list = None, postDataList: lis
 
     for reqIndex, request in enumerate(requestList):
         request: ReqObj
-        session = request.headers if request.reuseSession else _oldHeaders
+        session.headers = request.headers if request.reuseSession else _oldHeaders
         if linkDataList:
             for inputDataIndex, linkData in enumerate(linkDataList[reqIndex]):
-                if postDataList:
+                if postDataList and request.reqtype != "post" or "put":
                     for postDataIndex, postDataList in enumerate(postDataList):
-                        Responses.append(makeRequest(
-                            request, linkData, postDataList[postDataIndex], session))
+                        if isinstance(postDataList, list):
+                            Responses.append(makeRequest(
+                                request, linkData, postDataList[postDataIndex], session))
+                            if sendProg:
+                                stateSender.send(
+                                    f"{uuid}: {((inputDataIndex + 1)/len(linkDataList[reqIndex]))+((reqIndex + 1)/len(requestList))*100 - 1}")
+
+                Responses.append(makeRequest(
+                    request, linkData, None, session))
+                if sendProg:
+                    stateSender.send(
+                        f"{uuid}: {((inputDataIndex + 1)/len(linkDataList[reqIndex]))+((reqIndex + 1)/len(requestList))*100 - 1}")
                 else:
-                    Responses.append(makeRequest(request, linkData, None, session))
-                    if sendProg: stateSender.send(f"{uuid}: {((inputDataIndex + 1)/len(linkDataList[reqIndex]))+((reqIndex + 1)/len(requestList))*100 - 1}")
+                    Responses.append(makeRequest(
+                        request, linkData, None, session))
+                    if sendProg:
+                        stateSender.send(
+                            f"{uuid}: {((inputDataIndex + 1)/len(linkDataList[reqIndex]))+((reqIndex + 1)/len(requestList))*100 - 1}")
 
         else:
-            Responses.append(makeRequest(request, None, request.data_params, session))
+            Responses.append(makeRequest(
+                request, None, request.data_params, session))
             if sendProg:
                 stateSender.send(
                     f"{uuid} : {(reqIndex + 1)/len(requestList)*100}")
+    sendProg: stateSender.send(
+        f"{uuid}: 100")
     return Responses
 
 
@@ -103,13 +121,13 @@ def parseURL(uri: str, data: Optional[list[str]]):
 def makeData(template_json: str, data: Optional[list[str]]):
     # incase data is empty
     assert template_json
-    
+# TODO: Add string / number parsing
     if data:
         pJson = template_json
         matches = re.findall("{[0-9]+}", template_json)
         if len(matches) <= len(data):
             for index, match in enumerate(matches):
-                pJson = pJson.replace(match, data[index])
+                payload = pJson.replace(match, data[index])
     else:
         payload = json.loads(template_json)
     return payload

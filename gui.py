@@ -158,9 +158,9 @@ class ProfileEditor(tk.Toplevel):
 
         self.tkRequestItems = []
         self.currentRequest = 0
-        
+
         self.bind("WM_DELETE_WINDOW", self.on_close)
-        
+
         self.profile = profile
         if not self.profile:
             self.profile = Profile()
@@ -302,13 +302,15 @@ class ProfileEditor(tk.Toplevel):
         if x >= self.width:
             x = self.width - self.mult
         widget.place(x=x, y=y)
-    
+
     def on_close(self):
         self.destroy()
         for var in vars(self):
             del var
 
 #  TODO Parse Progress Data
+
+
 class SelectorFrame(tk.Frame):
     def __init__(self, frameContainer, FrameController):
         """ 
@@ -534,7 +536,8 @@ class DataEntry(tk.Toplevel):
         # Prepares InputFields of all requests in profile
         for i in self.requests:
             self.URLInputFields.append(tkscrolled.ScrolledText(self))
-            self.DataInputFields.append(tkscrolled.ScrolledText(self) if i.data_params else None)
+            self.DataInputFields.append(
+                tkscrolled.ScrolledText(self) if i.data_params else "NULL")
 
         # Labels for drawLabels()
         self.ReqPreviewLabel = tk.Label(
@@ -590,10 +593,10 @@ class DataEntry(tk.Toplevel):
 
     def drawInputField(self):
         self.URLInputFields[self.CurrentInput -
-                         1].grid(row=2, rowspan=1, columnspan=5, column=0)
-        if self.DataInputFields[self.CurrentInput -1]:
+                            1].grid(row=2, rowspan=1, columnspan=5, column=0)
+        if self.DataInputFields[self.CurrentInput - 1] != "NULL":
             self.DataInputFields[self.CurrentInput -
-                                1].grid(row=2, rowspan=1, columnspan=5, column=1)
+                                 1].grid(row=2, rowspan=1, columnspan=5, column=1)
 
 
 # Clears DataEntry screen and displays entry fields for the next request.
@@ -630,6 +633,9 @@ class DataEntry(tk.Toplevel):
         for InputField in self.URLInputFields:
             fieldText: str = InputField.get('1.0', tk.END)
             LinkFieldsData.append(parseCSV(fieldText))
+        for DataInputField in self.DataInputFields:
+            DataParamData.append(parseCSV(DataInputField.get(
+                '1.0', tk.END)) if DataInputField != "NULL" else "NULL")
 
         reqsTask = proc.TaskThread(
             fun=MakeRequests, args=(requests, LinkFieldsData, DataParamData, uuid, self.stateSender, ))
@@ -640,5 +646,3 @@ class DataEntry(tk.Toplevel):
     def clear(self):
         for widget in self.winfo_children():
             widget.grid_forget()
-            
-

@@ -10,7 +10,7 @@
             [
                 {
                     reqtype: post
-                    _uri: http://ptsv2.com/t/wdr4p-1625102266/post?requestParm1={0}&requestParm2={1}
+                    uri: http://ptsv2.com/t/wdr4p-1625102266/post?requestParm1={0}&requestParm2={1}
                     reuseSession: true
                     headers:
                     {
@@ -18,11 +18,11 @@
                         Content-Type: text
                         Accept: */*
                     }
-                    data_params: "{json: {0}}"
+                    data_params: "{'json': {0}}"
                 }
                 {
                     reqtype: get
-                    _uri: http://ptsv2.com/t/wdr4p-1625102266/post?requestParm1={0}&requestParm2={1}
+                    uri: http://ptsv2.com/t/wdr4p-1625102266/post?requestParm1={0}&requestParm2={1}
                     reuseSession: true
                     headers:
                     {
@@ -42,7 +42,7 @@
             [
                 {
                     reqtype: get
-                    _uri: https://example.com/api?requestParm1={0}&requestParm2={1}
+                    uri: https://example.com/api?requestParm1={0}&requestParm2={1}
                     reuseSession: true
                     headers:
                     {
@@ -62,7 +62,7 @@
             [
                 {
                     reqtype: get
-                    _uri: https://example.com/api?requestParm1={0}&requestParm2={1}
+                    uri: https://example.com/api?requestParm1={0}&requestParm2={1}
                     reuseSession: true
                     headers:
                     {
@@ -74,7 +74,7 @@
                 }
                 {
                     reqtype: get
-                    _uri: https://example.com/api?requestParm1={0}&requestParm2={1}
+                    uri: https://example.com/api?requestParm1={0}&requestParm2={1}
                     reuseSession: true
                     headers:
                     {
@@ -86,7 +86,7 @@
                 }
                 {
                     reqtype: get
-                    _uri: https://example.com/api?requestParm1={0}&requestParm2={1}
+                    uri: https://example.com/api?requestParm1={0}&requestParm2={1}
                     reuseSession: true
                     headers:
                     {
@@ -98,7 +98,7 @@
                 }
                 {
                     reqtype: get
-                    _uri: https://example.com/api?requestParm1={0}&requestParm2={1}
+                    uri: https://example.com/api?requestParm1={0}&requestParm2={1}
                     reuseSession: true
                     headers:
                     {
@@ -118,7 +118,7 @@
             [
                 {
                     reqtype: GET
-                    _uri: https://example.com/test?
+                    uri: https://example.com/test?
                     reuseSession: true
                     headers:
                     {
@@ -130,7 +130,7 @@
                 }
                 {
                     reqtype: GET
-                    _uri: https://example.com/test?
+                    uri: https://example.com/test?
                     reuseSession: true
                     headers:
                     {
