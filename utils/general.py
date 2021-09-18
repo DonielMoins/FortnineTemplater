@@ -6,10 +6,16 @@ import string
 import webbrowser
 import random
 
-from constants import logFile
+from constants import logFile, logFolder
 
 
 def makeLogger(type: str):
+    if not logFolder.exists():
+        try:
+            logFolder.mkdir()
+        except Exception as e:
+            logging.error(e)
+
     match type.lower():
         case "debug":
             logging.basicConfig(format="%(levelname)s: %(module)s:  %(message)s",
