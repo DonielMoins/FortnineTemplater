@@ -541,10 +541,9 @@ class DataEntry(tk.Toplevel):
                 tkscrolled.ScrolledText(self) if i.data_params else "NULL")
 
         # Labels for drawLabels()
-        self.ReqPreviewLabel = tk.Label(
-            self, text=f"Preview: {self.requests[self.CurrentInput - 1].uri}")
-        self.ReqMethodLabel = tk.Label(
-            self, text=f"Method: {self.requests[self.CurrentInput - 1].reqtype.upper()}")
+        self.ReqPreviewLabel = tk.Label(self, text='')
+        self.InputGuideLabel = tk.Label(self, text='')
+        self.ReqMethodLabel = tk.Label(self, text='')
 
         # Buttons for drawButtons()
         self.NextBtn = tk.Button(
@@ -569,8 +568,15 @@ class DataEntry(tk.Toplevel):
 
         self.ReqMethodLabel.configure(
             {"text": f"Method: {self.requests[self.CurrentInput - 1].reqtype.upper()}"})
-        self.ReqPreviewLabel.grid(padx=10, row=0, column=0, columnspan=1)
-        self.ReqMethodLabel.grid(row=0,  column=5, columnspan=1, padx=225)
+        self.InputGuideLabel.configure(
+            {"text":
+                f"← Input Link Data{'                  ' + 'Input ' + self.requests[self.CurrentInput - 1].reqtype.title() + ' Data →' if self.requests[self.CurrentInput - 1].reqtype == 'post' or 'put' else ''}"
+             }
+        )
+        self.ReqPreviewLabel.grid(padx=10, row=1, column=0, columnspan=1)
+        self.InputGuideLabel.grid(
+            padx=10, row=1, column=2, columnspan=1, rowspan=4)
+        self.ReqMethodLabel.grid(row=1,  column=5, columnspan=1, padx=225)
 
 # .grid() cleared buttons to end of DataEntry screen.
 
