@@ -30,11 +30,15 @@ def makeRequest(requestTemplate: ReqObj, linkData: Optional[list[str]], postData
     match reqtype:
         case  "post" | "put":
             URL = parseURL(requestTemplate.uri, linkData)
+            logger.debug(f"\t\tURL: {URL}")
             payload = makeData(requestTemplate.data_params, postData)
+            logger.debug(f"\t\tPayload: {payload}")
             request = requests.Request(str(reqtype).upper(), URL, data=payload)
+            prepedreq = session.prepare_request(request)
 
         case "get" | "head" | "patch" | "delete" | "options":
             URL = parseURL(requestTemplate.uri, linkData)
+            logger.debug(f"\t\tURL: {URL}")
             request = requests.Request(str(reqtype).upper(), URL)
             prepedreq = session.prepare_request(request)
 
@@ -48,6 +52,7 @@ def makeRequest(requestTemplate: ReqObj, linkData: Optional[list[str]], postData
             return response
 
     response: requests.Response = session.send(prepedreq)
+    logger.debug(f"\tResponse ok? {response.ok}")
     return response
 
 
@@ -62,8 +67,10 @@ def MakeRequests(requestList: list, linkDataList: list = None, postDataList: lis
         stateSender.send(f"{uuid}: 0.0")
     else:
         sendProg = False
+    logger.debug(f"Profile {uuid} started.")
 
     for reqIndex, request in enumerate(requestList):
+        logger.debug(f"Request {reqIndex}/{len(requestList)}")
         request: ReqObj
         session.headers = request.headers if request.reuseSession else _oldHeaders
         if linkDataList:
