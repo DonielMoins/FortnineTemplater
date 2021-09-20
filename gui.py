@@ -520,6 +520,8 @@ class DataEntry(tk.Toplevel):
         assert isinstance(profile, Profile)
 
         self.resizable(0, 0)
+        self.columnconfigure(5, weight=1)
+        self.rowconfigure(7, weight=1)
         self.title("Input Request variables")
         self.profile = profile
         self.requests = profile.requests
@@ -553,35 +555,34 @@ class DataEntry(tk.Toplevel):
             self, text="Make Request", command=lambda: self.SendRequest(self.requests, uuid=self.profile.uuid))
 
         self.drawLabels()
-        if len(self.URLInputFields) >= 1:
-            self.drawInputField()
+        self.drawInputField()
         self.drawButtons()
         self.sizes()
 
 
 # .grid() cleared labels to begining of DataEntry screen.
 
-
     def drawLabels(self):
-        self.profLabel.grid(padx=10, pady=10, sticky="new", columnspan=5)
+        self.profLabel.grid(padx=10, pady=10, sticky="new", row=0, column=2)
         self.ReqPreviewLabel.configure(
             {"text": f"Preview: {self.requests[self.CurrentInput - 1].uri}"})
 
         self.ReqMethodLabel.configure(
             {"text": f"Method: {self.requests[self.CurrentInput - 1].reqtype.upper()}"})
-        self.ReqPreviewLabel.grid(padx=10, row=1, rowspan=1)
-        self.ReqMethodLabel.grid(padx=10, row=1, rowspan=1, column=1)
+        self.ReqPreviewLabel.grid(padx=10, row=0, column=0, columnspan=1)
+        self.ReqMethodLabel.grid(row=0,  column=5, columnspan=1, padx=225)
 
 # .grid() cleared buttons to end of DataEntry screen.
 
     def drawButtons(self):
         if len(self.URLInputFields) > 1:
             if self.CurrentInput != 1:
-                self.PrevBtn.grid(padx=5, row=7, pady=5, columnspan=1)
+                self.PrevBtn.grid(padx=5, row=7, column=0,
+                                  pady=5, columnspan=1)
 
             if self.CurrentInput != len(self.URLInputFields):
                 self.NextBtn.grid(padx=5, row=7, pady=5,
-                                  column=3, columnspan=1)
+                                  column=5, columnspan=1)
 
         self.makeReqBtn.grid(padx=5, row=7, pady=5, column=2, columnspan=1)
 
@@ -589,16 +590,17 @@ class DataEntry(tk.Toplevel):
 # .grid() InputField from self.CurrentInput
 # To facilitate changing GUI placement
 
-
     def drawInputField(self):
+        # pass
         self.URLInputFields[self.CurrentInput -
-                            1].grid(row=2, rowspan=1, columnspan=5, column=0)
+                            1].grid(padx=10, row=2, rowspan=4, columnspan=2, column=0)
         if self.DataInputFields[self.CurrentInput - 1] != "NULL":
             self.DataInputFields[self.CurrentInput -
-                                 1].grid(row=2, rowspan=1, columnspan=5, column=1)
+                                 1].grid(padx=10, row=2, rowspan=4, columnspan=3, column=3)
 
 
 # Clears DataEntry screen and displays entry fields for the next request.
+
 
     def ShowNextField(self):
         self.clear()
