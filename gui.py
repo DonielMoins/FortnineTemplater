@@ -139,9 +139,6 @@ class ProfileEditor(tk.Toplevel):
                 to tkRequestItems list in a dictionary. I did this due to tkinter not supporting default variable
                 classes provided by python.
 
-            I made a "betterGrid" function because i just feel like its more flexible unlike the grid provided
-                in tkinter.
-
 
     """
 
@@ -223,33 +220,32 @@ class ProfileEditor(tk.Toplevel):
 
     def upperWidgets(self, redraw=False):
         self.currentRequestLabel.config(
-            text=f"Viewing Request: {self.currentRequest + 1}/{len(self.requests)}")
-        self.betterGrid(self.nameLabel, x=0.5, y=0.5)
-        self.betterGrid(self.nameEntry, x=3, y=0.5)
-        self.betterGrid(self.currentRequestLabel, x=12.5, y=0.5)
+            text=f"Request: {self.currentRequest + 1}/{len(self.requests)}")
+        self.nameLabel.grid(padx=10, pady=10, row=0)
+        self.nameEntry.grid(padx=10, pady=10, row=0, column=1, columnspan=2)
+        self.currentRequestLabel.grid(padx=10, pady=10, row=0, column=4)
 
         if redraw:
             self.redrawAll()
 
     def bottomWidgets(self, redraw=False):
         if len(self.tkRequestItems) > 1:
-            self.betterGrid(self.prevRequestbtn, x=3, y=9.3)
-            self.betterGrid(self.nextRequestbtn, x=10.3, y=9.3)
-        self.betterGrid(self.newRequestbtn, x=7, y=9.3)
-        self.betterGrid(self.saveProfilebtn, x=7.1, y=10.4)
+            self.prevRequestbtn.grid(padx=10, row=4, column=2)
+            self.nextRequestbtn.grid(padx=10, row=4, column=4)
+        self.newRequestbtn.grid(padx=10, row=4, column=3)
+        self.saveProfilebtn.grid(padx=10, row=5, column=3)
         if redraw:
             self.redrawAll()
 
     def showRequestWidgets(self, redraw=False):
-        self.betterGrid(self.requestUriLabel, x=0.5, y=2)
-        self.betterGrid(
-            self.tkRequestItems[self.currentRequest]["Entry"], x=3, y=2)
-        self.betterGrid(
-            self.requestMethodDropdown[self.currentRequest], x=14, y=1.90)
-        self.betterGrid(
-            self.tkRequestItems[self.currentRequest]["ReuseBox"], x=2, y=3)
-        self.betterGrid(
-            self.requestMethodDropdown[self.currentRequest], x=14, y=4)
+        self.requestUriLabel.grid(padx=10, row=1, column=0)
+        self.tkRequestItems[self.currentRequest]["Entry"].grid(
+            padx=10, row=1, column=1, columnspan=2)
+        self.requestMethodDropdown[self.currentRequest]
+        self.tkRequestItems[self.currentRequest]["ReuseBox"].grid(
+            padx=10, row=2, column=1)
+        self.requestMethodDropdown[self.currentRequest].grid(
+            padx=10, row=1, column=4)
         if redraw:
             self.redrawAll()
 
@@ -293,22 +289,10 @@ class ProfileEditor(tk.Toplevel):
         self.showRequestWidgets()
         self.bottomWidgets()
 
-    def betterGrid(self, widget: tk.Widget, x: int, y: int):
-        self.mult = self.mult // 1
-        x = (x * self.mult) // 1
-        y = (y * self.mult) // 1
-        if y >= self.height:
-            y = self.height - self.mult
-        if x >= self.width:
-            x = self.width - self.mult
-        widget.place(x=x, y=y)
-
     def on_close(self):
         self.destroy()
         for var in vars(self):
             del var
-
-#  TODO Parse Progress Data
 
 
 class SelectorFrame(tk.Frame):
@@ -561,6 +545,7 @@ class DataEntry(tk.Toplevel):
 
 # .grid() cleared labels to begining of DataEntry screen.
 
+
     def drawLabels(self):
         self.profLabel.grid(padx=10, pady=10, sticky="new", row=0, column=2)
         self.ReqPreviewLabel.configure(
@@ -568,9 +553,11 @@ class DataEntry(tk.Toplevel):
 
         self.ReqMethodLabel.configure(
             {"text": f"Method: {self.requests[self.CurrentInput - 1].reqtype.upper()}"})
+        # TODO: Fix link data not showing properly
         self.InputGuideLabel.configure(
             {"text":
-                f"← Input Link Data{'                  ' + 'Input ' + self.requests[self.CurrentInput - 1].reqtype.title() + ' Data →' if self.requests[self.CurrentInput - 1].reqtype == 'post' or 'put' else ''}"
+                '← Input Link Data                  Input ' + self.requests[self.CurrentInput - 1].reqtype.title(
+                ) + ' Data →' if self.requests[self.CurrentInput - 1].reqtype.casefold() == ('post' or 'put') else "← Input Link Data"
              }
         )
         self.ReqPreviewLabel.grid(padx=10, row=1, column=0, columnspan=1)
@@ -596,6 +583,7 @@ class DataEntry(tk.Toplevel):
 # .grid() InputField from self.CurrentInput
 # To facilitate changing GUI placement
 
+
     def drawInputField(self):
         # pass
         self.URLInputFields[self.CurrentInput -
@@ -606,7 +594,6 @@ class DataEntry(tk.Toplevel):
 
 
 # Clears DataEntry screen and displays entry fields for the next request.
-
 
     def ShowNextField(self):
         self.clear()
