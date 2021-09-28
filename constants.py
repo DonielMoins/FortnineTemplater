@@ -18,16 +18,18 @@ GlobalLaunchParams = {
     }
 }
 
-OverridesFolder = Path(__file__).parent.joinpath("Overrides")
+baseLoc = Path(__file__).parent
+
+OverridesFolder = baseLoc.joinpath("Overrides")
 Overrides = []
 
 # Can be replaced by:
 #       logFolder = Path("C:\\whatever\\path\\where\\you_store_logs") or Path("/home/ur_user/forPermissionReasons/logsFolder")
-logFolder = Path(__file__).parent.joinpath("logs")
+logFolder = baseLoc.joinpath("logs")
 logFile = logFolder.absolute().joinpath(f"templater-{dayDate}.log")
 
 
-ProgramVersion = parse("0.3.0")
+ProgramVersion = parse("0.3.1")
 
 ProjDetails = {
     "github": "https://github.com/DonielMoins/FortnineTemplater/",

@@ -4,6 +4,9 @@ import re
 import requests
 from objects import Request as ReqObj
 import logging
+from utils.general import saveResponses
+from constants import responsesFolder
+import datetime as dt
 
 """
  * NOTE USE IN THREAD FROM THREADPOOL OR ELSE BLOCKING
@@ -56,7 +59,7 @@ def makeRequest(requestTemplate: ReqObj, linkData: Optional[list[str]], postData
     return response
 
 
-def MakeRequests(requestList: list, linkDataList: list = None, postDataList: list = None, uuid=None, stateSender: Connection = None):
+def MakeRequests(requestList: list, linkDataList: list = None, postDataList: list = None, uuid: str = None, stateSender: Connection = None, log: bool = True):
 
     Responses = []
     session = requests.Session()
@@ -100,6 +103,18 @@ def MakeRequests(requestList: list, linkDataList: list = None, postDataList: lis
                     f"{uuid} : {(reqIndex + 1)/len(requestList)*100}")
     sendProg: stateSender.send(
         f"{uuid}: 100")
+    if log:
+        sp = "    "
+        logger.info(
+            f"Responses of {uuid} @ {dt.datetime.now.strftime('%d-%m-%Y %H:%M:%S')} : ")
+        for n, res in enumerate(Responses):
+            res: requests.Response  # For intellisense
+            logger.info(f"{sp}Response {n}/{len(Responses)}:")
+            logger.info(
+                f"{2 * sp}URL: {res.request.url}")
+            logger.info(f"{2 * sp}Status Code: {res.status_code}")
+            if res.status_code != 200:
+                logger.info(f"{2*sp}Content: {res.content}")
     return Responses
 
 
