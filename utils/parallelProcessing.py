@@ -1,41 +1,19 @@
-"""
-	Copyright (C) 2014  Ivan Gregor
- 
-	This program is free software: you can redistribute it and/or modify
-	it under the terms of the GNU General Public License as published by
-	the Free Software Foundation, either version 3 of the License, or
-	(at your option) any later version.
-	This program is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-	GNU General Public License for more details.
-	You should have received a copy of the GNU General Public License
-	along with this program.  If not, see <http://www.gnu.org/licenses/>.
-	Provides convenient functions to run functions and command line commands in parallel.
-"""
-
-"""
-	Original code: https://github.com/CAMI-challenge/CAMISIM/blob/master/scripts/parallel.py
-"""
-
-
-# from multiprocessing.context import BaseContext, DefaultContext
-
-
-
-
-from enum import Enum
-import threading as th
-import multiprocessing as mp
-import traceback
 from utils.general import randomHex
+from enum import Enum
+
+import multiprocessing as mp
+import threading as th
+import traceback
+import logging
+
 
 class TaskTypes(Enum):
     QUEUE_END_SIGNAL = -1
     NORMAL = 0
 
+
 class TaskThread:
-    def __init__(self, fun=None, args=None, identifier=None, tasktype: TaskTypes=TaskTypes.NORMAL):
+    def __init__(self, fun=None, args=None, identifier=None, tasktype: TaskTypes = TaskTypes.NORMAL):
         """Defines one function and its arguments to be executed in one thread.
 
         Attention, never use "_QueueEndSignal" as identifier unless you want to end the Queue.
@@ -52,13 +30,12 @@ class TaskThread:
             self.identifier = identifier
         if not fun:
             if identifier != "_QueueEndSignal" or tasktype != TaskTypes.QUEUE_END_SIGNAL:
-                raise ValueError(f"fun must be a reference to a function and not {type(fun)}")
+                raise ValueError(
+                    f"fun must be a reference to a function and not {type(fun)}")
         else:
             self.fun = fun
             self.args = args
             # self.args = args[:2] + (self.identifier, ) + args[2:]
-            
-            
 
 
 class TaskCmd:
@@ -115,7 +92,7 @@ class AsyncParallel:
 
         if thread_task.identifier not in self.task_handler_list:
             self.task_handler_list[thread_task.identifier] = []
-            
+
         self.task_handler_list[thread_task.identifier].append(
             self.pool.apply_async(thread_task.fun, thread_task.args)
         )
@@ -147,8 +124,8 @@ class AsyncParallel:
         # return return_value_list
         fail_list = []
         for return_value in return_value_list:
-            if not isinstance(return_value, list):
-                continue
+            if isinstance(return_value, list):
+                break
             process, task = return_value
             if process.returncode is None:
                 continue
@@ -163,11 +140,14 @@ class AsyncParallel:
 
 class _QueueEndSignal(TaskThread):
     def __init__(self):
-        super().__init__(None, None, identifier="_QueueEndSignal", tasktype=TaskTypes.QUEUE_END_SIGNAL)
+        super().__init__(None, None, identifier="_QueueEndSignal",
+                         tasktype=TaskTypes.QUEUE_END_SIGNAL)
 
 
 def runPatientThread(pool: AsyncParallel, taskQueue: mp.JoinableQueue, progressSender=None):
-    def loop(pool, taskQueue):
+    logger = logging.getLogger(__name__)
+
+    def loop(pool: AsyncParallel, taskQueue: mp.JoinableQueue, logger: logging.Logger):
         while True:
             try:
                 task = taskQueue.get()
@@ -182,12 +162,14 @@ def runPatientThread(pool: AsyncParallel, taskQueue: mp.JoinableQueue, progressS
                     task.progressSender = progressSender
                 pool.add_task(task)
                 taskQueue.task_done()
-                
+                res = pool.get_results()
+                if res:
+                    logger.debug(res)
             except:
                 traceback.print_exc()
-                
+
     PatientThread = th.Thread(target=loop, args=(
-        pool, taskQueue), name="PatientThread")
+        pool, taskQueue, logger), name="PatientThread")
     PatientThread.start()
     return PatientThread
 

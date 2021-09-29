@@ -3,12 +3,13 @@ Python file containing all objects used in FortnineTemplater
 *ahem* except BaseConfig (in config.py)
 """
 
-import re
-from packaging import version
+from constants import ProgramVersion
 from collections import OrderedDict
 from typing import List, Optional
+from packaging import version
+
 import uuid as id
-from constants import ProgramVersion
+import re
 
 
 class Request:

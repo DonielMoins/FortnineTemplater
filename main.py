@@ -1,19 +1,19 @@
-import logging
+from utils.general import getOverrides, makeLogger, multilineBanner
 from threading import current_thread
-import multiprocessing as mp
-import time
-
-from constants import *
-from utils.general import getOverrides, makeLogger
 from gui import startGUI
+from constants import *
+
 import utils.parallelProcessing as proc
+import multiprocessing as mp
+import logging
+import time
 
 Processes = {}
 
 
 def main():
     global logger
-    current_thread().name = "Main Thread/Program Exit Handler"
+    current_thread().name = "Main Thread"
     taskQueue = mp.JoinableQueue()
 
     try:
@@ -34,17 +34,20 @@ def main():
                 for name, thread in Processes.items():
                     if name != "GUI":
                         thread.join()
-                        logger.info(f"Joined Process {name}.")
+                        logger.debug(f"Joined Process {name}.")
 
                 taskQueue.put(proc._QueueEndSignal())
-                logger.info("Sent TaskQueue End Signal.")
+                logger.debug("Sent TaskQueue End Signal.")
 
                 if stateSender or stateReceiver:
                     stateSender.close()
                     stateReceiver.close()
-                    logger.info("Closed Progress Pipes")
+                    logger.debug("Closed Progress Pipes.")
                 break
-        logger.info("Ending program. Good night ;p")
+        logger.debug('All sub-processes dead, logger shuting down.')
+        banner = multilineBanner("Templater Closing") + "\n"
+        for line in banner.splitlines():
+            logger.info(line)
         logging.shutdown()
     # Intercept ctrl+c and end program gracefully
     except KeyboardInterrupt:
@@ -65,9 +68,10 @@ def main():
             Processes["GUI"].kill()
 
             while(Processes["GUI"].is_alive()):
-                time.sleep(0.1)
+                time.sleep(0.25)
+
                 logger.warning(
-                    "Blocked for (an additional?) 500 milliseconds to wait for program to be killed.")
+                    "Blocked 250 milliseconds to wait for program to be killed.")
             logger.warning(
                 "GUI proc killed, attempting to release any resources held by GUI process.")
 
@@ -75,71 +79,47 @@ def main():
             logger.warning(
                 "GUI proc resources flushed gracefully; Proceeding with normal exit procedure.")
         except Exception as e:
-            logger.error(e)
+            logger.exception(e)
             logger.error("Error occurred while killing/cleaning GUI proc!")
             logger.error(
                 "Please use TaskManager to make sure all python processes belonging to\n\tthe templater are closed!!")
             logger.error(
-                "This is important as un-killed processed will take up open ports and system resources!!!")
-
-    """            So, this is complicated but here we go.
-    
-    MultiProcessing.Manager creates a Task Queue, Progress Sender and Receiver
-    These will later be shared between the Request Executioner Pool and the GUI Process.
-    
-    Then, setup GUI Process with GlobalLaunchParams["GUI"]
-    start GUI Process and add it to Processes dictionary.
-    
-    Setup Request Executioner Pool using AsyncParallel and add it to Processes Dict.
-    Then using stateSender/Receiver and TaskQueue run "PatientThread"; Infinitely loops \
-        waiting for a job in the TaskQueue, once a job is found, Send it Directly to 
-        the RequestExecPool.
-        
-    Infinitely Loop while any items are in Processes Dict checking
-        if "GUI" Process is alive.
-    If GUI Process is dead, .join() all processes in Processes Dictionary, send
-        QueueEndSignal to the TaskQueue and close Progress Pipes.
-        Once all of the multiprocessing Processes are dead, exit the loop.
-    
-    Shutdown logger, because its 5 o'clock and I need to go home.
-     
-    """
+                "This is important as un-killed processed will take up open ports and system resources!")
 
 
 if __name__ == '__main__':
+
     # parser = argparse.ArgumentParser(description='Request profile creator/manager made for  Fortnine.ca (Boutique Linus Inc.)')
     # parser.add_argument('editor', metavar='N', type=int, nargs='+',
     #                 help='an integer for the accumulator')
+
+    params = GlobalLaunchParams
+
     try:
-        _ov = getOverrides(OverridesFolder)
 
         # If DEBUG file found in overrides folder, enable debug logging
-        if _ov and "debug" in _ov:
-            makeLogger("debug")
-            logging.debug("Attention: Logger started in logging.DEBUG mode")
-        else:
-            makeLogger("info")
+        for override in getOverrides(OverridesFolder):
+            match override.lower():
+                case "debug":
+                    params["logging_level"] = override.lower()
+                case _:
+                    # Add more overrides
+                    pass
 
-        formatter = logging.Formatter(
-            '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-        logger = logging.getLogger("main")
+        makeLogger(params["logging_level"]
+                   if params["logging_level"] else "info")
 
-        ch = logging.StreamHandler()
-        ch.setLevel(logger.level)
-        ch.setFormatter(formatter)
-
-        logger.addHandler(ch)
+        logger = logging.getLogger("Main")
 
     except Exception as e:
-        makeLogger("info")
+        makeLogger(None)
         logging.error(
             "Following error raised while getting overrides, defaulting to logging.INFO:")
         logging.exception(e)
+        print(e.with_traceback())
 
-    logger.info('Starting up Templater')
-    logger.debug(
-        f"Launched with following parameters: \n{GlobalLaunchParams}")
+    for line in multilineBanner("Starting up Templater").splitlines():
+        logger.info(line)
+    logger.debug(f"Launched with following parameters: {GlobalLaunchParams}")
 
     main()
-
-    logger.debug('All sub-processes dead, program ending.')

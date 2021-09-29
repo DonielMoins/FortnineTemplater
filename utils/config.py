@@ -1,20 +1,20 @@
 # Config I/O Handler file with multiple functions to manipulate the
 # storing/deleting/editing of profiles in the config file.
-from collections import OrderedDict
-import tkinter
-from types import MappingProxyType
-import hjson
-import logging
-import os
 from hjson import HjsonEncoder, HjsonDecodeError, load
-from pathlib import Path
 from configparser import ConfigParser
-
-from packaging import version
-from objects import Profile, Request
 from constants import ProgramVersion
+from objects import Profile, Request
+from collections import OrderedDict
+from types import MappingProxyType
+from pathlib import Path
+from packaging import version
 
-logger = logging.getLogger(__name__)
+import tkinter
+import logging
+import hjson
+import os
+
+logger = logging.getLogger("Config")
 
 # TODO: Make settings file window.
 home_dir = Path(__file__).parent.parent
@@ -206,68 +206,25 @@ def backup_config(oldloc=configPath, retry=True):
 
 
 class ConfigEncoder(HjsonEncoder):
-    """Encoder that will turn BaseConfig onto an Hjson string.
-    Heavily used and hard to understand due to the heavy use of recursion and the un-debugability 
-    of custom json encoders.
-
-    We use this to make BaseConfig serializable so we can save it and load it later.
-    Problem is, BaseConfig contains more non-serializable objects (a list of Profile objects, and a config version) which also
-        contain more of said non-serializable objects (a list of Request objects).
-
-    Flow:
-        Object (BaseConfig) -> default(), 
-                                    ^                                                               
-                                config.vars() -> default()                                          
-                                                    |                                                
-                                      / -----------------------------\                              +- ProfileName
-                            /-----Version                      Profile List > for each item x ------|
-                            ^                                   set index of x to return of         +- Request List
-                       str(version)                                      default(x)                          |
-                                                                                                             ▼
-                                                                                                    for each request x
-
-
-
-
-    Explanations:
-    1st call to default()
-        First it checks if the object passed is an instance of BaseConfig, if yes, get all its variables using vars()
-            and send them as the next objects to serialize using default(). 2nd default()
-
-            Next, for each object, we go through these checks:
-                A: Check if the obj is an instance of LegacyVersion or Version,
-                    if yes, we serialize the version using str().
-
-                B: Check if the object is an instance of a Profile. If it is, we send it to the ParseProfile Function. 
-                    The return of ParseProfile is mapped to a dictionary and returned.
-                    NOTE: Usually this is not called called first since BaseConfig contains a List of Profiles and not just a single
-                            profile object.
-
-                C: Check if this is a list containing profiles. if yes, send each profile to default() 
-                    and set list value to return of default.
-
-
-    """
-
     def default(self, obj):
         """
         Function called when class is passed as cls variable. 
-        this function has to be overridden 
+        this function has to be overridden.
+
+        Even I hate this Encoder. 
         """
 
         if isinstance(obj, BaseConfig):
             return self.default(obj.json())
 
-        # Check A
         if isinstance(obj, version.Version | version.LegacyVersion):
             return str(obj)
-        # Check B
+
         if isinstance(obj, Profile):
             return dict(self.ParseProfile(obj))
 
-        # Check C
         if isinstance(obj, list) and len(obj) > 0 and any(isinstance(x, Profile) for x in obj):
-            print("\tEncoding Profile List")
+            # print("\tEncoding Profile List")
             for index, profile in enumerate(obj):
                 obj[index] = self.default(profile)
             return list(obj)
@@ -299,25 +256,25 @@ class ConfigEncoder(HjsonEncoder):
     def ParseList(self, obj: list):
         # print(f"Encoding List of {type(obj[0])}")
         if isinstance(obj[0], Request):
-            print("\t\tEncoding Request List")
+            # print("\t\tEncoding Request List")
             for i in obj:
                 return self.default(i)
         elif isinstance(obj[0], Profile):
-            print("Encoding Profile List")
+            # print("Encoding Profile List")
             for profile in obj:
                 self.default(profile)
         else:
             return HjsonEncoder.default(self, obj)
 
     def ParseRequest(self, obj: Request):
-        print("\t\t\t\t\tEncoding Request")
+        # print("\t\t\t\t\tEncoding Request")
         if isinstance(obj, Request):
             return obj.json()
         elif isinstance(obj, dict):
             return obj
 
     def ParseProfile(self, obj: Profile):
-        print("\t\tEncoding Profile:")
+        # print("\t\tEncoding Profile:")
         profile = obj.json()
         for index, request in enumerate(profile["requests"]):
             profile["requests"][index] = self.ParseRequest(request)

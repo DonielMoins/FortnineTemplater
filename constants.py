@@ -1,6 +1,6 @@
-from datetime import date
-from pathlib import Path
 from packaging.version import parse
+from datetime import datetime
+from pathlib import Path
 
 """
 Constants that are used almost everywhere in program, these are expected not to change during runtime and
@@ -9,8 +9,8 @@ Constants that are used almost everywhere in program, these are expected not to 
     TODO: GlobalLaunchParams should be replaced by an argparser
 """
 
-today = date.today()
-dayDate = today.strftime("%d-%m-%Y")
+launchtime = datetime.now()
+execDateTime = launchtime.strftime("%d-%m-%Y_%H-%M")
 
 GlobalLaunchParams = {
     "GUI": {
@@ -26,10 +26,12 @@ Overrides = []
 # Can be replaced by:
 #       logFolder = Path("C:\\whatever\\path\\where\\you_store_logs") or Path("/home/ur_user/forPermissionReasons/logsFolder")
 logFolder = baseLoc.joinpath("logs")
-logFile = logFolder.absolute().joinpath(f"templater-{dayDate}.log")
+logFile = logFolder.absolute().joinpath(f"templater-{execDateTime}.log")
+logFormat = "[%(asctime)s] %(levelname)s - %(module)s:  %(message)s"
 
+ProgramVersion = parse("0.3.2")
 
-ProgramVersion = parse("0.3.1")
+tab = "\t"
 
 ProjDetails = {
     "github": "https://github.com/DonielMoins/FortnineTemplater/",

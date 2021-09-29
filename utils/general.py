@@ -1,28 +1,44 @@
-import logging
-import enum
-from pathlib import Path
-from packaging import version
-import string
-import webbrowser
-import random
-
 from constants import logFile, logFolder
+from threading import current_thread
+from constants import logFormat
+from packaging import version
+from pathlib import Path
+
+import webbrowser
+import logging
+import random
+import string
+import enum
+
+# Check/make logs folder, then
 
 
-def makeLogger(type: str):
+def makeLogger(type: str = "", name=current_thread().name):
+
     if not logFolder.exists():
         try:
             logFolder.mkdir()
         except Exception as e:
-            logging.error(e)
+            logging.exception(e)
+            print(e.with_traceback())
 
     match type.lower():
         case "debug":
-            logging.basicConfig(format="%(levelname)s: %(module)s:  %(message)s",
-                                filename=logFile.absolute(), level=logging.DEBUG, force=True)
+            lvl = logging.DEBUG
         case "info":
-            logging.basicConfig(format="%(levelname)s: %(module)s:  %(message)s",
-                                filename=logFile.absolute(), level=logging.INFO, force=True)
+            lvl = logging.INFO
+        case _:
+            lvl = logging.NOTSET
+
+    logging.basicConfig(format=logFormat,
+                        filename=logFile.absolute(), level=lvl, force=True)
+    formatter = logging.Formatter(
+        logFormat)
+    logger = logging.getLogger()
+    ch = logging.StreamHandler()
+    ch.setLevel(logger.level)
+    ch.setFormatter(formatter)
+    logger.addHandler(ch)
 
 
 def getOverrides(folder: Path):
@@ -112,3 +128,15 @@ def open_url(str: str, email=False):
     else:
         url = "mailto:\\\\" + str
     webbrowser.open_new_tab(url)
+
+
+def multilineBanner(text, ch="=", width=120):
+    char = ch * width
+    pad = (width + len(text)) // 2
+    return f'{char}\n{banner(text, ch, width):>{pad}}\n{char}'
+
+
+def banner(text, ch='=', width=120):
+    spaced_text = f' {text} '
+    banner = spaced_text.center(width, ch)
+    return banner

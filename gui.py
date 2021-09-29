@@ -1,20 +1,18 @@
-import tkinter as tk
+from multiprocessing.connection import Connection
+from constants import ProjDetails, DevDetails
+from utils.general import open_url, parseCSV
+from utils.requests import MakeRequests
+from objects import Profile, Request
+from typing import List
+
 import tkinter.scrolledtext as tkscrolled
+import utils.parallelProcessing as proc
 import tkinter.messagebox as popupBox
+import multiprocessing as mp
+import utils.config as cfg
+import tkinter as tk
 import gc
 import re
-
-
-import multiprocessing as mp
-from multiprocessing.connection import Connection
-from typing import List
-import utils.parallelProcessing as proc
-
-from objects import Profile, Request
-from utils.general import open_url, parseCSV
-from constants import ProjDetails, DevDetails
-from utils.requests import MakeRequests
-import utils.config as cfg
 
 # Initialize the GUI then start FrameController with minimum size.
 # Finally run main tkinter's mainloop()
@@ -72,7 +70,7 @@ class EditorFrame(tk.Frame):
         editProfilesbtn.pack(pady=10, padx=10)
 
     def openEditor(self):
-        _ = ProfileEditor(master=self.parent)
+        ProfileEditor(master=self.parent)
 
     def editProfile(self):
         EditorSelector(master=self.parent, mode=0)
