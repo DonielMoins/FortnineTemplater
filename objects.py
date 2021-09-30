@@ -42,8 +42,6 @@ class Request:
         """
 
         self.__dict__.update(kwargs)
-
-        self._uri = None
         self.reqtype: str = reqtype.casefold()
         self._uri = uri
         self.reuseSession = reuseSession
@@ -53,6 +51,8 @@ class Request:
             'Accept': '*/*',
         } if not headers else headers
         self.data_params = data_params
+        # self.log_level = 4  # 0 Most verbose - 4 log on error - 5 Silent
+        self.log_level = 0  # 0 Most verbose - 4 log on error - 5 Silent
 
         # Check if request type is supported with these 3 Cases:
         # If Request Type is supported, Ignore.
@@ -63,27 +63,10 @@ class Request:
             case "connect" | "request" | "trace":
                 raise ValueError("Unsupported Request Type")
             case _:
-                raise ValueError(f"""
-                                 Unknown Request Type: '{self.reqtype}'
-                                    Supported Values (Case-Insensitive):
-                                        Get (Tested)
-                                        Head (Untested)
-                                        Post (Tested)
-                                        Patch (Untested)
-                                        Put (Untested)
-                                        Delete (Untested)
-                                        Options (Untested)"""
-                                 )
+                raise ValueError(f"Unknown Request Type: '{self.reqtype}'")
 
     @property
     def uri(self):
-        return self._uri
-
-    @uri.getter
-    def uri(self):
-        match = re.match(r"((?:https|http)?:\/\/){1}((?:[-a-z0-9._~!$&\'()*+,;=]|%[0-9a-f]{2})+(?::(?:[-a-z0-9._~!$&\'()*+,;=]|%[0-9a-f]{2})+)?@)?(?:((?:(?:\d|[1-9]\d|1\d{2}|2[0-4]\d|25[0-5])\.){3}(?:\d|[1-9]\d|1\d{2}|2[0-4]\d|25[0-5]))|((?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z][a-z0-9-]*[a-z0-9]))(:\d+)?((?:\/(?:[-a-z0-9._~!$&\'()*+,;=:@]|%[0-9a-f]{2})+)*\/?)(\?(?:[-a-z0-9._~!$&\'()*+,;=:@\/?]|%[0-9a-f]{2})*)?",
-                         self._uri)
-        assert match
         return self._uri
 
     @uri.setter
@@ -94,17 +77,19 @@ class Request:
         self._uri = match.string
 
     def json(self):
-        return vars(self)
+        d = {k: getattr(self, k, '') for k in self.__dir__() if k[:2] != "__" and k[:1] != "_" and type(
+            getattr(self, k, '')).__name__ != "method"}
+        return d
 
 
 # Profile Contains Profile Name, List of Requests and an optional dictionary for profile settings.
 # UUID MUST BE UNIQUE
 # ? **kwargs overrides all settings
 class Profile:
-    def __init__(self, profileName: str = "Default Name", uuid: str = str(id.uuid4()), requests: List[Request] = [Request()], settings: dict = None, version: Optional[version.Version | version.LegacyVersion] = None, migrateData: bool = False, **kwargs):
+    def __init__(self, profileName: str = "Default Name", uuid: str = str(id.uuid4()), requests: List[Request] = [Request()], settings: dict = {}, version: Optional[version.Version | version.LegacyVersion] = None, migrateData: bool = False, **kwargs):
         self.profileName = profileName
         self.uuid = uuid
-        self.settings = {}
+        self.settings = settings
 
         self.__dict__.update(kwargs)
         # "requests" in vars(self).keys()

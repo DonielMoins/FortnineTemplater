@@ -80,8 +80,9 @@ class AsyncParallel:
         self.max_processes = max_processes
 
     def join(self):
-        self.pool.close()
-        self.pool.join()
+        if self.pool:
+            self.pool.close()
+            self.pool.join()
 
     def add_task(self, thread_task: TaskThread):
 

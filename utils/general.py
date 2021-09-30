@@ -3,6 +3,7 @@ from threading import current_thread
 from constants import logFormat
 from packaging import version
 from pathlib import Path
+from typing import List
 
 import webbrowser
 import logging
@@ -130,13 +131,75 @@ def open_url(str: str, email=False):
     webbrowser.open_new_tab(url)
 
 
-def multilineBanner(text, ch="=", width=120):
+"""
+Functions for pretty printing / logging
+"""
+
+
+def basic_multiline_banner(text: str = '', ch="=", width=120):
     char = ch * width
     pad = (width + len(text)) // 2
-    return f'{char}\n{banner(text, ch, width):>{pad}}\n{char}'
+    return f'{char}\n{one_line_banner(text, ch, width):>{pad}}\n{char}'
 
 
-def banner(text, ch='=', width=120):
-    spaced_text = f' {text} '
+def one_line_banner(text: str = "", ch='=', width=120):
+    """Creates a one-line string banner using input.
+    Ex:
+        In:  ('Content End', ch='-',)
+        Out: '----------------------------------------------------- Content End ------------------------------------------------------'
+
+    Args:
+        text (str): String used for creation of banner
+        ch (str, optional): [description]. Defaults to '='.
+        width (int, optional): [description]. Defaults to 120.
+
+    Returns:
+        [type]: [description]
+    """
+    spaced_text = f' {text} ' if text else ""
     banner = spaced_text.center(width, ch)
     return banner
+
+
+def logger_ml(logger: logging.Logger, textLines: List[str], logLevel=logging.INFO, lpad="", rpad="", topchar='', rchar='', lchar='', botchar='', charWidth=1, OneLine=False):
+    # Clean char inputs
+    rchar = rchar[:1] if len(rchar) > 1 else rchar
+    lchar = lchar[:1] if len(lchar) > 1 else lchar
+    topchar = topchar[:1] if len(topchar) > 1 else topchar
+    botchar = botchar[:1] if len(botchar) > 1 else botchar
+
+    for i in textLines:
+        i = lpad + i + rpad
+
+    match logLevel:
+        case logging.INFO:
+            def log(text): return logger.info(text)
+        case logging.DEBUG:
+            def log(text): return logger.debug(text)
+        case logging.WARNING:
+            def log(text): return logger.warning(text)
+        case logging.ERROR:
+            def log(text): return logger.info(text)
+        case _:
+            def log(text): return logger.info(text)
+
+    maxlen = max(len((rchar + lchar) * charWidth + lpad + string +
+                 rpad) for string in textLines)
+
+    top = charWidth * \
+        (maxlen * topchar +
+         "\n") if OneLine else [maxlen * topchar for _ in range(charWidth)]
+
+    bottom = charWidth * \
+        (maxlen * botchar +
+         "\n") if OneLine else [maxlen * botchar for _ in range(charWidth)]
+
+    if OneLine:
+        text = "\n" + "".join(textLines) + rpad
+
+        log(text)
+    else:
+
+        text = textLines   # top + textLines + bottom
+        for i in text:
+            log(i)

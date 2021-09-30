@@ -1,4 +1,5 @@
-from utils.general import getOverrides, makeLogger, multilineBanner
+import json
+from utils.general import getOverrides, logger_ml, makeLogger, basic_multiline_banner
 from threading import current_thread
 from gui import startGUI
 from constants import *
@@ -45,9 +46,7 @@ def main():
                     logger.debug("Closed Progress Pipes.")
                 break
         logger.debug('All sub-processes dead, logger shuting down.')
-        banner = multilineBanner("Templater Closing") + "\n"
-        for line in banner.splitlines():
-            logger.info(line)
+        logger_ml(logger, basic_multiline_banner("Templater Closing") + "\n")
         logging.shutdown()
     # Intercept ctrl+c and end program gracefully
     except KeyboardInterrupt:
@@ -57,33 +56,33 @@ def main():
             3. block until is_alive is false
             4. Flush GUI resources using .close()
         """
-        logger.warning(
+        logger.info(
             "Received KeyboardInterrupt, attempting to end Program gracefully")
 
         taskQueue.put(proc._QueueEndSignal())
-        logger.warning("QueueEndSignal sent to taskQueue")
+        logger.debug("QueueEndSignal sent to taskQueue")
 
         try:
-            logger.warning("Trying to kill GUI proc")
+            logger.debug("Trying to kill GUI proc")
             Processes["GUI"].kill()
 
             while(Processes["GUI"].is_alive()):
                 time.sleep(0.25)
 
-                logger.warning(
+                logger.debug(
                     "Blocked 250 milliseconds to wait for program to be killed.")
-            logger.warning(
+            logger.debug(
                 "GUI proc killed, attempting to release any resources held by GUI process.")
 
             Processes["GUI"].close()
-            logger.warning(
+            logger.warn(
                 "GUI proc resources flushed gracefully; Proceeding with normal exit procedure.")
         except Exception as e:
             logger.exception(e)
             logger.error("Error occurred while killing/cleaning GUI proc!")
-            logger.error(
+            logger.warn(
                 "Please use TaskManager to make sure all python processes belonging to\n\tthe templater are closed!!")
-            logger.error(
+            logger.warn(
                 "This is important as un-killed processed will take up open ports and system resources!")
 
 
@@ -99,9 +98,9 @@ if __name__ == '__main__':
 
         # If DEBUG file found in overrides folder, enable debug logging
         for override in getOverrides(OverridesFolder):
-            match override.lower():
+            match override.casefold():
                 case "debug":
-                    params["logging_level"] = override.lower()
+                    params["logging_level"] = override.casefold()
                 case _:
                     # Add more overrides
                     pass
@@ -118,8 +117,10 @@ if __name__ == '__main__':
         logging.exception(e)
         print(e.with_traceback())
 
-    for line in multilineBanner("Starting up Templater").splitlines():
+    for line in basic_multiline_banner("Starting up Templater").splitlines():
         logger.info(line)
-    logger.debug(f"Launched with following parameters: {GlobalLaunchParams}")
+    logger.debug("Launched with following parameters:")
+    logger_ml(logger=logger, textLines=json.dumps(GlobalLaunchParams,
+              indent=2).splitlines())
 
     main()

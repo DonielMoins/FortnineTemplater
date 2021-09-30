@@ -1,5 +1,5 @@
 from multiprocessing.connection import Connection
-from utils.general import banner, makeLogger
+from utils.general import one_line_banner, makeLogger, logger_ml
 from objects import Request as ReqObj
 from threading import current_thread
 from datetime import datetime
@@ -7,6 +7,7 @@ from typing import Optional
 from constants import tab
 import requests
 import logging
+import hjson
 import re
 
 
@@ -55,8 +56,9 @@ def makeRequest(requestTemplate: ReqObj, linkData: Optional[list[str]], postData
             response.status_code = 405      # Status Code 405: Method Not Allowed
             return response
 
-    response: requests.Response = session.send(prepedreq)
-    return (execTime, response)
+    response: requests.Response = session.send(
+        prepedreq) if not response else response
+    return (execTime, response, requestTemplate.log_level)
 
 
 def MakeRequests(requestList: list, linkDataList: list = None, postDataList: list = None, uuid: str = None, stateSender: Connection = None, log: bool = True):
@@ -101,24 +103,44 @@ def MakeRequests(requestList: list, linkDataList: list = None, postDataList: lis
                     f"{uuid} : {(reqIndex + 1)/len(requestList)*100}")
     sendProg: stateSender.send(f"{uuid}: 100")
     if log:
-        logger.info(banner(f"Responses of {uuid}"))
+        logger.info(one_line_banner(f"Responses of {uuid}"))
         for n, data in enumerate(Responses):
-            time, res = data
+            time, res, log_level = data
             res: requests.Response
             time: datetime
             # For intellisense
 
             logger.info(
-                banner(f"Response {n + 1}/{len(Responses)} @ {time.strftime('%Y-%m-%d %H:%M:%S')}"))
+                one_line_banner(f"Response {n + 1}/{len(Responses)} @ {time.strftime('%Y-%m-%d %H:%M:%S')}"))
             logger.info(f"URL: {res.request.url}")
             logger.info(f"{2 * tab}Status Code: {res.status_code}")
-            if res.status_code != 200:
-                logger.info(f"{2 * tab}Content:")
-                content = str(res.content).removeprefix(
-                    "b'").removesuffix("'").removesuffix("\\n").split("\\n")
-                for line in content:
-                    logger.info(3 * tab + line)
-            logger.info(banner(""))
+            match log_level:
+                case 4:
+                    if res.status_code != 200:
+                        logger.info(f"{2 * tab}Content:")
+                        content = str(res.content).removeprefix(
+                            "b'").removesuffix("'").removesuffix("\\n").split("\\n")
+                        for line in content:
+                            logger.info(3 * tab + line)
+                        logger.info(2*tab + "Reason:")
+                        logger.info(3*tab + res.reason)
+                case 0:
+                    logger.info(
+                        2*tab + f"Time Elapsed: {res.elapsed.total_seconds()}s")
+                    logger.info(f"{2*tab}Reason: {res.reason}")
+                    logger.info(f"{2*tab}Encoding: {res.encoding}")
+
+                    logger.info(f"{2*tab}Headers:")
+                    logger_ml(logger, hjson.dumpsJSON(
+                        res.headers.__dict__, indent=2).splitlines(), logging.INFO, lpad=3*tab)
+
+                    logger.info(one_line_banner(ch="-", text="Content Start"))
+                    content = str(res.content).removeprefix(
+                        "b'").removesuffix("'").removesuffix("\\n").split("\\n")
+                    logger_ml(logger, content, lpad=3*tab)
+                    logger.info(one_line_banner(ch="-", text="Content End"))
+
+            logger.info(one_line_banner(""))
     return Responses
 
 

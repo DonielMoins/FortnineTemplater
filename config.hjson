@@ -10,7 +10,6 @@
             [
                 {
                     reqtype: post
-                    uri: http://ptsv2.com/t/wdr4p-1625102266/post?requestParm1={0}&requestParm2={1}
                     reuseSession: true
                     headers:
                     {
@@ -19,10 +18,11 @@
                         Accept: */*
                     }
                     data_params: "{'json': {0}}"
+                    log_level: 0
+                    uri: http://ptsv2.com/t/wdr4p-1625102266/post?requestParm1={0}&requestParm2={1}
                 }
                 {
                     reqtype: get
-                    uri: http://ptsv2.com/t/wdr4p-1625102266/post?requestParm1={0}&requestParm2={1}
                     reuseSession: true
                     headers:
                     {
@@ -31,6 +31,8 @@
                         Accept: */*
                     }
                     data_params: null
+                    log_level: 0
+                    uri: http://ptsv2.com/t/wdr4p-1625102266/post?requestParm1={0}&requestParm2={1}
                 }
             ]
         }
@@ -42,7 +44,6 @@
             [
                 {
                     reqtype: get
-                    uri: https://example.com/api?requestParm1={0}&requestParm2={1}
                     reuseSession: true
                     headers:
                     {
@@ -51,6 +52,71 @@
                         Accept: */*
                     }
                     data_params: null
+                    log_level: 0
+                    uri: https://example.com/api?requestParm1={0}&requestParm2={1}
+                }
+            ]
+        }
+        {
+            profileName: Default Name
+            uuid: 4acff727-727e-4698-9418-1e90b7f993ab
+            settings: {}
+            requests:
+            [
+                {
+                    reqtype: get
+                    reuseSession: true
+                    headers:
+                    {
+                        User-Agent: FortnineActions/0.3.2
+                        Content-Type: text
+                        Accept: */*
+                    }
+                    data_params: null
+                    log_level: 0
+                    uri: https://google.com/
+                }
+            ]
+        }
+        {
+            profileName: Error Google
+            uuid: dd95c8f8-a336-4079-a2bf-d34b5d426a8a
+            settings: {}
+            requests:
+            [
+                {
+                    reqtype: get
+                    reuseSession: true
+                    headers:
+                    {
+                        User-Agent: FortnineActions/0.3.2
+                        Content-Type: text
+                        Accept: */*
+                    }
+                    data_params: null
+                    log_level: 0
+                    uri: https://google.com/test?678237678
+                }
+            ]
+        }
+        {
+            profileName: Default Name
+            uuid: 8ba4d076-9ea6-411c-9406-15f687f45897
+            settings: {}
+            requests:
+            [
+                {
+                    reqtype: GET
+                    reuseSession: true
+                    headers:
+                    {
+                        User-Agent: FortnineActions/0.3.2
+                        Content-Type: text
+                        Accept: */*
+                    }
+                    data_params: null
+                    log_level: 0
+                    uri: https://example.com/test?
                 }
             ]
         }
