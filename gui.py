@@ -1,7 +1,7 @@
 from multiprocessing.connection import Connection
 from constants import ProjDetails, DevDetails
-from utils.general import open_url, parseCSV
-from utils.requests import MakeRequests
+from utils.general import open_url, parse_csv
+from utils.requests import make_requests
 from objects import Profile, Request
 from typing import List
 
@@ -18,30 +18,29 @@ import re
 # Finally run main tkinter's mainloop()
 
 
-def startGUI(launchParams, taskQueue: mp.JoinableQueue,  stateReceiver: Connection, stateSender: Connection, master: bool):
+def start_gui(launchParams, taskQueue: mp.JoinableQueue,  stateReceiver: Connection, stateSender: Connection, master: bool):
     def key(x):
         # Ctrl + = (Equals key) switches to Selector Window
         # Ctrl + - (Minus Key) switches to Editor Frame
         # Ctrl + / switches to Credits Frame with an update checker
         if x.state == 4:
-            match x.keysym.casefold():
-                case 'equal':
-                    master.show_frame(SelectorFrame, True)
-                case 'minus':
-                    master.show_frame(EditorFrame)
-                case 'slash':
-                    master.show_frame(CreditsFrame)
-                case 'h':
-                    # TODO ctrl + h opens screen with all shortcuts.
-                    # master.show_frame(HelpFrame)
-                    pass
+            if x.keysym.casefold() == 'equal':
+                master.show_frame(SelectorFrame, True)
+            if x.keysym.casefold() == 'minus':
+                master.show_frame(EditorFrame)
+            if x.keysym.casefold() == 'slash':
+                master.show_frame(CreditsFrame)
+            if x.keysym.casefold() == 'h':
+                # TODO ctrl + h opens screen with all shortcuts.
+                # master.show_frame(HelpFrame)
+                pass
 
-    master = FrameController(launchParams, taskQueue,
+    master = FrameController(launchParams, taskQueue, 
                              stateReceiver, stateSender)
     if master:
-        master.bind("<Key>", lambda x: key(x))
+        master.bind(" < Key > ", lambda x: key(x))
     master.geometry("")
-    master.minsize(height=100, width=300)
+    master.minsize(height = 100, width = 300)
 
     # mainloop, runs infinitely
     master.mainloop()
@@ -53,52 +52,51 @@ class EditorFrame(tk.Frame):
     def __init__(self, frameContainer, frameController):
         tk.Frame.__init__(self, frameContainer)
         self.parent = frameContainer
-        label = tk.Label(self, text="Editor Mode")
-        label.pack(pady=10, padx=10)
+        label = tk.Label(self, text = "Editor Mode")
+        label.pack(pady = 10, padx = 10)
 
-        switchbtn = tk.Button(self, text="Switch to User Mode",
-                              command=lambda: frameController.show_frame(SelectorFrame, True))
-        createProfilebtn = tk.Button(self, text="Create new Profile",
-                                     command=lambda: self.openEditor())
-        deleteProfilebtn = tk.Button(self, text="Delete pre-existing Profile",
-                                     command=lambda: self.delProfile())
-        editProfilesbtn = tk.Button(self, text="Edit Profile",
-                                    command=lambda: self.editProfile())
-        switchbtn.pack(pady=10, padx=10)
-        createProfilebtn.pack(pady=10, padx=10)
-        deleteProfilebtn.pack(pady=10, padx=10)
-        editProfilesbtn.pack(pady=10, padx=10)
+        switchbtn = tk.Button(self, text = "Switch to User Mode", 
+                              command = lambda: frameController.show_frame(SelectorFrame, True))
+        createProfilebtn = tk.Button(self, text = "Create new Profile", 
+                                     command = lambda: self.openEditor())
+        deleteProfilebtn = tk.Button(self, text = "Delete pre-existing Profile", 
+                                     command = lambda: self.delProfile())
+        editProfilesbtn = tk.Button(self, text = "Edit Profile", 
+                                    command = lambda: self.editProfile())
+        switchbtn.pack(pady = 10, padx = 10)
+        createProfilebtn.pack(pady = 10, padx = 10)
+        deleteProfilebtn.pack(pady = 10, padx = 10)
+        editProfilesbtn.pack(pady = 10, padx = 10)
 
-    def openEditor(self):
-        ProfileEditor(master=self.parent)
+    def open_editor(self):
+        ProfileEditor(master = self.parent)
 
-    def editProfile(self):
-        EditorSelector(master=self.parent, mode=0)
+    def edit_profile(self):
+        EditorSelector(master = self.parent, mode = 0)
 
-    def delProfile(self):
-        EditorSelector(master=self.parent, mode=1)
+    def del_profile(self):
+        EditorSelector(master = self.parent, mode = 1)
 
 
 class EditorSelector(tk.Toplevel):
-    def __init__(self, master=None, mode: int = -1):
-        super().__init__(master=master)
+    def __init__(self, master = None, mode: int = -1):
+        super().__init__(master = master)
         mainLabel = None
         # self.tooltip = tooltip.Balloon(master)
-        match mode:
-            case 0:  # Select to edit mode
-                mainLabel = tk.Label(self, text="Select Profile to edit.")
 
-            case 1:  # Select to delete
-                mainLabel = tk.Label(self, text="Select Profile to delete")
-                # self.tooltip.bind(mainLabel, "Warning!\nThis will delete the profile from the config file.\nThis is permanent!")
-                pass
-            case _:
-                popupBox.showerror(
-                    "Error!", f"EditorSelector class initialized with the invalid mode {mode}.")
-                self.destroy()
+        if mode == 0:  # Select to edit mode
+            mainLabel = tk.Label(self, text = "Select Profile to edit.")
+        if mode == 1:  # Select to delete
+            mainLabel = tk.Label(self, text = "Select Profile to delete")
+            # self.tooltip.bind(mainLabel, "Warning!\nThis will delete the profile from the config file.\nThis is permanent!")
+            pass
+        else:
+            popupBox.showerror(
+                "Error!", f"EditorSelector class initialized with the invalid mode {mode}.")
+            self.destroy()
         self.mode = mode
 
-        mainLabel.pack(padx=5, pady=2)
+        mainLabel.pack(padx = 5, pady = 2)
 
         self.config = cfg.get_config()
         profileList = cfg.get_profiles(self.config)
@@ -106,21 +104,21 @@ class EditorSelector(tk.Toplevel):
             profile: Profile
             uuid = profile.uuid
             if mode == 0:
-                btn = tk.Button(self, text=profile.profileName,
-                                command=lambda: self.editProfile(uuid))
+                btn = tk.Button(self, text = profile.profileName, 
+                                command = lambda: self.editProfile(uuid))
                 # self.tooltip.bind(btn, f"Profile UUID:\n{uuid}")
-                btn.pack(padx=3, pady=4)
+                btn.pack(padx = 3, pady = 4)
             if mode == 1:
-                btn = tk.Button(self, text=profile.profileName,
-                                command=lambda: self.delProfile(uuid))
+                btn = tk.Button(self, text = profile.profileName, 
+                                command = lambda: self.delProfile(uuid))
                 # self.tooltip.bind(btn, f"Profile UUID:\n{uuid}")
-                btn.pack(padx=3, pady=4)
+                btn.pack(padx = 3, pady = 4)
 
-    def delProfile(self, uuid):
+    def del_profile(self, uuid):
         cfg.del_profile_uuid(self.config, uuid)
         pass
 
-    def editProfile(self, uuid):
+    def edit_profile(self, uuid):
         pass
 
 
@@ -140,10 +138,10 @@ class ProfileEditor(tk.Toplevel):
 
     """
 
-    def __init__(self, master=None, profile: Profile = None):
+    def __init__(self, master = None, profile: Profile = None):
         self.profile = profile
 
-        super().__init__(master=master)
+        super().__init__(master = master)
         self.title("Profile Creator")
         self.width = 600
         self.height = 400
@@ -167,34 +165,34 @@ class ProfileEditor(tk.Toplevel):
             self.tkRequestItems.append({"uri": tk.StringVar(
                 self, request.uri), "reqtype": tk.StringVar(self, request.reqtype.upper())})
             self.tkRequestItems[reqIndex]["Entry"] = tk.Entry(
-                self, textvariable=self.tkRequestItems[reqIndex]["uri"], width=45)
+                self, textvariable = self.tkRequestItems[reqIndex]["uri"], width = 45)
             self.tkRequestItems[reqIndex]["reuseSession"] = tk.IntVar(
-                self, value=int(request.reuseSession))
+                self, value = int(request.reuseSession))
             self.tkRequestItems[reqIndex]["ReuseBox"] = tk.Checkbutton(
-                self, text='Reuse Session', variable=self.tkRequestItems[reqIndex]["reuseSession"], onvalue=1, offvalue=0)
+                self, text = 'Reuse Session', variable = self.tkRequestItems[reqIndex]["reuseSession"], onvalue = 1, offvalue = 0)
 
-        self.nameLabel = tk.Label(self, text="Profile Name:")
+        self.nameLabel = tk.Label(self, text = "Profile Name:")
         self.nameEntry = tk.Entry(
-            self, textvariable=self.profileName, width=40)
+            self, textvariable = self.profileName, width = 40)
         self.currentRequestLabel = tk.Label(
-            self, text=f"Viewing Request: {self.currentRequest + 1}/{len(self.requests)}")
+            self, text = f"Viewing Request: {self.currentRequest + 1}/{len(self.requests)}")
 
         # Request part
-        self.requestUriLabel = tk.Label(self, text="Request Uri:")
+        self.requestUriLabel = tk.Label(self, text = "Request Uri:")
         self.requestMethodDropdown = [tk.OptionMenu(
             self, self.tkRequestItems[0]["reqtype"], *("GET", "HEAD", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"))]
 
         self.prevRequestbtn = tk.Button(
-            self, text="Previous Request", command=lambda: self.prevReq(True))
+            self, text = "Previous Request", command = lambda: self.prevReq(True))
         self.newRequestbtn = tk.Button(
-            self, text="New Request", command=lambda: self.CreateRequest(True))
+            self, text = "New Request", command = lambda: self.CreateRequest(True))
         self.nextRequestbtn = tk.Button(
-            self, text="Next Request", command=lambda: self.nextReq(True))
+            self, text = "Next Request", command = lambda: self.nextReq(True))
         self.saveProfilebtn = tk.Button(
-            self, text="Save Profile", command=lambda: self.saveProfile())
+            self, text = "Save Profile", command = lambda: self.saveProfile())
         self.redrawAll()
 
-    def saveProfile(self):
+    def save_profile(self):
         self.profile.profileName = self.profileName.get()
         for tkReqIndex, tkItemDict in enumerate(self.tkRequestItems):
             self.requests[tkReqIndex].uri = tkItemDict["uri"].get()
@@ -212,42 +210,42 @@ class ProfileEditor(tk.Toplevel):
         gc.collect()
         self.destroy()
 
-    def clearScreen(self):
+    def clear_screen(self):
         for widget in self.winfo_children():
             widget.place_forget()
 
-    def upperWidgets(self, redraw=False):
+    def upper_widgets(self, redraw = False):
         self.currentRequestLabel.config(
-            text=f"Request: {self.currentRequest + 1}/{len(self.requests)}")
-        self.nameLabel.grid(padx=10, pady=10, row=0)
-        self.nameEntry.grid(padx=10, pady=10, row=0, column=1, columnspan=2)
-        self.currentRequestLabel.grid(padx=10, pady=10, row=0, column=4)
+            text = f"Request: {self.currentRequest + 1}/{len(self.requests)}")
+        self.nameLabel.grid(padx = 10, pady = 10, row = 0)
+        self.nameEntry.grid(padx = 10, pady = 10, row = 0, column = 1, columnspan = 2)
+        self.currentRequestLabel.grid(padx = 10, pady = 10, row = 0, column = 4)
 
         if redraw:
             self.redrawAll()
 
-    def bottomWidgets(self, redraw=False):
+    def bottom_widgets(self, redraw = False):
         if len(self.tkRequestItems) > 1:
-            self.prevRequestbtn.grid(padx=10, row=4, column=2)
-            self.nextRequestbtn.grid(padx=10, row=4, column=4)
-        self.newRequestbtn.grid(padx=10, row=4, column=3)
-        self.saveProfilebtn.grid(padx=10, row=5, column=3)
+            self.prevRequestbtn.grid(padx = 10, row = 4, column = 2)
+            self.nextRequestbtn.grid(padx = 10, row = 4, column = 4)
+        self.newRequestbtn.grid(padx = 10, row = 4, column = 3)
+        self.saveProfilebtn.grid(padx = 10, row = 5, column = 3)
         if redraw:
             self.redrawAll()
 
-    def showRequestWidgets(self, redraw=False):
-        self.requestUriLabel.grid(padx=10, row=1, column=0)
+    def show_request_widgets(self, redraw = False):
+        self.requestUriLabel.grid(padx = 10, row = 1, column = 0)
         self.tkRequestItems[self.currentRequest]["Entry"].grid(
-            padx=10, row=1, column=1, columnspan=2)
+            padx = 10, row = 1, column = 1, columnspan = 2)
         self.requestMethodDropdown[self.currentRequest]
         self.tkRequestItems[self.currentRequest]["ReuseBox"].grid(
-            padx=10, row=2, column=1)
+            padx = 10, row = 2, column = 1)
         self.requestMethodDropdown[self.currentRequest].grid(
-            padx=10, row=1, column=4)
+            padx = 10, row = 1, column = 4)
         if redraw:
             self.redrawAll()
 
-    def prevReq(self, redraw=False):
+    def prev_req(self, redraw = False):
         if len(self.tkRequestItems) > 1:
             if self.currentRequest == 0:
                 self.currentRequest = len(self.tkRequestItems) - 1
@@ -256,7 +254,7 @@ class ProfileEditor(tk.Toplevel):
             if redraw:
                 self.redrawAll()
 
-    def nextReq(self, redraw=False):
+    def next_req(self, redraw = False):
         if len(self.tkRequestItems) > 1:
             if self.currentRequest == len(self.tkRequestItems) - 1:
                 self.currentRequest = 0
@@ -265,23 +263,23 @@ class ProfileEditor(tk.Toplevel):
             if redraw:
                 self.redrawAll()
 
-    def CreateRequest(self, redraw=False):
+    def create_request(self, redraw = False):
         newReq = Request()
         self.requests.append(newReq)
         self.tkRequestItems.append({"uri": tk.StringVar(
             self, newReq.uri), "reqtype": tk.StringVar(self, newReq.reqtype.upper())})
         self.tkRequestItems[len(self.tkRequestItems) - 1]["Entry"] = tk.Entry(
-            self, textvariable=self.tkRequestItems[len(self.tkRequestItems) - 1]["uri"], width=45)
+            self, textvariable = self.tkRequestItems[len(self.tkRequestItems) - 1]["uri"], width = 45)
         self.requestMethodDropdown.append(tk.OptionMenu(self, self.tkRequestItems[len(
             self.tkRequestItems) - 1]["reqtype"], *("GET", "HEAD", "POST", "PATCH", "PUT", "DELETE", "OPTIONS")))
         self.tkRequestItems[len(
-            self.tkRequestItems) - 1]["reuseSession"] = tk.IntVar(value=int(newReq.reuseSession))
-        self.tkRequestItems[len(self.tkRequestItems) - 1]["ReuseBox"] = tk.Checkbutton(self, text='Reuse Session',
-                                                                                       variable=self.tkRequestItems[len(self.tkRequestItems) - 1]["reuseSession"], onvalue=1, offvalue=0)
+            self.tkRequestItems) - 1]["reuseSession"] = tk.IntVar(value = int(newReq.reuseSession))
+        self.tkRequestItems[len(self.tkRequestItems) - 1]["ReuseBox"] = tk.Checkbutton(self, text = 'Reuse Session', 
+                                                                                       variable = self.tkRequestItems[len(self.tkRequestItems) - 1]["reuseSession"], onvalue = 1, offvalue = 0)
         if redraw:
             self.redrawAll()
 
-    def redrawAll(self):
+    def redraw_all(self):
         self.clearScreen()
         self.upperWidgets()
         self.showRequestWidgets()
@@ -307,32 +305,32 @@ class SelectorFrame(tk.Frame):
         stateSender: Connection = FrameController.stateSender
         self.profileButtons = {}
         if len(profiles) > 0:
-            ProfilesLabel = tk.Label(self, text="Run profiles:")
-            ProfilesLabel.pack(pady=10, padx=10)
+            ProfilesLabel = tk.Label(self, text = "Run profiles:")
+            ProfilesLabel.pack(pady = 10, padx = 10)
             for profile in profiles:
                 if "delMode" in vars(FrameController).keys():
-                    button = tk.Button(self, text=profile.profileName,
-                                       command=lambda: self.deleteProfile(config, profile, FrameController))
+                    button = tk.Button(self, text = profile.profileName, 
+                                       command = lambda: self.deleteProfile(config, profile, FrameController))
                 else:
-                    button = tk.Button(self, text=profile.profileName,
-                                       command=lambda profFromButton=profile: DataEntry(profile=profFromButton, taskQueue=FrameController.taskQueue, stateSender=stateSender))
+                    button = tk.Button(self, text = profile.profileName, 
+                                       command = lambda profFromButton = profile: DataEntry(profile = profFromButton, taskQueue = FrameController.taskQueue, stateSender = stateSender))
                 self.profileButtons.update({profile.uuid: button})
-                button.pack(padx=10, pady=10)
+                button.pack(padx = 10, pady = 10)
         else:
             ProfilesLabel = tk.Label(
-                self, text="Error: No profiles in config file.")
-            ProfilesLabel.pack(pady=10, padx=10)
+                self, text = "Error: No profiles in config file.")
+            ProfilesLabel.pack(pady = 10, padx = 10)
 
         if stateSender and stateReceiver:
             self.disabledButtons: list[str] = []
             self.after_idle(self.stateListener, stateReceiver)
 
-    def deleteProfile(self, config, profile, controller):
+    def delete_profile(self, config, profile, controller):
         cfg.del_profile(config, profile)
         del controller.delMode
         self.destroy()
 
-    def stateListener(self, stateReceiver: Connection):
+    def state_listener(self, stateReceiver: Connection):
         """
             If blockedButtons contains a button, grey it out, then re-add check to tkinter's idle loop.
             stateReceiver.recv() blocks, so if stateReceiver contains any data, stateReceiver.recv()
@@ -378,30 +376,30 @@ class CreditsFrame(tk.Frame):
         labels = []
         for dev in DevDetails:
             nameLabel = tk.Label(
-                self, text=f"Developer: {dev.get('username', '')} {dev.get('name', '')}")
+                self, text = f"Developer: {dev.get('username', '')} {dev.get('name', '')}")
             ghLabel = tk.Label(
-                self, text=f"Github: {dev.get('github', 'None Provided')}")
+                self, text = f"Github: {dev.get('github', 'None Provided')}")
             emailLabel = tk.Label(
-                self, text=f"Email: {dev.get('email', 'None Provided')}")
+                self, text = f"Email: {dev.get('email', 'None Provided')}")
 
             if 'github' in dev.keys():
-                ghLabel.bind("<Button-1>", lambda x: open_url(dev['github']))
+                ghLabel.bind(" < Button-1 > ", lambda x: open_url(dev['github']))
             if 'email' in dev.keys():
-                ghLabel.bind("<Button-1>", lambda x: open_url(dev['email']))
+                ghLabel.bind(" < Button-1 > ", lambda x: open_url(dev['email']))
 
             labels.append(nameLabel)
             labels.append(ghLabel)
             labels.append(emailLabel)
 
         projGithubLabel = tk.Label(
-            self, text=f"Project Github: {ProjDetails['github']}")
+            self, text = f"Project Github: {ProjDetails['github']}")
         projVersionLabel = tk.Label(
-            self, text=f"Current Version: {ProjDetails['version']}")
+            self, text = f"Current Version: {ProjDetails['version']}")
 
         projGithubLabel.bind(
-            "<Button-1>", lambda x: open_url(ProjDetails['github']))
+            " < Button-1 > ", lambda x: open_url(ProjDetails['github']))
         projVersionLabel.bind(
-            "<Button-1>", lambda x: self.checkUpdate(projVersionLabel))
+            " < Button-1 > ", lambda x: self.checkUpdate(projVersionLabel))
 
         labels.append(projGithubLabel)
         labels.append(projVersionLabel)
@@ -409,11 +407,11 @@ class CreditsFrame(tk.Frame):
             label: tk.Widget
             label.pack()
 
-    def checkUpdate(self, label):
+    def check_update(self, label):
         label: tk.Button
         try:
             import git
-            repo = git.Repo(search_parent_directories=True)
+            repo = git.Repo(search_parent_directories = True)
             localSHA = repo.head.commit.hexsha
             remoteSHA = repo.remote("origin").refs.main.commit.hexsha
             if localSHA == remoteSHA:
@@ -434,48 +432,48 @@ class FrameController(tk.Tk):
     def __init__(self, launchParams: dict, taskQueue: mp.JoinableQueue, stateReceiver: Connection, stateSender: Connection, *args, **kwargs):
 
         tk.Tk.__init__(
-            self, className=' Fortnine Request Templates', *args, **kwargs)
+            self, className = ' Fortnine Request Templates', *args, **kwargs)
         self.container = tk.Frame(self)
         self.taskQueue: mp.JoinableQueue = taskQueue
         self.stateReceiver = stateReceiver
         self.stateSender = stateSender
 
-        self.container.pack(side="top", fill="both", expand=True)
-        self.container.grid_rowconfigure(0, weight=1)
-        self.container.grid_columnconfigure(0, weight=1)
+        self.container.pack(side = "top", fill = "both", expand = True)
+        self.container.grid_rowconfigure(0, weight = 1)
+        self.container.grid_columnconfigure(0, weight = 1)
 
         self.frames = {}
         self.activeFrame = None
-        self.makeFrames()
+        self.make_frames()
 
         # GUI Parameters, edit at Start of file
-        match launchParams.items():
-            case "openEditor", True:
+        for k, v in launchParams.items():
+            if (k, v) == ("openEditor", True):
                 self.show_frame(EditorFrame)
-            case "openEditor", False:
+            if (k, v) == ("openEditor", False):
                 self.show_frame(SelectorFrame)
 
         if not self.activeFrame:
             self.show_frame(SelectorFrame)
 
         self.__dict__.update(launchParams)
-        # self.after(5000, printReceived, args=(stateReceiver)
+        # self.after(5000, printReceived, args = (stateReceiver)
 
-    def show_frame(self, frame, refreshFrame=False):
+    def show_frame(self, frame, refreshFrame = False):
         self.activeFrame = str(frame.__name__).lower()
         if refreshFrame:
             self.refreshFrame(frame)
         frame = self.frames[frame]
         frame.tkraise()
 
-    def makeFrames(self):
+    def make_frames(self):
         # Here F in Each FrameClass e.g. EditorFrame, SelectorFrame
         for F in Frames:
             frame = F(self.container, self)
             self.frames[F] = frame
-            frame.grid(row=0, column=0, sticky="nsew")
+            frame.grid(row = 0, column = 0, sticky = "nsew")
 
-    def refreshFrame(self, frame):
+    def refresh_frame(self, frame):
         for F in Frames:
             if isinstance(F, frame):
                 # Clear leftover vars and start fresh
@@ -483,11 +481,11 @@ class FrameController(tk.Tk):
                 del frame
                 frame = F(self.container, self)
                 self.frames[F] = frame
-                frame.grid(row=0, column=0, sticky="nsew")
+                frame.grid(row = 0, column = 0, sticky = "nsew")
 
 
 class DataEntry(tk.Toplevel):
-    def __init__(self, taskQueue, master=None, profile: Profile = None, stateSender=None):
+    def __init__(self, taskQueue, master = None, profile: Profile = None, stateSender = None):
         # TODO add drag and drop to facilitate Inputing CSV data
         """Create Data Entry window to paste in csv data then send request to AsyncExecPool.
             Can handle multiple requests, each request hosting a page with an Input Field
@@ -497,13 +495,13 @@ class DataEntry(tk.Toplevel):
             master (tk.Window?, optional): Master window that spawned frame. Defaults to None.
             requests (list, optional): Requests list taken from Profile.requests. Defaults to [].
         """
-        super().__init__(master=master)
+        super().__init__(master = master)
 
         assert isinstance(profile, Profile)
 
         self.resizable(0, 0)
-        self.columnconfigure(5, weight=1)
-        self.rowconfigure(7, weight=1)
+        self.columnconfigure(5, weight = 1)
+        self.rowconfigure(7, weight = 1)
         self.title("Input Request variables")
         self.profile = profile
         self.requests = profile.requests
@@ -514,7 +512,7 @@ class DataEntry(tk.Toplevel):
         self.stateSender = stateSender
 
         self.profLabel = tk.Label(
-            self, text=f"Profile Name: {self.profile.profileName}\t UUID: {self.profile.uuid}")
+            self, text = f"Profile Name: {self.profile.profileName}\t UUID: {self.profile.uuid}")
 
         # Prepares InputFields of all requests in profile
         for i in self.requests:
@@ -523,17 +521,17 @@ class DataEntry(tk.Toplevel):
                 tkscrolled.ScrolledText(self) if i.data_params else "NULL")
 
         # Labels for drawLabels()
-        self.ReqPreviewLabel = tk.Label(self, text='')
-        self.InputGuideLabel = tk.Label(self, text='')
-        self.ReqMethodLabel = tk.Label(self, text='')
+        self.ReqPreviewLabel = tk.Label(self, text = '')
+        self.InputGuideLabel = tk.Label(self, text = '')
+        self.ReqMethodLabel = tk.Label(self, text = '')
 
         # Buttons for drawButtons()
         self.NextBtn = tk.Button(
-            self, text="Next Request", command=lambda: self.ShowNextField())
+            self, text = "Next Request", command = lambda: self.ShowNextField())
         self.PrevBtn = tk.Button(
-            self, text="Previous Request", command=lambda: self.ShowPrevField())
+            self, text = "Previous Request", command = lambda: self.ShowPrevField())
         self.makeReqBtn = tk.Button(
-            self, text="Make Request", command=lambda: self.SendRequest(self.requests, uuid=self.profile.uuid))
+            self, text = "Make Request", command = lambda: self.SendRequest(self.requests, uuid = self.profile.uuid))
 
         self.drawLabels()
         self.drawInputField()
@@ -544,8 +542,8 @@ class DataEntry(tk.Toplevel):
 # .grid() cleared labels to begining of DataEntry screen.
 
 
-    def drawLabels(self):
-        self.profLabel.grid(padx=10, pady=10, sticky="new", row=0, column=2)
+    def draw_labels(self):
+        self.profLabel.grid(padx = 10, pady = 10, sticky = "new", row = 0, column = 2)
         self.ReqPreviewLabel.configure(
             {"text": f"Preview: {self.requests[self.CurrentInput - 1].uri}"})
 
@@ -558,42 +556,37 @@ class DataEntry(tk.Toplevel):
                 ) + ' Data →' if self.requests[self.CurrentInput - 1].reqtype.casefold() == ('post' or 'put') else "← Input Link Data"
              }
         )
-        self.ReqPreviewLabel.grid(padx=10, row=1, column=0, columnspan=1)
-        self.InputGuideLabel.grid(
-            padx=10, row=1, column=2, columnspan=1, rowspan=4)
-        self.ReqMethodLabel.grid(row=1,  column=5, columnspan=1, padx=225)
-
 # .grid() cleared buttons to end of DataEntry screen.
 
-    def drawButtons(self):
+    def draw_buttons(self):
         if len(self.URLInputFields) > 1:
             if self.CurrentInput != 1:
-                self.PrevBtn.grid(padx=5, row=7, column=0,
-                                  pady=5, columnspan=1)
+                self.PrevBtn.grid(padx = 5, row = 7, column = 0, 
+                                  pady = 5, columnspan = 1)
 
             if self.CurrentInput != len(self.URLInputFields):
-                self.NextBtn.grid(padx=5, row=7, pady=5,
-                                  column=5, columnspan=1)
+                self.NextBtn.grid(padx = 5, row = 7, pady = 5, 
+                                  column = 5, columnspan = 1)
 
-        self.makeReqBtn.grid(padx=5, row=7, pady=5, column=2, columnspan=1)
+        self.makeReqBtn.grid(padx = 5, row = 7, pady = 5, column = 2, columnspan = 1)
 
 
 # .grid() InputField from self.CurrentInput
 # To facilitate changing GUI placement
 
 
-    def drawInputField(self):
+    def draw_input_field(self):
         # pass
         self.URLInputFields[self.CurrentInput -
-                            1].grid(padx=10, row=2, rowspan=4, columnspan=2, column=0)
+                            1].grid(padx = 10, row = 2, rowspan = 4, columnspan = 2, column = 0)
         if self.DataInputFields[self.CurrentInput - 1] != "NULL":
             self.DataInputFields[self.CurrentInput -
-                                 1].grid(padx=10, row=2, rowspan=4, columnspan=3, column=3)
+                                 1].grid(padx = 10, row = 2, rowspan = 4, columnspan = 3, column = 3)
 
 
 # Clears DataEntry screen and displays entry fields for the next request.
 
-    def ShowNextField(self):
+    def show_next_field(self):
         self.clear()
         self.CurrentInput += 1
         self.drawLabels()
@@ -602,7 +595,7 @@ class DataEntry(tk.Toplevel):
         self.sizes()
 
 # Clears DataEntry screen and displays entry fields for the Previous request.
-    def ShowPrevField(self):
+    def show_prev_field(self):
         self.CurrentInput -= 1
         self.clear()
         self.drawLabels()
@@ -615,18 +608,18 @@ class DataEntry(tk.Toplevel):
 
 # Get Input of every Request, parse data, then send a requestTask with requests, FieldsData and stateSender to TaskQueue.
 # TODO: Fix Nullbeing put recursively
-    def SendRequest(self, requests: List[Request], uuid: str):
+    def send_request(self, requests: List[Request], uuid: str):
         LinkFieldsData = []
         DataParamData = []
         for InputField in self.URLInputFields:
             fieldText: str = InputField.get('1.0', tk.END)
-            LinkFieldsData.append(parseCSV(fieldText))
+            LinkFieldsData.append(parse_csv(fieldText))
         for DataInputField in self.DataInputFields:
-            DataParamData.append(parseCSV(DataInputField.get(
+            DataParamData.append(parse_csv(DataInputField.get(
                 '1.0', tk.END)) if DataInputField != "NULL" else "NULL")
 
         reqsTask = proc.TaskThread(
-            fun=MakeRequests, args=(requests, LinkFieldsData, DataParamData, uuid, self.stateSender, ))
+            fun = make_requests, args = (requests, LinkFieldsData, DataParamData, uuid, self.stateSender, ))
         self.taskQueue.put(reqsTask)
 
         self.destroy()

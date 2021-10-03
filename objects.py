@@ -57,13 +57,12 @@ class Request:
         # Check if request type is supported with these 3 Cases:
         # If Request Type is supported, Ignore.
         # If not supported or if unknown request type, raise ValueError with appropriate message
-        match self.reqtype:
-            case "get" | "head" | "post" | "patch" | "put" | "delete" | "options":
-                pass
-            case "connect" | "request" | "trace":
-                raise ValueError("Unsupported Request Type")
-            case _:
-                raise ValueError(f"Unknown Request Type: '{self.reqtype}'")
+        if ("get" or "head" or "post" or "patch" or "put" or "delete" or "options"):
+            pass
+        elif self.reqtype == ("connect" or "request" or "trace"):
+            raise ValueError("Unsupported Request Type")
+        else:
+            raise ValueError(f"Unknown Request Type: '{self.reqtype}'")
 
     @property
     def uri(self):
@@ -86,7 +85,7 @@ class Request:
 # UUID MUST BE UNIQUE
 # ? **kwargs overrides all settings
 class Profile:
-    def __init__(self, profileName: str = "Default Name", uuid: str = str(id.uuid4()), requests: List[Request] = [Request()], settings: dict = {}, version: Optional[version.Version | version.LegacyVersion] = None, migrateData: bool = False, **kwargs):
+    def __init__(self, profileName: str = "Default Name", uuid: str = str(id.uuid4()), requests: List[Request] = [Request()], settings: dict = {}, version: Optional[version.Version] = None, migrateData: bool = False, **kwargs):
         self.profileName = profileName
         self.uuid = uuid
         self.settings = settings
@@ -112,12 +111,15 @@ class Profile:
         if not resultVersion:
             resultVersion = ProgramVersion
         # Check if specific version needs specific migration
-        match resultVersion:
-            case version.Version("99.99.99"):  # Add broken config fixes
-                # Specific Fixes
-                pass
-            case _:
-                pass
+        
+        #? Add if statements for version numbers then run this func recusively till desired version migration has been achieved
+        
+        # match resultVersion:
+        #     case version.Version("99.99.99"):  # Add broken config fixes
+        #         # Specific Fixes
+        #         pass
+        #     case _:
+        #         pass
 
     def _serializeRequestList(self):
         requests = [request.json() for request in self.requests]

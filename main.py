@@ -1,7 +1,7 @@
 import json
-from utils.general import getOverrides, logger_ml, makeLogger, basic_multiline_banner
+from utils.general import get_overrides, logger_ml, make_logger, basic_multiline_banner
 from threading import current_thread
-from gui import startGUI
+from gui import start_gui
 from constants import *
 
 import utils.parallelProcessing as proc
@@ -21,7 +21,7 @@ def main():
         Processes["TaskQueue"] = taskQueue
         stateSender, stateReceiver = mp.Pipe()
 
-        GUIProc = mp.Process(target=startGUI, name="GUI", args=(
+        GUIProc = mp.Process(target = start_gui, name = "GUI", args = (
             GlobalLaunchParams.get("GUI", {}), taskQueue, stateReceiver, stateSender, True))
         GUIProc.start()
         Processes["GUI"] = GUIProc
@@ -88,30 +88,29 @@ def main():
 
 if __name__ == '__main__':
 
-    # parser = argparse.ArgumentParser(description='Request profile creator/manager made for  Fortnine.ca (Boutique Linus Inc.)')
-    # parser.add_argument('editor', metavar='N', type=int, nargs='+',
-    #                 help='an integer for the accumulator')
+    # parser = argparse.ArgumentParser(description = 'Request profile creator/manager made for  Fortnine.ca (Boutique Linus Inc.)')
+    # parser.add_argument('editor', metavar = 'N', type = int, nargs = '+', 
+    #                 help = 'an integer for the accumulator')
 
     params = GlobalLaunchParams
 
     try:
 
         # If DEBUG file found in overrides folder, enable debug logging
-        for override in getOverrides(OverridesFolder):
-            match override.casefold():
-                case "debug":
-                    params["logging_level"] = override.casefold()
-                case _:
-                    # Add more overrides
-                    pass
+        for override in get_overrides(OverridesFolder):
+            if override.casefold() == "debug":
+                params["logging_level"] = override.casefold()
+            else:
+                # Add more overrides
+                pass
 
-        makeLogger(params["logging_level"]
+        make_logger(params["logging_level"]
                    if params["logging_level"] else "info")
 
         logger = logging.getLogger("Main")
 
     except Exception as e:
-        makeLogger(None)
+        make_logger(None)
         logging.error(
             "Following error raised while getting overrides, defaulting to logging.INFO:")
         logging.exception(e)
@@ -120,7 +119,7 @@ if __name__ == '__main__':
     for line in basic_multiline_banner("Starting up Templater").splitlines():
         logger.info(line)
     logger.debug("Launched with following parameters:")
-    logger_ml(logger=logger, textLines=json.dumps(GlobalLaunchParams,
-              indent=2).splitlines())
+    logger_ml(logger = logger, textLines = json.dumps(GlobalLaunchParams, 
+              indent = 2).splitlines())
 
     main()

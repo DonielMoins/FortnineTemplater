@@ -1,4 +1,4 @@
-from utils.general import randomHex
+from utils.general import random_hex
 from enum import Enum
 
 import multiprocessing as mp
@@ -25,7 +25,7 @@ class TaskThread:
         """
 
         if not identifier:
-            self.identifier = fun.__name__ + randomHex(len=5)
+            self.identifier = fun.__name__ + random_hex(len=5)
         else:
             self.identifier = identifier
         if not fun:
