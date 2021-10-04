@@ -24,14 +24,13 @@ def startGUI(launchParams, taskQueue: mp.JoinableQueue,  stateReceiver: Connecti
         # Ctrl + - (Minus Key) switches to Editor Frame
         # Ctrl + / switches to Credits Frame with an update checker
         if x.state == 4:
-            match x.keysym.casefold():
-                case 'equal':
+            if x.keysym.casefold() == 'equal':
                     master.show_frame(SelectorFrame, True)
-                case 'minus':
+            if x.keysym.casefold() == 'minus':
                     master.show_frame(EditorFrame)
-                case 'slash':
+            if x.keysym.casefold() == 'slash':
                     master.show_frame(CreditsFrame)
-                case 'h':
+            if x.keysym.casefold() == 'h':
                     # TODO ctrl + h opens screen with all shortcuts.
                     # master.show_frame(HelpFrame)
                     pass
@@ -84,21 +83,20 @@ class EditorSelector(tk.Toplevel):
         super().__init__(master=master)
         mainLabel = None
         # self.tooltip = tooltip.Balloon(master)
-        match mode:
-            case 0:  # Select to edit mode
-                mainLabel = tk.Label(self, text="Select Profile to edit.")
 
-            case 1:  # Select to delete
-                mainLabel = tk.Label(self, text="Select Profile to delete")
+        if mode == 0:  # Select to edit mode
+            mainLabel = tk.Label(self, text = "Select Profile to edit.")
+        if mode == 1:  # Select to delete
+            mainLabel = tk.Label(self, text = "Select Profile to delete")
                 # self.tooltip.bind(mainLabel, "Warning!\nThis will delete the profile from the config file.\nThis is permanent!")
-                pass
-            case _:
+
+        else:
                 popupBox.showerror(
                     "Error!", f"EditorSelector class initialized with the invalid mode {mode}.")
                 self.destroy()
         self.mode = mode
 
-        mainLabel.pack(padx=5, pady=2)
+        mainLabel.pack(padx = 5, pady = 2)
 
         self.config = cfg.get_config()
         profileList = cfg.get_profiles(self.config)
@@ -114,7 +112,7 @@ class EditorSelector(tk.Toplevel):
                 btn = tk.Button(self, text=profile.profileName,
                                 command=lambda: self.delProfile(uuid))
                 # self.tooltip.bind(btn, f"Profile UUID:\n{uuid}")
-                btn.pack(padx=3, pady=4)
+                btn.pack(padx = 3, pady = 4)
 
     def delProfile(self, uuid):
         cfg.del_profile_uuid(self.config, uuid)
@@ -449,10 +447,10 @@ class FrameController(tk.Tk):
         self.makeFrames()
 
         # GUI Parameters, edit at Start of file
-        match launchParams.items():
-            case "openEditor", True:
+        for k, v in launchParams.items():
+            if (k, v) == ("openEditor", True):
                 self.show_frame(EditorFrame)
-            case "openEditor", False:
+            if (k, v) == ("openEditor", False):
                 self.show_frame(SelectorFrame)
 
         if not self.activeFrame:
@@ -555,7 +553,7 @@ class DataEntry(tk.Toplevel):
         self.InputGuideLabel.configure(
             {"text":
                 '← Input Link Data                  Input ' + self.requests[self.CurrentInput - 1].reqtype.title(
-                ) + ' Data →' if self.requests[self.CurrentInput - 1].reqtype.casefold() == ('post' or 'put') else "← Input Link Data"
+                ) + ' Data →' if self.requests[self.CurrentInput - 1].reqtype.casefold() in {'post', 'put'} else "← Input Link Data"
              }
         )
         self.ReqPreviewLabel.grid(padx=10, row=1, column=0, columnspan=1)

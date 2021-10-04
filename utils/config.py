@@ -22,12 +22,12 @@ configPath = home_dir.joinpath("config.hjson")
 
 
 class BaseConfig(object):
-    def __init__(self, configVersion=None, profiles=None, settings={}, path: Path = None, **kwargs):
+    def __init__(self, configVersion = None, profiles = None, settings = {}, path: Path = None, **kwargs):
         # Will first check if argument in kwargs, if not, check if passed as argument, if not use defaults.
         # Defaults to configVersion if settings is None
         self.configVersion = kwargs.get(
             "configVersion", str(ProgramVersion) if not configVersion else configVersion)
-        # Defaults to [Profile(fromDict={}), Profile(fromDict={})] if profiles is None
+        # Defaults to [Profile(fromDict = {}), Profile(fromDict = {})] if profiles is None
         self.profiles = kwargs.get(
             "profiles", [Profile(), Profile()] if not profiles else profiles)
         # Defaults to {} if settings is None
@@ -75,7 +75,7 @@ class BaseConfig(object):
 
 
 def dumps(obj, **kwargs):
-    return hjson.dumps(obj, cls=ConfigEncoder, indent=4)
+    return hjson.dumps(obj, cls = ConfigEncoder, indent = 4)
 
 # Returns Json of config file
 # if file doesant exist, create one from hardcoded default
@@ -143,7 +143,7 @@ def add_profile(config: BaseConfig, profile: Profile):
 
 def del_profile(config: BaseConfig, profile: Profile):
 
-    del_profile_uuid(config=config, uuid=profile.uuid)
+    del_profile_uuid(config = config, uuid = profile.uuid)
     config.write_config_file()
 
 
@@ -172,7 +172,7 @@ def del_profile_uuid(config: BaseConfig, uuid: str):
         config.profiles.pop(i)
 
 
-def backup_config(oldloc=configPath, retry=True):
+def backup_config(oldloc = configPath, retry = True):
     def recursivebackuploc(oldloc):
         newloc = oldloc.__str__() + ".bak"
         if Path(newloc).exists():
@@ -236,7 +236,7 @@ class ConfigEncoder(HjsonEncoder):
             if isinstance(obj, dict):
                 if ("profiles" or "requests") in obj.keys():
                     # If obj looks like {profiles: [{?, requests: [{}]}]} or basically list[dict[list[dict]]]
-                    dictionary: dict = obj  # TODO Remove unnecessary line, only used for typing hints
+                    obj: dict  # TODO Remove unnecessary line, only used for typing hints
                     if isinstance(obj["profiles"], list) and all(isinstance(x, Profile) for x in obj["profiles"]) and isinstance(obj["profiles"][len(obj["profiles"]) - 1]["requests"], list) and isinstance(obj["profiles"][len(obj["profiles"]) - 1]["requests"][len(obj["profiles"][len(obj["profiles"]) - 1]["requests"]) - 1], dict):
                         return obj
                     else:
@@ -253,7 +253,7 @@ class ConfigEncoder(HjsonEncoder):
 
         return HjsonEncoder.encode(self, obj)
 
-    def ParseList(self, obj: list):
+    def parse_list(self, obj: list):
         # print(f"Encoding List of {type(obj[0])}")
         if isinstance(obj[0], Request):
             # print("\t\tEncoding Request List")
@@ -266,14 +266,14 @@ class ConfigEncoder(HjsonEncoder):
         else:
             return HjsonEncoder.default(self, obj)
 
-    def ParseRequest(self, obj: Request):
+    def parse_request(self, obj: Request):
         # print("\t\t\t\t\tEncoding Request")
         if isinstance(obj, Request):
             return obj.json()
         elif isinstance(obj, dict):
             return obj
 
-    def ParseProfile(self, obj: Profile):
+    def parse_profile(self, obj: Profile):
         # print("\t\tEncoding Profile:")
         profile = obj.json()
         for index, request in enumerate(profile["requests"]):

@@ -5,7 +5,7 @@ Create request templates and run them easily using CSV files as input params.
 
 ## Requirements
 
-- Python >= 3.10b3
+- Python >= 3.9
 - venv: Run ``` pip install -r Requirements.txt ``` in venv
 
 ## TODO

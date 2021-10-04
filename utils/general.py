@@ -14,7 +14,7 @@ import enum
 # Check/make logs folder, then
 
 
-def makeLogger(type: str = "", name=current_thread().name):
+def makeLogger(type: str = "", name = current_thread().name):
 
     if not logFolder.exists():
         try:
@@ -23,12 +23,11 @@ def makeLogger(type: str = "", name=current_thread().name):
             logging.exception(e)
             print(e.with_traceback())
 
-    match type.lower():
-        case "debug":
+    if type.lower() == "debug":
             lvl = logging.DEBUG
-        case "info":
+    if type.lower() == "info":
             lvl = logging.INFO
-        case _:
+    else:
             lvl = logging.NOTSET
 
     logging.basicConfig(format=logFormat,
@@ -123,7 +122,7 @@ def compareVersion(oldVersion, newVersion):
 # Untested option to send emails using mailto:\\{str} in browser
 
 
-def open_url(str: str, email=False):
+def open_url(str: str, email = False):
     if not email:
         url = str
     else:
@@ -136,10 +135,12 @@ Functions for pretty printing / logging
 """
 
 
-def basic_multiline_banner(text: str = '', ch="=", width=120):
+def basic_multiline_banner(text: str = '', ch: str = "=", width = 120):
+    ch = ch.strip()[:1]
+    
     char = ch * width
     pad = (width + len(text)) // 2
-    return f'{char}\n{one_line_banner(text, ch, width):>{pad}}\n{char}'
+    return "{cha}\n{banner}\n{cha}".format(cha=char, banner=one_line_banner(text, ch, width))
 
 
 def one_line_banner(text: str = "", ch='=', width=120):
@@ -156,50 +157,27 @@ def one_line_banner(text: str = "", ch='=', width=120):
     Returns:
         [type]: [description]
     """
+    
+    ch = ch.strip()[:1]
+    
     spaced_text = f' {text} ' if text else ""
     banner = spaced_text.center(width, ch)
     return banner
 
 
-def logger_ml(logger: logging.Logger, textLines: List[str], logLevel=logging.INFO, lpad="", rpad="", topchar='', rchar='', lchar='', botchar='', charWidth=1, OneLine=False):
-    # Clean char inputs
-    rchar = rchar[:1] if len(rchar) > 1 else rchar
-    lchar = lchar[:1] if len(lchar) > 1 else lchar
-    topchar = topchar[:1] if len(topchar) > 1 else topchar
-    botchar = botchar[:1] if len(botchar) > 1 else botchar
+def logger_ml(logger: logging.Logger, textLines: List[str], logLevel = logging.INFO):
 
-    for i in textLines:
-        i = lpad + i + rpad
-
-    match logLevel:
-        case logging.INFO:
+    if logLevel == logging.INFO:
             def log(text): return logger.info(text)
-        case logging.DEBUG:
+    if logLevel == logging.DEBUG:
             def log(text): return logger.debug(text)
-        case logging.WARNING:
+    if logLevel == logging.WARNING:
             def log(text): return logger.warning(text)
-        case logging.ERROR:
+    if logLevel == logging.ERROR:
             def log(text): return logger.info(text)
-        case _:
-            def log(text): return logger.info(text)
-
-    maxlen = max(len((rchar + lchar) * charWidth + lpad + string +
-                 rpad) for string in textLines)
-
-    top = charWidth * \
-        (maxlen * topchar +
-         "\n") if OneLine else [maxlen * topchar for _ in range(charWidth)]
-
-    bottom = charWidth * \
-        (maxlen * botchar +
-         "\n") if OneLine else [maxlen * botchar for _ in range(charWidth)]
-
-    if OneLine:
-        text = "\n" + "".join(textLines) + rpad
-
-        log(text)
     else:
+        def log(text): return logger.info(text)
 
-        text = textLines   # top + textLines + bottom
-        for i in text:
+    # top + textLines + bottom
+    for i in textLines:
             log(i)

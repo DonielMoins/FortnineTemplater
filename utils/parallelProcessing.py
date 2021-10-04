@@ -103,24 +103,28 @@ class AsyncParallel:
         for taskHandler in self.task_handler_list[identifier]:
             taskHandler.wait()
 
-    def get_results(self):
+    def get_results(self, end=False):
         if self.pool is None:
             return None
+        if end:
         # finish all tasks
-        self.pool.close()
-        self.pool.join()
+            self.pool.close()
+            self.pool.join()
 
         # retrieve the return values
         return_value_list = []
-        for identifier in self.task_handler_list:
-            for taskHandler in self.task_handler_list[identifier]:
+        safe_task_handler_list = self.task_handler_list.copy()
+        for identifier in safe_task_handler_list:
+            for taskHandler in safe_task_handler_list[identifier]:
                 taskHandler.wait()
                 # assert taskHandler.successful()
                 return_value_list.append(taskHandler.get())
 
         # reset pool
-        self.pool = None
-        self.task_handler_list = {}
+        if end:
+            self.pool = None
+            self.task_handler_list = {}
+        safe_task_handler_list = {}
 
         # return return_value_list
         fail_list = []

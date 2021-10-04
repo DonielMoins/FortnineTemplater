@@ -34,15 +34,15 @@ ProgramVersion = parse("0.3.2")
 tab = "\t"
 
 ProjDetails = {
-    "github": "https://github.com/DonielMoins/FortnineTemplater/",
+    "github": "https://github.com/DonielMoins/FortnineTemplater/", 
     "version": str(ProgramVersion)
 }
 DevDetails = [
     {
-        "name": "Fakhri Hammami",
-        "username": "DonielMoins",
-        "github": "https://github.com/DonielMoins/",
+        "name": "Fakhri Hammami", 
+        "username": "DonielMoins", 
+        "github": "https://github.com/DonielMoins/", 
         "email": "Fakhri.Hamm@gmail.com"
-    },
+    }, 
 
 ]

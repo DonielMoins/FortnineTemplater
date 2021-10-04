@@ -1,5 +1,5 @@
 import json
-from utils.general import getOverrides, logger_ml, makeLogger, basic_multiline_banner
+from utils.general import getOverrides, logger_ml, makeLogger, basic_multiline_banner, one_line_banner
 from threading import current_thread
 from gui import startGUI
 from constants import *
@@ -46,7 +46,7 @@ def main():
                     logger.debug("Closed Progress Pipes.")
                 break
         logger.debug('All sub-processes dead, logger shuting down.')
-        logger_ml(logger, basic_multiline_banner("Templater Closing") + "\n")
+        logger.info(one_line_banner("Templater Closing"))
         logging.shutdown()
     # Intercept ctrl+c and end program gracefully
     except KeyboardInterrupt:
@@ -98,10 +98,9 @@ if __name__ == '__main__':
 
         # If DEBUG file found in overrides folder, enable debug logging
         for override in getOverrides(OverridesFolder):
-            match override.casefold():
-                case "debug":
+            if override.casefold() == "debug":
                     params["logging_level"] = override.casefold()
-                case _:
+            else:
                     # Add more overrides
                     pass
 
