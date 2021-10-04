@@ -107,7 +107,7 @@ class AsyncParallel:
         if self.pool is None:
             return None
         if end:
-        # finish all tasks
+            # finish all tasks
             self.pool.close()
             self.pool.join()
 

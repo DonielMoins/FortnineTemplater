@@ -21,7 +21,7 @@ def main():
         Processes["TaskQueue"] = taskQueue
         stateSender, stateReceiver = mp.Pipe()
 
-        GUIProc = mp.Process(target = startGUI, name = "GUI", args = (
+        GUIProc = mp.Process(target=startGUI, name="GUI", args=(
             GlobalLaunchParams.get("GUI", {}), taskQueue, stateReceiver, stateSender, True))
         GUIProc.start()
         Processes["GUI"] = GUIProc
@@ -89,7 +89,7 @@ def main():
 if __name__ == '__main__':
 
     # parser = argparse.ArgumentParser(description = 'Request profile creator/manager made for  Fortnine.ca (Boutique Linus Inc.)')
-    # parser.add_argument('editor', metavar = 'N', type = int, nargs = '+', 
+    # parser.add_argument('editor', metavar = 'N', type = int, nargs = '+',
     #                 help = 'an integer for the accumulator')
 
     params = GlobalLaunchParams
@@ -99,10 +99,10 @@ if __name__ == '__main__':
         # If DEBUG file found in overrides folder, enable debug logging
         for override in getOverrides(OverridesFolder):
             if override.casefold() == "debug":
-                    params["logging_level"] = override.casefold()
+                params["logging_level"] = override.casefold()
             else:
-                    # Add more overrides
-                    pass
+                # Add more overrides
+                pass
 
         makeLogger(params["logging_level"]
                    if params["logging_level"] else "info")
@@ -119,7 +119,7 @@ if __name__ == '__main__':
     for line in basic_multiline_banner("Starting up Templater").splitlines():
         logger.info(line)
     logger.debug("Launched with following parameters:")
-    logger_ml(logger = logger, textLines = json.dumps(GlobalLaunchParams, 
-              indent = 2).splitlines())
+    logger_ml(logger=logger, textLines=json.dumps(GlobalLaunchParams,
+              indent=2).splitlines())
 
     main()

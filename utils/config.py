@@ -22,7 +22,7 @@ configPath = home_dir.joinpath("config.hjson")
 
 
 class BaseConfig(object):
-    def __init__(self, configVersion = None, profiles = None, settings = {}, path: Path = None, **kwargs):
+    def __init__(self, configVersion=None, profiles=None, settings={}, path: Path = None, **kwargs):
         # Will first check if argument in kwargs, if not, check if passed as argument, if not use defaults.
         # Defaults to configVersion if settings is None
         self.configVersion = kwargs.get(
@@ -75,7 +75,7 @@ class BaseConfig(object):
 
 
 def dumps(obj, **kwargs):
-    return hjson.dumps(obj, cls = ConfigEncoder, indent = 4)
+    return hjson.dumps(obj, cls=ConfigEncoder, indent=4)
 
 # Returns Json of config file
 # if file doesant exist, create one from hardcoded default
@@ -143,7 +143,7 @@ def add_profile(config: BaseConfig, profile: Profile):
 
 def del_profile(config: BaseConfig, profile: Profile):
 
-    del_profile_uuid(config = config, uuid = profile.uuid)
+    del_profile_uuid(config=config, uuid=profile.uuid)
     config.write_config_file()
 
 
@@ -172,7 +172,7 @@ def del_profile_uuid(config: BaseConfig, uuid: str):
         config.profiles.pop(i)
 
 
-def backup_config(oldloc = configPath, retry = True):
+def backup_config(oldloc=configPath, retry=True):
     def recursivebackuploc(oldloc):
         newloc = oldloc.__str__() + ".bak"
         if Path(newloc).exists():
@@ -217,7 +217,7 @@ class ConfigEncoder(HjsonEncoder):
         if isinstance(obj, BaseConfig):
             return self.default(obj.json())
 
-        if isinstance(obj, version.Version | version.LegacyVersion):
+        if isinstance(obj, version.Version or version.LegacyVersion):
             return str(obj)
 
         if isinstance(obj, Profile):

@@ -35,13 +35,12 @@ def makeRequest(requestTemplate: ReqObj, linkData: Optional[list[str]], postData
 
     # If Unknown reqtype, warn in logs, then return response with status code 405.
 
-    
-    if reqtype in {"post" , "put"}:
+    if reqtype in {"post", "put"}:
         URL = parseURL(requestTemplate.uri, linkData)
         payload = makeData(requestTemplate.data_params, postData)
-        request = requests.Request(str(reqtype).upper(), URL, data = payload)
+        request = requests.Request(str(reqtype).upper(), URL, data=payload)
         prepedreq = session.prepare_request(request)
-        
+
     elif reqtype in {"get", "head", "patch", "delete", "options"}:
         URL = parseURL(requestTemplate.uri, linkData)
         request = requests.Request(str(reqtype).upper(), URL)
@@ -79,21 +78,21 @@ def MakeRequests(requestList: list, linkDataList: list = None, postDataList: lis
         if linkDataList:
             for inputDataIndex, linkData in enumerate(linkDataList[reqIndex]):
                 if request.reqtype in {"post", "put"}:
-                
-                        for postData in postDataList[reqIndex]:
-                            # just a sanity check
-                            if isinstance(postData, list):
-                                Responses.append(makeRequest(
-                                    request, linkData, postData, session, logger))
-                                if sendProg:
-                                    stateSender.send(
-                                        f"{uuid}: {((inputDataIndex + 1)/len(linkDataList[reqIndex]))+((reqIndex + 1)/len(requestList))*100 - 1}")
+
+                    for postData in postDataList[reqIndex]:
+                        # just a sanity check
+                        if isinstance(postData, list):
+                            Responses.append(makeRequest(
+                                request, linkData, postData, session, logger))
+                            if sendProg:
+                                stateSender.send(
+                                    f"{uuid}: {((inputDataIndex + 1)/len(linkDataList[reqIndex]))+((reqIndex + 1)/len(requestList))*100 - 1}")
                 else:
-                        Responses.append(makeRequest(
-                            request, linkData, None, session, logger))
-                        if sendProg:
-                            stateSender.send(
-                                f"{uuid}: {((inputDataIndex + 1)/len(linkDataList[reqIndex]))+((reqIndex + 1)/len(requestList))*100 - 1}")
+                    Responses.append(makeRequest(
+                        request, linkData, None, session, logger))
+                    if sendProg:
+                        stateSender.send(
+                            f"{uuid}: {((inputDataIndex + 1)/len(linkDataList[reqIndex]))+((reqIndex + 1)/len(requestList))*100 - 1}")
 
         else:
             Responses.append(makeRequest(
@@ -115,29 +114,29 @@ def MakeRequests(requestList: list, linkDataList: list = None, postDataList: lis
             logger.info(f"URL: {res.request.url}")
             logger.info(f"{2 * tab}Status Code: {res.status_code}")
             if log_level == 4:
-                    if res.status_code != 200:
-                        logger.info(f"{2 * tab}Content:")
-                        content = str(res.content).removeprefix(
-                            "b'").removesuffix("'").removesuffix("\\n").split("\\n")
-                        for line in content:
-                            logger.info(3 * tab + line)
-                        logger.info(2*tab + "Reason:")
-                        logger.info(3*tab + res.reason)
-            if log_level == 0:
-                    logger.info(
-                        2*tab + f"Time Elapsed: {res.elapsed.total_seconds()}s")
-                    logger.info(f"{2*tab}Reason: {res.reason}")
-                    logger.info(f"{2*tab}Encoding: {res.encoding}")
-
-                    logger.info(f"{2*tab}Headers:")
-                    logger_ml(logger, hjson.dumpsJSON(
-                        res.headers.__dict__, indent=2).splitlines(), logging.INFO)
-
-                    logger.info(one_line_banner(ch="-", text="Content Start"))
+                if res.status_code != 200:
+                    logger.info(f"{2 * tab}Content:")
                     content = str(res.content).removeprefix(
                         "b'").removesuffix("'").removesuffix("\\n").split("\\n")
-                    logger_ml(logger, content)
-                    logger.info(one_line_banner(ch="-", text="Content End"))
+                    for line in content:
+                        logger.info(3 * tab + line)
+                    logger.info(2*tab + "Reason:")
+                    logger.info(3*tab + res.reason)
+            if log_level == 0:
+                logger.info(
+                    2*tab + f"Time Elapsed: {res.elapsed.total_seconds()}s")
+                logger.info(f"{2*tab}Reason: {res.reason}")
+                logger.info(f"{2*tab}Encoding: {res.encoding}")
+
+                logger.info(f"{2*tab}Headers:")
+                logger_ml(logger, hjson.dumpsJSON(
+                    res.headers.__dict__, indent=2).splitlines(), logging.INFO)
+
+                logger.info(one_line_banner(ch="-", text="Content Start"))
+                content = str(res.content).removeprefix(
+                    "b'").removesuffix("'").removesuffix("\\n").split("\\n")
+                logger_ml(logger, content)
+                logger.info(one_line_banner(ch="-", text="Content End"))
 
             logger.info(one_line_banner(""))
     return Responses
@@ -165,7 +164,8 @@ def makeData(template_json: str, data: Optional[list[str]]):
         matches = re.findall("{[0-9]+}", template_json)
         if len(matches) <= len(data):
             for index, match in enumerate(matches):
-                payload = pJson.replace(match, data[index] if data[index] else "''")
+                payload = pJson.replace(
+                    match, data[index] if data[index] else "''")
     else:
         payload = template_json
     return payload

@@ -14,7 +14,7 @@ import enum
 # Check/make logs folder, then
 
 
-def makeLogger(type: str = "", name = current_thread().name):
+def makeLogger(type: str = "", name=current_thread().name):
 
     if not logFolder.exists():
         try:
@@ -24,14 +24,14 @@ def makeLogger(type: str = "", name = current_thread().name):
             print(e.with_traceback())
 
     if type.lower() == "debug":
-            lvl = logging.DEBUG
+        lvl = logging.DEBUG
     if type.lower() == "info":
-            lvl = logging.INFO
+        lvl = logging.INFO
     else:
-            lvl = logging.NOTSET
+        lvl = logging.NOTSET
 
-    logging.basicConfig(format = logFormat, 
-                        filename = logFile.absolute(), level = lvl, force = True)
+    logging.basicConfig(format=logFormat,
+                        filename=logFile.absolute(), level=lvl, force=True)
     formatter = logging.Formatter(
         logFormat)
     logger = logging.getLogger()
@@ -49,7 +49,7 @@ def getOverrides(folder: Path):
     return [Override.name.casefold().removesuffix(".ov") for Override in folder.glob("*.ov")]
 
 
-def parseCSV(lines, newLines = True, strip = True, removeSpaces = True, sep = ","):
+def parseCSV(lines, newLines=True, strip=True, removeSpaces=True, sep=","):
     """Turn List of strings (lines) into list[list["param", "param", "param"...], list[...], list[...]]
 
     Args:
@@ -80,21 +80,21 @@ def parseCSV(lines, newLines = True, strip = True, removeSpaces = True, sep = ",
     return CsvList
 
 
-def randomHex(len = 5):
+def randomHex(len=5):
     maxHex = ''.join(list(["F" for f in range(len)]))
     maxDec = int(maxHex, 16)
     random_number = random.randint(0, maxDec)
     return str(hex(random_number))
 
 
-def randomString(MAX_LIMIT = 5):
+def randomString(MAX_LIMIT=5):
     ran = ''.join(random.choices(
-        string.ascii_uppercase+ string.digits, k = MAX_LIMIT))
+        string.ascii_uppercase + string.digits, k=MAX_LIMIT))
     return str(ran)
 
 
-def randomSymbols(MAX_LIMIT = 1):
-    ran = ''.join(random.choices('!@#$%^&*()_', k = MAX_LIMIT))
+def randomSymbols(MAX_LIMIT=1):
+    ran = ''.join(random.choices('!@#$%^&*()_', k=MAX_LIMIT))
     return str(ran)
 
 
@@ -122,7 +122,7 @@ def compareVersion(oldVersion, newVersion):
 # Untested option to send emails using mailto:\\{str} in browser
 
 
-def open_url(str: str, email = False):
+def open_url(str: str, email=False):
     if not email:
         url = str
     else:
@@ -135,15 +135,15 @@ Functions for pretty printing / logging
 """
 
 
-def basic_multiline_banner(text: str = '', ch: str = "=", width = 120):
+def basic_multiline_banner(text: str = '', ch: str = "=", width=120):
     ch = ch.strip()[:1]
-    
+
     char = ch * width
     pad = (width + len(text)) // 2
     return "{cha}\n{banner}\n{cha}".format(cha=char, banner=one_line_banner(text, ch, width))
 
 
-def one_line_banner(text: str = "", ch: str= '=', width = 120):
+def one_line_banner(text: str = "", ch: str = '=', width=120):
     """Creates a one-line string banner using input.
     Ex:
         In:  ('Content End', ch = '-', )
@@ -157,27 +157,27 @@ def one_line_banner(text: str = "", ch: str= '=', width = 120):
     Returns:
         [type]: [description]
     """
-    
+
     ch = ch.strip()[:1]
-    
+
     spaced_text = f' {text} ' if text else ""
     banner = spaced_text.center(width, ch)
     return banner
 
 
-def logger_ml(logger: logging.Logger, textLines: List[str], logLevel = logging.INFO):
+def logger_ml(logger: logging.Logger, textLines: List[str], logLevel=logging.INFO):
 
     if logLevel == logging.INFO:
-            def log(text): return logger.info(text)
+        def log(text): return logger.info(text)
     if logLevel == logging.DEBUG:
-            def log(text): return logger.debug(text)
+        def log(text): return logger.debug(text)
     if logLevel == logging.WARNING:
-            def log(text): return logger.warning(text)
+        def log(text): return logger.warning(text)
     if logLevel == logging.ERROR:
-            def log(text): return logger.info(text)
+        def log(text): return logger.info(text)
     else:
         def log(text): return logger.info(text)
 
     # top + textLines + bottom
     for i in textLines:
-            log(i)
+        log(i)
