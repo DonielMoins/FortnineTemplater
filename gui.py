@@ -611,9 +611,11 @@ class DataEntry(tk.Toplevel):
         LinkFieldsData = []
         DataParamData = []
         for InputField in self.URLInputFields:
+            InputField: tkscrolled.ScrolledText
             fieldText: str = InputField.get('1.0', tk.END)
             LinkFieldsData.append(parseCSV(fieldText))
         for DataInputField in self.DataInputFields:
+            InputField: tkscrolled.ScrolledText
             DataParamData.append(parseCSV(DataInputField.get(
                 '1.0', tk.END)) if DataInputField != "NULL" else "NULL")
 
