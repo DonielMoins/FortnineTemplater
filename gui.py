@@ -113,11 +113,11 @@ class EditorSelector(tk.Toplevel):
                 # self.tooltip.bind(btn, f"Profile UUID:\n{uuid}")
                 btn.pack(padx=3, pady=4)
 
-    def del_profile(self, uuid):
+    def delProfile(self, uuid):
         cfg.del_profile_uuid(self.config, uuid)
         pass
 
-    def edit_profile(self, uuid):
+    def editProfile(self, uuid):
         pass
 
 
@@ -324,7 +324,7 @@ class SelectorFrame(tk.Frame):
             self.disabledButtons: list[str] = []
             self.after_idle(self.stateListener, stateReceiver)
 
-    def delete_profile(self, config, profile, controller):
+    def deleteProfile(self, config, profile, controller):
         cfg.del_profile(config, profile)
         del controller.delMode
         self.destroy()
