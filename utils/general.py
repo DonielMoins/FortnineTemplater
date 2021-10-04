@@ -30,8 +30,8 @@ def makeLogger(type: str = "", name = current_thread().name):
     else:
             lvl = logging.NOTSET
 
-    logging.basicConfig(format=logFormat,
-                        filename=logFile.absolute(), level=lvl, force=True)
+    logging.basicConfig(format = logFormat, 
+                        filename = logFile.absolute(), level = lvl, force = True)
     formatter = logging.Formatter(
         logFormat)
     logger = logging.getLogger()
@@ -49,15 +49,15 @@ def getOverrides(folder: Path):
     return [Override.name.casefold().removesuffix(".ov") for Override in folder.glob("*.ov")]
 
 
-def parseCSV(lines, newLines=True, strip=True, removeSpaces=True, sep=","):
-    """Turn List of strings (lines) into list[list["param","param","param"...], list[...], list[...]]
+def parseCSV(lines, newLines = True, strip = True, removeSpaces = True, sep = ","):
+    """Turn List of strings (lines) into list[list["param", "param", "param"...], list[...], list[...]]
 
     Args:
         lines (list[str]): Input lines to parse.
         newLines (bool, optional): Split at all "\n"? Defaults to True.
         strip (bool, optional): strip() all params?. Defaults to True.
         ignoreWhiteSpaces (bool, optional): replace(" ", "") all params. Defaults to True.
-        sep (str, optional): Set CSV param seperator. Defaults to ",".
+        sep (str, optional): Set CSV param seperator. Defaults to ", ".
 
     Returns:
         list[list[list[x: str]]]: Returns list comprehensible by MakeRequests(). 
@@ -80,21 +80,21 @@ def parseCSV(lines, newLines=True, strip=True, removeSpaces=True, sep=","):
     return CsvList
 
 
-def randomHex(len=5):
+def randomHex(len = 5):
     maxHex = ''.join(list(["F" for f in range(len)]))
     maxDec = int(maxHex, 16)
     random_number = random.randint(0, maxDec)
     return str(hex(random_number))
 
 
-def randomString(MAX_LIMIT=5):
+def randomString(MAX_LIMIT = 5):
     ran = ''.join(random.choices(
-        string.ascii_uppercase + string.digits, k=MAX_LIMIT))
+        string.ascii_uppercase+ string.digits, k = MAX_LIMIT))
     return str(ran)
 
 
-def randomSymbols(MAX_LIMIT=1):
-    ran = ''.join(random.choices('!@#$%^&*()_', k=MAX_LIMIT))
+def randomSymbols(MAX_LIMIT = 1):
+    ran = ''.join(random.choices('!@#$%^&*()_', k = MAX_LIMIT))
     return str(ran)
 
 
@@ -143,15 +143,15 @@ def basic_multiline_banner(text: str = '', ch: str = "=", width = 120):
     return "{cha}\n{banner}\n{cha}".format(cha=char, banner=one_line_banner(text, ch, width))
 
 
-def one_line_banner(text: str = "", ch='=', width=120):
+def one_line_banner(text: str = "", ch: str= '=', width = 120):
     """Creates a one-line string banner using input.
     Ex:
-        In:  ('Content End', ch='-',)
-        Out: '----------------------------------------------------- Content End ------------------------------------------------------'
+        In:  ('Content End', ch = '-', )
+        Out: '----------------------------------------------------- Content End------------------------------------------------------'
 
     Args:
         text (str): String used for creation of banner
-        ch (str, optional): [description]. Defaults to '='.
+        ch (str, optional): [description]. Defaults to ' = '.
         width (int, optional): [description]. Defaults to 120.
 
     Returns:

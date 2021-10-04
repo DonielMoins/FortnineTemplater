@@ -266,14 +266,14 @@ class ConfigEncoder(HjsonEncoder):
         else:
             return HjsonEncoder.default(self, obj)
 
-    def parse_request(self, obj: Request):
+    def ParseRequest(self, obj: Request):
         # print("\t\t\t\t\tEncoding Request")
         if isinstance(obj, Request):
             return obj.json()
         elif isinstance(obj, dict):
             return obj
 
-    def parse_profile(self, obj: Profile):
+    def ParseProfile(self, obj: Profile):
         # print("\t\tEncoding Profile:")
         profile = obj.json()
         for index, request in enumerate(profile["requests"]):
